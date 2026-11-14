@@ -147,15 +147,23 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
+  min-width: 0;
   min-height: 0;
   padding: 22px 28px 18px;
   border: 1px solid var(--color-line);
   border-radius: var(--radius-m);
   background: rgba(3, 10, 20, 0.5);
   animation: swap 0.35s var(--ease-out);
+  @include mixins.inner-scroll;
+
+  > header,
+  > footer {
+    flex-shrink: 0;
+  }
 
   header {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: flex-end;
     gap: 24px;
@@ -197,10 +205,9 @@
 }
 
 .flow {
-  flex: 1;
-  min-height: 0;
+  flex: 1 0 auto;
   display: grid;
-  grid-template-rows: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(3, minmax(min-content, 1fr));
   gap: 20px;
   list-style: none;
 
@@ -210,7 +217,6 @@
     flex-direction: column;
     justify-content: center;
     gap: 5px;
-    min-height: 0;
     padding: 10px 20px;
     border: 1px solid var(--color-line-soft);
     border-left: 3px solid var(--c);
@@ -239,7 +245,6 @@
     font-size: clamp(14.5px, 1.25vw, 18px);
     line-height: 1.45;
     color: var(--color-text);
-    @include mixins.clamp(3);
   }
 
   svg {
@@ -267,5 +272,59 @@
   from {
     opacity: 0;
     transform: translateX(10px);
+  }
+}
+
+// En pantallas bajas se compacta el detalle para que ningún texto quede cortado.
+@media (max-height: 900px) {
+  .why {
+    margin-bottom: 8px;
+    padding: 7px 14px;
+    font-size: 12.5px;
+  }
+
+  .detail {
+    gap: 9px;
+    padding: 14px 20px 12px;
+
+    header h2 {
+      font-size: clamp(20px, 2vw, 28px);
+    }
+
+    footer {
+      padding-top: 8px;
+    }
+  }
+
+  .stat output {
+    font-size: clamp(26px, 2.6vw, 38px);
+  }
+
+  .flow {
+    gap: 16px;
+
+    li {
+      padding: 7px 16px;
+    }
+
+    p {
+      font-size: clamp(13px, 1.05vw, 15px);
+      line-height: 1.35;
+    }
+
+    svg {
+      bottom: -17px;
+      width: 14px;
+      height: 14px;
+      margin-left: -7px;
+    }
+  }
+
+  .project {
+    padding: 7px 14px;
+
+    p {
+      font-size: 13px;
+    }
   }
 }

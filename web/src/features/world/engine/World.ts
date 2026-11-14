@@ -10,7 +10,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import type { L } from "@/content/i18n";
 import type { ModuleId } from "@/content/modules";
 import { getMaterial } from "@/features/fire/engine/materials";
-import { act as simAct, ignite as simIgnite, makeState, step, type ActionKey, type SimConfig, type SimState } from "@/features/fire/engine/sim";
+import { act as simAct, configureState, ignite as simIgnite, step, type ActionKey, type SimConfig, type SimState } from "@/features/fire/engine/sim";
 import { tigNow } from "@/features/fire/engine/physics";
 import { emptyHistory, fireStore, type FireHistory, type FireSnapshot } from "@/features/fire/store";
 import { FireRig, flameMaterial } from "./flame";
@@ -415,37 +415,32 @@ export class World {
   // ── Escenario de fuego ───────────────────────────────────────────────────
   /** Aplica la configuración del escenario; reinicia si cambia el material, el modo o el volumen. */
   configure(cfg: SimConfig): void {
-    const S = this.S;
-    if (!S || S.cfg.mat !== cfg.mat || S.cfg.volume !== cfg.volume || S.cfg.mode !== cfg.mode || S.cfg.g !== cfg.g) {
-      this.resetFire(cfg);
-      return;
-    }
-    const atmosphere = S.cfg.o2 !== cfg.o2 || S.cfg.P !== cfg.P;
-    S.cfg = { ...cfg };
-    if (atmosphere && S.fire === "none") {
-      S.cab.O2 = cfg.o2;
-      S.O2l = cfg.o2;
-      S.P = cfg.P;
-    }
-    fireStore.set({ cfg });
+    this.setFireState(configureState(this.S, cfg));
   }
 
   resetFire(cfg?: SimConfig): void {
     const c = cfg ?? this.S?.cfg;
     if (!c) return;
-    this.S = makeState(c);
-    step(this.S, 0.05);
-    this.hist = emptyHistory();
-    this.histNext = 0;
-    this.acc = 0;
-    this.rig.setMaterial(getMaterial(c.mat));
-    fireStore.set({ cfg: c, hist: this.hist, histTick: 0 });
+    this.setFireState(configureState(null, c));
+  }
+
+  private setFireState(S: SimState): void {
+    if (S !== this.S) {
+      this.hist = emptyHistory();
+      this.histNext = 0;
+      this.acc = 0;
+      this.rig.setMaterial(getMaterial(S.cfg.mat));
+      fireStore.set({ hist: this.hist, histTick: 0 });
+    }
+    this.S = S;
+    fireStore.set({ cfg: S.cfg });
     this.publish();
   }
 
   ignite(): boolean {
     if (!this.S) return false;
     const ok = simIgnite(this.S);
+    step(this.S, 0);
     this.publish();
     return ok;
   }

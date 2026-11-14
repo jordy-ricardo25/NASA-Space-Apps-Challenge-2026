@@ -1,0 +1,2481 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "emberwatch API",
+    "description": "Inteligencia de seguridad contra incendios sobre NASA PSI.",
+    "version": "1.7.0"
+  },
+  "paths": {
+    "/api/meta": {
+      "get": {
+        "tags": [
+          "metadatos"
+        ],
+        "summary": "Entornos, pesos y materiales",
+        "operationId": "meta_api_meta_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetaOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ingest": {
+      "post": {
+        "tags": [
+          "metadatos"
+        ],
+        "summary": "Reconstruir la base desde DATASET_DIR",
+        "operationId": "ingest_api_ingest_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IngestOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/findings": {
+      "get": {
+        "tags": [
+          "hallazgos"
+        ],
+        "summary": "Ranking por entorno",
+        "operationId": "findings_api_findings_get",
+        "parameters": [
+          {
+            "name": "environment",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "eva",
+              "title": "Environment"
+            }
+          },
+          {
+            "name": "min_rpi",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "title": "Min Rpi"
+            }
+          },
+          {
+            "name": "material",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Material"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 500,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FindingOut"
+                  },
+                  "title": "Response Findings Api Findings Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/matrix": {
+      "get": {
+        "tags": [
+          "hallazgos"
+        ],
+        "summary": "Matriz hallazgo x entorno",
+        "operationId": "matrix_api_matrix_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatrixOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/provenance/{source_file}": {
+      "get": {
+        "tags": [
+          "procedencia"
+        ],
+        "summary": "Fila cruda, banderas y calidad",
+        "operationId": "provenance_api_provenance__source_file__get",
+        "parameters": [
+          {
+            "name": "source_file",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Source File"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProvenanceOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/lab/simulate": {
+      "post": {
+        "tags": [
+          "laboratorio"
+        ],
+        "summary": "Contrafactual de atmosfera",
+        "operationId": "simulate_api_lab_simulate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LabIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LabOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/incidents": {
+      "get": {
+        "tags": [
+          "incidentes"
+        ],
+        "summary": "Revalidacion historica",
+        "operationId": "incidents_api_incidents_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/IncidentOut"
+                  },
+                  "type": "array",
+                  "title": "Response Incidents Api Incidents Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/spinoffs": {
+      "get": {
+        "tags": [
+          "beneficio terrestre"
+        ],
+        "summary": "Aplicaciones en Tierra",
+        "operationId": "spinoffs_api_spinoffs_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SpinoffOut"
+                  },
+                  "type": "array",
+                  "title": "Response Spinoffs Api Spinoffs Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/export": {
+      "get": {
+        "tags": [
+          "informe"
+        ],
+        "summary": "Informe de mision en md o json",
+        "operationId": "export_api_export_get",
+        "parameters": [
+          {
+            "name": "environment",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "eva",
+              "title": "Environment"
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "md",
+              "title": "Format"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/investigations": {
+      "get": {
+        "tags": [
+          "investigaciones"
+        ],
+        "summary": "Listado de experimentos",
+        "operationId": "investigations_api_investigations_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/InvestigationOut"
+                  },
+                  "type": "array",
+                  "title": "Response Investigations Api Investigations Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/investigations/{clave}/variation": {
+      "get": {
+        "tags": [
+          "investigaciones"
+        ],
+        "summary": "Variables que cambian entre corridas",
+        "operationId": "variation_api_investigations__clave__variation_get",
+        "parameters": [
+          {
+            "name": "clave",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Clave"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VariationOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/similarity": {
+      "get": {
+        "tags": [
+          "comparacion"
+        ],
+        "summary": "Similitud entre experimentos",
+        "operationId": "similarity_api_similarity_get",
+        "parameters": [
+          {
+            "name": "minimo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 0,
+              "default": 0,
+              "title": "Minimo"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SimilarityPair"
+                  },
+                  "title": "Response Similarity Api Similarity Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/hardware": {
+      "get": {
+        "tags": [
+          "hardware"
+        ],
+        "summary": "Arbol de facilidades y proyectos",
+        "operationId": "hardware_api_hardware_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/HardwareNodeOut"
+                  },
+                  "type": "array",
+                  "title": "Response Hardware Api Hardware Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/gaps": {
+      "get": {
+        "tags": [
+          "vacios"
+        ],
+        "summary": "Celdas sin evidencia y brechas declaradas",
+        "operationId": "gaps_api_gaps_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GapsOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/oxygen-ladder": {
+      "get": {
+        "tags": [
+          "atmosfera"
+        ],
+        "summary": "Umbrales de material a lo largo del O2",
+        "operationId": "oxygen_ladder_api_oxygen_ladder_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OxygenLadderOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/lab/gravity-band": {
+      "post": {
+        "tags": [
+          "laboratorio"
+        ],
+        "summary": "Banda ug a 1 g",
+        "operationId": "gravity_band_api_lab_gravity_band_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GravityBandIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GravityBandOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/measurements": {
+      "get": {
+        "tags": [
+          "sensores"
+        ],
+        "summary": "Que se midio y con que",
+        "operationId": "measurements_api_measurements_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeasurementsOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/findings/{clave}/context": {
+      "get": {
+        "tags": [
+          "interpretacion"
+        ],
+        "summary": "Paquete listo para un LLM",
+        "operationId": "finding_context_api_findings__clave__context_get",
+        "parameters": [
+          {
+            "name": "clave",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Clave"
+            }
+          },
+          {
+            "name": "environment",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "eva",
+              "title": "Environment"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContextOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/rules": {
+      "get": {
+        "tags": [
+          "reglas"
+        ],
+        "summary": "Mitos y hechos de la guia oficial",
+        "operationId": "rules_api_rules_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RulesOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/facilities": {
+      "get": {
+        "tags": [
+          "hardware"
+        ],
+        "summary": "Instalaciones con masa y volumen",
+        "operationId": "facilities_api_facilities_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FacilitiesOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/fm2": {
+      "get": {
+        "tags": [
+          "atmosfera"
+        ],
+        "summary": "Payload lunar planificado",
+        "operationId": "fm2_api_fm2_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Fm2Out"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/incidents/{slug}/source": {
+      "get": {
+        "tags": [
+          "incidentes"
+        ],
+        "summary": "Extracto del informe original",
+        "operationId": "incident_source_api_incidents__slug__source_get",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IncidentSourceOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "metadatos"
+        ],
+        "summary": "Estado del servicio",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ContextOut": {
+        "properties": {
+          "finding": {
+            "$ref": "#/components/schemas/FindingOut"
+          },
+          "environment": {
+            "$ref": "#/components/schemas/EnvironmentOut"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/EvidenceRow"
+            },
+            "type": "array",
+            "title": "Evidence"
+          },
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/Message"
+            },
+            "type": "array",
+            "title": "Messages"
+          },
+          "response_schema": {
+            "type": "object",
+            "title": "Response Schema"
+          },
+          "provider": {
+            "type": "string",
+            "title": "Provider"
+          }
+        },
+        "type": "object",
+        "required": [
+          "finding",
+          "environment",
+          "evidence",
+          "messages",
+          "response_schema",
+          "provider"
+        ],
+        "title": "ContextOut"
+      },
+      "DeclaredGap": {
+        "properties": {
+          "area": {
+            "type": "string",
+            "title": "Area"
+          },
+          "detail": {
+            "type": "string",
+            "title": "Detail"
+          },
+          "bound": {
+            "type": "string",
+            "title": "Bound"
+          }
+        },
+        "type": "object",
+        "required": [
+          "area",
+          "detail",
+          "bound"
+        ],
+        "title": "DeclaredGap"
+      },
+      "EnvironmentOut": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "gravity_g": {
+            "type": "number",
+            "title": "Gravity G"
+          },
+          "o2_fraction": {
+            "type": "number",
+            "title": "O2 Fraction"
+          },
+          "pressure_atm": {
+            "type": "number",
+            "title": "Pressure Atm"
+          },
+          "diluent": {
+            "type": "string",
+            "title": "Diluent"
+          },
+          "egress_s": {
+            "type": "integer",
+            "title": "Egress S"
+          },
+          "caption": {
+            "type": "string",
+            "title": "Caption"
+          },
+          "material_fit": {
+            "type": "number",
+            "title": "Material Fit"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "label",
+          "gravity_g",
+          "o2_fraction",
+          "pressure_atm",
+          "diluent",
+          "egress_s",
+          "caption",
+          "material_fit"
+        ],
+        "title": "EnvironmentOut"
+      },
+      "EvidenceRow": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "title": "File"
+          },
+          "row": {
+            "type": "integer",
+            "title": "Row"
+          },
+          "quality": {
+            "type": "number",
+            "title": "Quality"
+          },
+          "flags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Flags"
+          },
+          "raw": {
+            "type": "object",
+            "title": "Raw"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file",
+          "row",
+          "quality",
+          "flags",
+          "raw"
+        ],
+        "title": "EvidenceRow"
+      },
+      "FacilitiesOut": {
+        "properties": {
+          "facilities": {
+            "items": {
+              "$ref": "#/components/schemas/FacilityOut"
+            },
+            "type": "array",
+            "title": "Facilities"
+          },
+          "investigations": {
+            "items": {
+              "$ref": "#/components/schemas/FacilityInvestigation"
+            },
+            "type": "array",
+            "title": "Investigations"
+          }
+        },
+        "type": "object",
+        "required": [
+          "facilities",
+          "investigations"
+        ],
+        "title": "FacilitiesOut"
+      },
+      "FacilityInvestigation": {
+        "properties": {
+          "psi_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Psi Id"
+          },
+          "acronimo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Acronimo"
+          },
+          "titulo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Titulo"
+          },
+          "pilar": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pilar"
+          }
+        },
+        "type": "object",
+        "title": "FacilityInvestigation"
+      },
+      "FacilityOut": {
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "nombre": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nombre"
+          },
+          "bastidor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bastidor"
+          },
+          "masa_kg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Masa Kg"
+          },
+          "volumen_m3": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Volumen M3"
+          }
+        },
+        "type": "object",
+        "title": "FacilityOut"
+      },
+      "FactorOut": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "value": {
+            "type": "number",
+            "title": "Value"
+          },
+          "weight": {
+            "type": "number",
+            "title": "Weight"
+          },
+          "contribution": {
+            "type": "number",
+            "title": "Contribution"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "value",
+          "weight",
+          "contribution"
+        ],
+        "title": "FactorOut"
+      },
+      "FindingOut": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "experiment": {
+            "type": "string",
+            "title": "Experiment"
+          },
+          "facility": {
+            "type": "string",
+            "title": "Facility"
+          },
+          "material": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Material"
+          },
+          "geometry": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Geometry"
+          },
+          "flame_mode": {
+            "type": "string",
+            "title": "Flame Mode"
+          },
+          "o2_min": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "O2 Min"
+          },
+          "o2_max": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "O2 Max"
+          },
+          "pressure_atm": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pressure Atm"
+          },
+          "observations": {
+            "type": "integer",
+            "title": "Observations"
+          },
+          "quality": {
+            "type": "number",
+            "title": "Quality"
+          },
+          "rpi": {
+            "type": "integer",
+            "title": "Rpi"
+          },
+          "band": {
+            "type": "string",
+            "title": "Band"
+          },
+          "factors": {
+            "items": {
+              "$ref": "#/components/schemas/FactorOut"
+            },
+            "type": "array",
+            "title": "Factors"
+          },
+          "narrative": {
+            "type": "string",
+            "title": "Narrative"
+          },
+          "sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Sources"
+          },
+          "rules": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Rules"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "experiment",
+          "facility",
+          "material",
+          "geometry",
+          "flame_mode",
+          "o2_min",
+          "o2_max",
+          "pressure_atm",
+          "observations",
+          "quality",
+          "rpi",
+          "band",
+          "factors",
+          "narrative",
+          "sources",
+          "rules"
+        ],
+        "title": "FindingOut"
+      },
+      "Fm2Out": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "title": "Payload"
+          },
+          "note": {
+            "type": "string",
+            "title": "Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "payload",
+          "note"
+        ],
+        "title": "Fm2Out"
+      },
+      "GapCell": {
+        "properties": {
+          "environment": {
+            "type": "string",
+            "title": "Environment"
+          },
+          "material_class": {
+            "type": "string",
+            "title": "Material Class"
+          },
+          "observations": {
+            "type": "integer",
+            "title": "Observations"
+          },
+          "affinity": {
+            "type": "number",
+            "title": "Affinity"
+          },
+          "state": {
+            "type": "string",
+            "title": "State"
+          }
+        },
+        "type": "object",
+        "required": [
+          "environment",
+          "material_class",
+          "observations",
+          "affinity",
+          "state"
+        ],
+        "title": "GapCell"
+      },
+      "GapsOut": {
+        "properties": {
+          "cells": {
+            "items": {
+              "$ref": "#/components/schemas/GapCell"
+            },
+            "type": "array",
+            "title": "Cells"
+          },
+          "declared": {
+            "items": {
+              "$ref": "#/components/schemas/DeclaredGap"
+            },
+            "type": "array",
+            "title": "Declared"
+          },
+          "note": {
+            "type": "string",
+            "title": "Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "cells",
+          "declared",
+          "note"
+        ],
+        "title": "GapsOut"
+      },
+      "GravityBandIn": {
+        "properties": {
+          "material": {
+            "type": "string",
+            "title": "Material",
+            "default": "SIBAL"
+          },
+          "o2_fraction": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.05,
+            "title": "O2 Fraction",
+            "default": 0.21
+          },
+          "pressure_atm": {
+            "type": "number",
+            "maximum": 3.0,
+            "exclusiveMinimum": 0.05,
+            "title": "Pressure Atm",
+            "default": 1.0
+          },
+          "diluent": {
+            "type": "string",
+            "title": "Diluent",
+            "default": "N2"
+          },
+          "mode": {
+            "type": "string",
+            "title": "Mode",
+            "default": "opposed"
+          },
+          "gravity_g": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Gravity G",
+            "default": 0.165
+          }
+        },
+        "type": "object",
+        "title": "GravityBandIn"
+      },
+      "GravityBandOut": {
+        "properties": {
+          "low": {
+            "type": "number",
+            "title": "Low"
+          },
+          "high": {
+            "type": "number",
+            "title": "High"
+          },
+          "interpolated": {
+            "type": "number",
+            "title": "Interpolated"
+          },
+          "interpolated_at": {
+            "type": "number",
+            "title": "Interpolated At"
+          },
+          "declared": {
+            "type": "boolean",
+            "title": "Declared"
+          },
+          "quenched_low": {
+            "type": "boolean",
+            "title": "Quenched Low"
+          },
+          "quenched_high": {
+            "type": "boolean",
+            "title": "Quenched High"
+          }
+        },
+        "type": "object",
+        "required": [
+          "low",
+          "high",
+          "interpolated",
+          "interpolated_at",
+          "declared",
+          "quenched_low",
+          "quenched_high"
+        ],
+        "title": "GravityBandOut"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HardwareExperiment": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "observations": {
+            "type": "integer",
+            "title": "Observations"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "observations"
+        ],
+        "title": "HardwareExperiment"
+      },
+      "HardwareNodeOut": {
+        "properties": {
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "facility": {
+            "type": "string",
+            "title": "Facility"
+          },
+          "hardware": {
+            "type": "string",
+            "title": "Hardware"
+          },
+          "project": {
+            "type": "string",
+            "title": "Project"
+          },
+          "experiments": {
+            "items": {
+              "$ref": "#/components/schemas/HardwareExperiment"
+            },
+            "type": "array",
+            "title": "Experiments"
+          }
+        },
+        "type": "object",
+        "required": [
+          "label",
+          "facility",
+          "hardware",
+          "project",
+          "experiments"
+        ],
+        "title": "HardwareNodeOut"
+      },
+      "IncidentOut": {
+        "properties": {
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "year": {
+            "type": "integer",
+            "title": "Year"
+          },
+          "environment": {
+            "type": "string",
+            "title": "Environment"
+          },
+          "atmosphere": {
+            "type": "string",
+            "title": "Atmosphere"
+          },
+          "timeline": {
+            "type": "string",
+            "title": "Timeline"
+          },
+          "verdict": {
+            "type": "string",
+            "title": "Verdict"
+          },
+          "evidence": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Evidence"
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary"
+          },
+          "linked_observations": {
+            "type": "integer",
+            "title": "Linked Observations"
+          },
+          "mean_rpi": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mean Rpi"
+          }
+        },
+        "type": "object",
+        "required": [
+          "slug",
+          "name",
+          "year",
+          "environment",
+          "atmosphere",
+          "timeline",
+          "verdict",
+          "evidence",
+          "summary",
+          "linked_observations"
+        ],
+        "title": "IncidentOut"
+      },
+      "IncidentSourceOut": {
+        "properties": {
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "excerpt": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Excerpt"
+          },
+          "lines": {
+            "type": "integer",
+            "title": "Lines"
+          },
+          "chars": {
+            "type": "integer",
+            "title": "Chars"
+          }
+        },
+        "type": "object",
+        "required": [
+          "slug",
+          "excerpt",
+          "lines",
+          "chars"
+        ],
+        "title": "IncidentSourceOut"
+      },
+      "IngestOut": {
+        "properties": {
+          "files_seen": {
+            "type": "integer",
+            "title": "Files Seen"
+          },
+          "files_parsed": {
+            "type": "integer",
+            "title": "Files Parsed"
+          },
+          "rows_read": {
+            "type": "integer",
+            "title": "Rows Read"
+          },
+          "rows_kept": {
+            "type": "integer",
+            "title": "Rows Kept"
+          },
+          "rows_rejected": {
+            "type": "integer",
+            "title": "Rows Rejected"
+          },
+          "skipped": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Skipped"
+          }
+        },
+        "type": "object",
+        "required": [
+          "files_seen",
+          "files_parsed",
+          "rows_read",
+          "rows_kept",
+          "rows_rejected",
+          "skipped"
+        ],
+        "title": "IngestOut"
+      },
+      "InvestigationOut": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "facility": {
+            "type": "string",
+            "title": "Facility"
+          },
+          "project": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Project"
+          },
+          "project_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Project Label"
+          },
+          "hardware": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hardware"
+          },
+          "observations": {
+            "type": "integer",
+            "title": "Observations"
+          },
+          "materials": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Materials"
+          },
+          "modes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Modes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "label",
+          "facility",
+          "observations",
+          "materials",
+          "modes"
+        ],
+        "title": "InvestigationOut"
+      },
+      "LabIn": {
+        "properties": {
+          "material": {
+            "type": "string",
+            "title": "Material",
+            "default": "SIBAL"
+          },
+          "o2_fraction": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.05,
+            "title": "O2 Fraction",
+            "default": 0.21
+          },
+          "pressure_atm": {
+            "type": "number",
+            "maximum": 3.0,
+            "exclusiveMinimum": 0.05,
+            "title": "Pressure Atm",
+            "default": 1.0
+          },
+          "gravity_g": {
+            "type": "number",
+            "maximum": 1.8,
+            "minimum": 0.0,
+            "title": "Gravity G",
+            "default": 0.0
+          },
+          "diluent": {
+            "type": "string",
+            "title": "Diluent",
+            "default": "N2"
+          },
+          "mode": {
+            "type": "string",
+            "title": "Mode",
+            "default": "opposed"
+          }
+        },
+        "type": "object",
+        "title": "LabIn"
+      },
+      "LabOut": {
+        "properties": {
+          "limit": {
+            "type": "number",
+            "title": "Limit"
+          },
+          "excess": {
+            "type": "number",
+            "title": "Excess"
+          },
+          "quenched": {
+            "type": "boolean",
+            "title": "Quenched"
+          },
+          "rate_mm_s": {
+            "type": "number",
+            "title": "Rate Mm S"
+          },
+          "curve": {
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Curve"
+          }
+        },
+        "type": "object",
+        "required": [
+          "limit",
+          "excess",
+          "quenched",
+          "rate_mm_s",
+          "curve"
+        ],
+        "title": "LabOut"
+      },
+      "LadderAnchor": {
+        "properties": {
+          "o2": {
+            "type": "number",
+            "title": "O2"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          }
+        },
+        "type": "object",
+        "required": [
+          "o2",
+          "label"
+        ],
+        "title": "LadderAnchor"
+      },
+      "LadderMaterial": {
+        "properties": {
+          "material": {
+            "type": "string",
+            "title": "Material"
+          },
+          "class": {
+            "type": "string",
+            "title": "Class"
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/LadderStep"
+            },
+            "type": "array",
+            "title": "Steps"
+          }
+        },
+        "type": "object",
+        "required": [
+          "material",
+          "class",
+          "steps"
+        ],
+        "title": "LadderMaterial"
+      },
+      "LadderStep": {
+        "properties": {
+          "o2": {
+            "type": "number",
+            "title": "O2"
+          },
+          "over_cabin_limit": {
+            "type": "number",
+            "title": "Over Cabin Limit"
+          },
+          "over_suit_limit": {
+            "type": "number",
+            "title": "Over Suit Limit"
+          },
+          "sustains_cabin": {
+            "type": "boolean",
+            "title": "Sustains Cabin"
+          },
+          "sustains_suit": {
+            "type": "boolean",
+            "title": "Sustains Suit"
+          }
+        },
+        "type": "object",
+        "required": [
+          "o2",
+          "over_cabin_limit",
+          "over_suit_limit",
+          "sustains_cabin",
+          "sustains_suit"
+        ],
+        "title": "LadderStep"
+      },
+      "MatrixCell": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "experiment": {
+            "type": "string",
+            "title": "Experiment"
+          },
+          "environment": {
+            "type": "string",
+            "title": "Environment"
+          },
+          "rpi": {
+            "type": "integer",
+            "title": "Rpi"
+          },
+          "band": {
+            "type": "string",
+            "title": "Band"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "experiment",
+          "environment",
+          "rpi",
+          "band"
+        ],
+        "title": "MatrixCell"
+      },
+      "MatrixOut": {
+        "properties": {
+          "findings": {
+            "items": {
+              "$ref": "#/components/schemas/MatrixCell"
+            },
+            "type": "array",
+            "title": "Findings"
+          },
+          "environment_means": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Environment Means"
+          }
+        },
+        "type": "object",
+        "required": [
+          "findings",
+          "environment_means"
+        ],
+        "title": "MatrixOut"
+      },
+      "MeasurementItem": {
+        "properties": {
+          "instrument": {
+            "type": "string",
+            "title": "Instrument"
+          },
+          "variable": {
+            "type": "string",
+            "title": "Variable"
+          },
+          "kind": {
+            "type": "string",
+            "title": "Kind"
+          }
+        },
+        "type": "object",
+        "required": [
+          "instrument",
+          "variable",
+          "kind"
+        ],
+        "title": "MeasurementItem"
+      },
+      "MeasurementOut": {
+        "properties": {
+          "experiment": {
+            "type": "string",
+            "title": "Experiment"
+          },
+          "measurements": {
+            "items": {
+              "$ref": "#/components/schemas/MeasurementItem"
+            },
+            "type": "array",
+            "title": "Measurements"
+          },
+          "kinds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Kinds"
+          }
+        },
+        "type": "object",
+        "required": [
+          "experiment",
+          "measurements",
+          "kinds"
+        ],
+        "title": "MeasurementOut"
+      },
+      "MeasurementsOut": {
+        "properties": {
+          "experiments": {
+            "items": {
+              "$ref": "#/components/schemas/MeasurementOut"
+            },
+            "type": "array",
+            "title": "Experiments"
+          },
+          "missing_variables": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Missing Variables"
+          },
+          "note": {
+            "type": "string",
+            "title": "Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "experiments",
+          "missing_variables",
+          "note"
+        ],
+        "title": "MeasurementsOut"
+      },
+      "Message": {
+        "properties": {
+          "role": {
+            "type": "string",
+            "title": "Role"
+          },
+          "content": {
+            "type": "string",
+            "title": "Content"
+          }
+        },
+        "type": "object",
+        "required": [
+          "role",
+          "content"
+        ],
+        "title": "Message"
+      },
+      "MetaOut": {
+        "properties": {
+          "kernel_version": {
+            "type": "string",
+            "title": "Kernel Version"
+          },
+          "environments": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/EnvironmentOut"
+            },
+            "type": "object",
+            "title": "Environments"
+          },
+          "weights": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Weights"
+          },
+          "materials": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Materials"
+          },
+          "diluents": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Diluents"
+          },
+          "bands": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Bands"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kernel_version",
+          "environments",
+          "weights",
+          "materials",
+          "diluents",
+          "bands"
+        ],
+        "title": "MetaOut"
+      },
+      "OxygenLadderOut": {
+        "properties": {
+          "steps": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Steps"
+          },
+          "materials": {
+            "items": {
+              "$ref": "#/components/schemas/LadderMaterial"
+            },
+            "type": "array",
+            "title": "Materials"
+          },
+          "anchors": {
+            "items": {
+              "$ref": "#/components/schemas/LadderAnchor"
+            },
+            "type": "array",
+            "title": "Anchors"
+          }
+        },
+        "type": "object",
+        "required": [
+          "steps",
+          "materials",
+          "anchors"
+        ],
+        "title": "OxygenLadderOut"
+      },
+      "ProvenanceOut": {
+        "properties": {
+          "source_file": {
+            "type": "string",
+            "title": "Source File"
+          },
+          "observations": {
+            "type": "integer",
+            "title": "Observations"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/ProvenanceRow"
+            },
+            "type": "array",
+            "title": "Rows"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source_file",
+          "observations",
+          "rows"
+        ],
+        "title": "ProvenanceOut"
+      },
+      "ProvenanceRow": {
+        "properties": {
+          "row": {
+            "type": "integer",
+            "title": "Row"
+          },
+          "flags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Flags"
+          },
+          "rules": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Rules"
+          },
+          "quality": {
+            "type": "number",
+            "title": "Quality"
+          },
+          "raw": {
+            "type": "object",
+            "title": "Raw"
+          }
+        },
+        "type": "object",
+        "required": [
+          "row",
+          "flags",
+          "rules",
+          "quality",
+          "raw"
+        ],
+        "title": "ProvenanceRow"
+      },
+      "RuleOut": {
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "mito": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mito"
+          },
+          "hecho": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hecho"
+          },
+          "fuente": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fuente"
+          }
+        },
+        "type": "object",
+        "title": "RuleOut"
+      },
+      "RulesOut": {
+        "properties": {
+          "rules": {
+            "items": {
+              "$ref": "#/components/schemas/RuleOut"
+            },
+            "type": "array",
+            "title": "Rules"
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rules",
+          "count",
+          "source"
+        ],
+        "title": "RulesOut"
+      },
+      "SimilarityPair": {
+        "properties": {
+          "a": {
+            "type": "string",
+            "title": "A"
+          },
+          "b": {
+            "type": "string",
+            "title": "B"
+          },
+          "similarity": {
+            "type": "integer",
+            "title": "Similarity"
+          },
+          "shared": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Shared"
+          },
+          "differing": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Differing"
+          }
+        },
+        "type": "object",
+        "required": [
+          "a",
+          "b",
+          "similarity",
+          "shared",
+          "differing"
+        ],
+        "title": "SimilarityPair"
+      },
+      "SpinoffOut": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "benefit": {
+            "type": "string",
+            "title": "Benefit"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "source",
+          "benefit"
+        ],
+        "title": "SpinoffOut"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "VariationColumn": {
+        "properties": {
+          "column": {
+            "type": "string",
+            "title": "Column"
+          },
+          "distinct": {
+            "type": "integer",
+            "title": "Distinct"
+          },
+          "minimum": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Minimum"
+          },
+          "maximum": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Maximum"
+          },
+          "examples": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Examples",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "column",
+          "distinct"
+        ],
+        "title": "VariationColumn"
+      },
+      "VariationOut": {
+        "properties": {
+          "experiment": {
+            "type": "string",
+            "title": "Experiment"
+          },
+          "material": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Material"
+          },
+          "observations": {
+            "type": "integer",
+            "title": "Observations"
+          },
+          "varying": {
+            "items": {
+              "$ref": "#/components/schemas/VariationColumn"
+            },
+            "type": "array",
+            "title": "Varying"
+          },
+          "constant": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Constant"
+          },
+          "note": {
+            "type": "string",
+            "title": "Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "experiment",
+          "material",
+          "observations",
+          "varying",
+          "constant",
+          "note"
+        ],
+        "title": "VariationOut"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "metadatos",
+      "description": "Entornos, pesos y reconstruccion del corpus."
+    },
+    {
+      "name": "hallazgos",
+      "description": "Ranking e interpretacion por entorno."
+    },
+    {
+      "name": "investigaciones",
+      "description": "Experimentos y variables."
+    },
+    {
+      "name": "comparacion",
+      "description": "Que es comparable con que."
+    },
+    {
+      "name": "hardware",
+      "description": "Facilidades, proyectos y masa."
+    },
+    {
+      "name": "atmosfera",
+      "description": "Oxigeno, presion y gravedad parcial."
+    },
+    {
+      "name": "sensores",
+      "description": "Instrumentos y variables medidas."
+    },
+    {
+      "name": "reglas",
+      "description": "Fisica de la guia oficial."
+    },
+    {
+      "name": "incidentes",
+      "description": "Revalidacion historica."
+    },
+    {
+      "name": "vacios",
+      "description": "Ausencias de evidencia."
+    },
+    {
+      "name": "beneficio terrestre",
+      "description": "Transferencia a Tierra."
+    },
+    {
+      "name": "procedencia",
+      "description": "Trazabilidad por fila."
+    },
+    {
+      "name": "laboratorio",
+      "description": "Contrafactuales."
+    },
+    {
+      "name": "interpretacion",
+      "description": "Contexto para un LLM."
+    },
+    {
+      "name": "informe",
+      "description": "Exportacion."
+    }
+  ]
+}

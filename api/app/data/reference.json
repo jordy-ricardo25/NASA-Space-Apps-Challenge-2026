@@ -1,0 +1,160 @@
+{
+  "reglas": [
+    {
+      "id": "RULE-01-QUIESCENT-FLAME",
+      "mito": "Mito: Un fuego estacionario no puede existir sin gravedad ni ventilación.",
+      "hecho": "Falso. En 0g, una llama de vela puede arder por difusión durante más de 45 minutos (casi invisible a simple vista) y las bolas de llama premezcladas (SOFBALL) arden más de 40 minutos a solo ~1 Watt.",
+      "fuente": "NP-2015-10-034-JSC"
+    },
+    {
+      "id": "RULE-02-LOW-FLOW-PEAK-HAZARD",
+      "mito": "Mito: Apagar la ventilación extingue el fuego de inmediato o los estándares terrestres son conservadores.",
+      "hecho": "Falso. Existe una zona crítica de baja velocidad de flujo (~10 cm/s, típica de ventilación de naves) donde la inflamabilidad alcanza su punto máximo y los materiales arden con MENOS oxígeno que en Tierra (haciendo que NASA-STD-6001 Test 1 no sea conservador).",
+      "fuente": "NP-2015-10-034-JSC"
+    },
+    {
+      "id": "RULE-03-UPSTREAM-SPREAD",
+      "mito": "Mito: El fuego se propaga en la dirección del flujo de aire.",
+      "hecho": "En microgravedad con flujos lentos, las llamas sobre combustibles delgados se propagan preferentemente CORRIENTE ARRIBA (hacia la fuente de oxígeno fresco), al revés que en la Tierra.",
+      "fuente": "NP-2015-10-034-JSC"
+    },
+    {
+      "id": "RULE-04-EXTINGUISHER-ENTRAINMENT",
+      "mito": "Mito: Disparar un chorro local de gas inerte (N2) siempre apaga la llama.",
+      "hecho": "Resultados de BASS mostraron que un chorro local de nitrógeno puede arrastrar oxígeno ambiental hacia la llama y fortalecerla en microgravedad.",
+      "fuente": "NP-2015-10-034-JSC"
+    },
+    {
+      "id": "RULE-05-COOL-FLAME-REIGNITION",
+      "mito": "Mito: Si la llama visible se apaga, el incendio terminó.",
+      "hecho": "En combustibles líquidos/hidrocarburos (FLEX), tras extinguirse la llama caliente por radiación, puede persistir una 'llama fría' invisible a baja temperatura que sigue vaporizando combustible y puede re-encenderse espontáneamente.",
+      "fuente": "NP-2015-10-034-JSC"
+    }
+  ],
+  "instalaciones": [
+    {
+      "id": "CIR-MDCA",
+      "nombre": "Multi-user Droplet Combustion Apparatus (MDCA)",
+      "bastidor": "Combustion Integrated Rack (CIR)",
+      "masa_kg": 254,
+      "volumen_m3": 0.48
+    },
+    {
+      "id": "CIR-ACME",
+      "nombre": "Advanced Combustion via Microgravity Experiments (ACME) Insert",
+      "bastidor": "Combustion Integrated Rack (CIR)",
+      "masa_kg": 250,
+      "volumen_m3": 0.5
+    },
+    {
+      "id": "CIR-SOFIE",
+      "nombre": "Solid Fuel Ignition and Extinction (SoFIE) Insert",
+      "bastidor": "Combustion Integrated Rack (CIR)",
+      "masa_kg": 250,
+      "volumen_m3": 0.5
+    },
+    {
+      "id": "MSG",
+      "nombre": "Microgravity Science Glovebox (MSG)",
+      "bastidor": "U.S. Laboratory (Ducto de flujo SPICE)",
+      "masa_kg": 40,
+      "volumen_m3": 0.1
+    }
+  ],
+  "investigaciones": [
+    {
+      "psi_id": "PSI-26 / PSI-25",
+      "acronimo": "BASS / BASS-II",
+      "titulo": "Burning and Suppression of Solids",
+      "pilar": "prevention_and_suppression"
+    },
+    {
+      "psi_id": "PSI-69 / PSI-68",
+      "acronimo": "FLEX / FLEX-2",
+      "titulo": "Flame Extinguishment Experiment",
+      "pilar": "suppression"
+    },
+    {
+      "psi_id": "PSI-20",
+      "acronimo": "ACME BRE",
+      "titulo": "Burning Rate Emulator",
+      "pilar": "prevention"
+    },
+    {
+      "psi_id": "PSI-22",
+      "acronimo": "ACME E-FIELD Flames",
+      "titulo": "Electric-Field Effects on Laminar Diffusion Flames",
+      "pilar": "partial_gravity_bounding"
+    },
+    {
+      "psi_id": "PSI-107 / PSI-106",
+      "acronimo": "SPICE / SLICE",
+      "titulo": "Smoke Point In Coflow / Structure & Liftoff In Combustion Experiment",
+      "pilar": "prevention_and_detection"
+    },
+    {
+      "psi_id": "PSI-102 / PSI-101",
+      "acronimo": "SAME / SAME-R / DAFT",
+      "titulo": "Smoke and Aerosol Measurement Experiment & Dust Aerosol Feasibility Test",
+      "pilar": "detection"
+    },
+    {
+      "psi_id": "STS-107-MIST",
+      "acronimo": "Mist",
+      "titulo": "Water Mist Fire Suppression Experiment",
+      "pilar": "suppression"
+    }
+  ],
+  "fm2": {
+    "id": "FUTURE-FM2",
+    "acronym": "FM2",
+    "title": "Flammability of Materials on the Moon",
+    "status": "Planned Lunar Surface Payload (Target: Late 2026)",
+    "pillar": "partial_gravity_bounding",
+    "research_type": "Lunar Surface Investigation (1/6 g)",
+    "hardware": {
+      "name": "FM2 Autonomous Sealed Combustion Chamber",
+      "dimensions_cm": "28.5 x 28.5 x 38.5",
+      "mass_kg": 25.0,
+      "gas_supply": "3 cilindros presurizados externos",
+      "sample_geometry": "4 muestras planas individuales (2 cm x 20 cm expuestas por ambas caras) con ignitores de alambre caliente"
+    },
+    "team": {
+      "principal_investigator": "Dr. Paul Ferkul (USRA / NASA Glenn Research Center)",
+      "co_investigators": [
+        "Prof. Ya-Ting Liao (Case Western Reserve University)",
+        "Dr. Michael Johnston (NASA Glenn Research Center)"
+      ],
+      "project_manager": "Amber Krauss (NASA Glenn Research Center)"
+    },
+    "fuels": [
+      "Tela SIBAL (75% algodón / 25% fibra de vidrio)",
+      "PMMA (Acrílico)"
+    ],
+    "test_conditions": {
+      "gravity_g": 0.165,
+      "pressure_psia_tested": [
+        8.2,
+        14.7
+      ],
+      "o2_percent_scan_at_8_2_psia": [
+        37.0,
+        33.0,
+        29.0,
+        25.0
+      ],
+      "expected_lunar_loc_o2_percent": "24% - 26% O2 (a 8.2 psia)",
+      "pmma_hls_reference_test": "34% O2 a 8.2 psia",
+      "sibal_reference_test": "21% O2 a 14.7 psia (tasa de propagación descendente en 1/6 g simulado: 0.086 a 0.11 cm/s)"
+    },
+    "sensors": [
+      "2 Cámaras ópticas (tamaño, intensidad, color y tasa de propagación de llama)",
+      "Termopares (temperatura de llama y combustible)",
+      "Radiómetros",
+      "Sensores de concentración de O2, CO2, CO y humedad"
+    ],
+    "key_finding": "La evidencia numérica y de centrífugas/vuelos parabólicos indica que la gravedad lunar (0.165 g) representa casi la condición MÁS inflamable posible: mantiene suficiente flotabilidad lenta para alimentar oxígeno fresco a la base de la llama sin enfriarla ni apagarla por arrastre (blowoff) como ocurre en 1g. La tela SIBAL arde hacia abajo en gravedad lunar (0.11 cm/s) cuando en la Tierra (1g) se autoextingue al instante.",
+    "relevance_to_psi_and_artemis": "Cierra la brecha de datos entre 0g (ISS/PSI) y 1g (estándar terrestre NASA-STD-6001 Test 1) para validar materiales de cabina en el Human Landing System (HLS), bases lunares y rovers presurizados.",
+    "earth_application": "Mejora de modelos predictivos de propagación de llama a baja velocidad y estándares de seguridad contra incendios en atmósferas enriquecidas."
+  }
+}

@@ -1,0 +1,55 @@
+# Entornos y cachés de Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Configuración local: solo la plantilla se comparte
+.env
+.env.*
+!.env.example
+
+# Bases locales y archivos auxiliares de SQLite
+*.db
+*.db-*
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+
+# Logs, respaldos y volcados locales
+*.log
+logs/
+*.bak
+*.backup
+*.dump
+dump*.sql
+backup*.sql
+backups/
+dumps/
+
+# Credenciales, secretos y llaves privadas
+.aws/
+.ssh/
+.secrets/
+secrets/
+credentials*.json
+*_credentials.json
+service-account*.json
+service_account*.json
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+id_rsa
+id_dsa
+id_ecdsa
+id_ed25519

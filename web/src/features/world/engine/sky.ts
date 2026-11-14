@@ -64,7 +64,7 @@ export function buildEarth(map: THREE.Texture): THREE.Group {
   return g;
 }
 
-export const MARS_POS = new THREE.Vector3(-300, 205, -640);
+export const MARS_POS = new THREE.Vector3(-330, 150, -640);
 
 /** Marte en el cielo lunar (disco estilizado dibujado por código): es la puerta a la base marciana. */
 export function buildMars(): THREE.Mesh {

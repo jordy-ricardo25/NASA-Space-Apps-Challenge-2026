@@ -676,7 +676,7 @@ export class World {
       const m = this.site.modules[el.dataset.anchor as ModuleId];
       if (!m) continue;
       this.tmp2.copy(m.anchor);
-      if (m.id === "estacion") this.tmp2.y = m.group.position.y + 13;
+      if (m.id === "estacion") this.tmp2.y = m.group.position.y + 11;
       this.tmp2.project(this.cam);
       const visible = this.tmp2.z < 1 && Math.abs(this.tmp2.x) < 1.1 && Math.abs(this.tmp2.y) < 1.1;
       const x = ((this.tmp2.x + 1) / 2) * r.width, y = ((1 - this.tmp2.y) / 2) * r.height;

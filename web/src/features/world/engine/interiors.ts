@@ -506,86 +506,169 @@ function buildBase(): Interior {
   return { scene, spec, fog };
 }
 
-/**
- * Banco de pruebas del traje EVA: una esclusa con dos trajes en sus soportes y
- * la muestra de material expuesta a la atmósfera del traje (O₂ puro a baja presión).
- */
-function buildSuitBay(): Interior {
-  const { scene, fog } = baseScene(0x0a0c10, 0x70747a, [0xf4f6fb, 0x74706a, 0.78]);
-  const HX = 1.9, HY = 1.15, HZ = 1.25;
-  const wallM = new THREE.MeshStandardMaterial({ map: rackTex(31, "#dadcd6"), roughness: 0.78 });
-  const wallM2 = new THREE.MeshStandardMaterial({ map: rackTex(32, "#d3d6d0"), roughness: 0.78 });
-  for (let i = 0; i < 4; i++) {
-    plane(scene, 0.95, 2 * HY, i % 2 ? wallM : wallM2, [-HX + 0.475 + i * 0.95, 0, -HZ], [0, 0, 0]);
-    plane(scene, 0.95, 2 * HY, i % 2 ? wallM2 : wallM, [-HX + 0.475 + i * 0.95, 0, HZ], [0, Math.PI, 0]);
-  }
-  plane(scene, 2 * HX, 2 * HZ, new THREE.MeshStandardMaterial({ map: floorTex([8, 5]), roughness: 0.85 }), [0, -HY, 0], [-Math.PI / 2, 0, 0]);
-  plane(scene, 2 * HX, 2 * HZ, new THREE.MeshStandardMaterial({ map: quiltTex([7, 4]), roughness: 0.9 }), [0, HY, 0], [Math.PI / 2, 0, 0]);
-  const lm = new THREE.MeshBasicMaterial({ color: 0xfbf6e6 });
-  for (const x of [-0.9, 0.6]) box(scene, 0.8, 0.02, 0.16, lm, x, HY - 0.012, 0);
-  // Escotilla al exterior con ventanilla a la superficie lunar
-  plane(scene, 2 * HZ, 2 * HY, new THREE.MeshStandardMaterial({ color: 0xd4d7d1, roughness: 0.8 }), [HX, 0, 0], [0, -Math.PI / 2, 0]);
-  const hatch = new THREE.Mesh(new THREE.TorusGeometry(0.62, 0.07, 10, 36), std(0x8d9391, 0.4, 0.7));
-  hatch.position.set(HX - 0.04, -0.1, 0);
-  hatch.rotation.y = Math.PI / 2;
-  const door = new THREE.Mesh(new THREE.CircleGeometry(0.6, 36), std(0xc3c7c2, 0.6, 0.3));
-  door.position.set(HX - 0.03, -0.1, 0);
-  door.rotation.y = -Math.PI / 2;
-  const porthole = new THREE.Mesh(new THREE.CircleGeometry(0.2, 28), new THREE.MeshBasicMaterial({ map: windowTex("moon") }));
-  porthole.position.set(HX - 0.045, 0.05, 0);
-  porthole.rotation.y = -Math.PI / 2;
-  scene.add(hatch, door, porthole);
-  // Dos trajes EVA en sus soportes: torso, casco con visor dorado, mochila de soporte vital
-  plane(scene, 2 * HZ, 2 * HY, new THREE.MeshStandardMaterial({ color: 0xcfd2cc, roughness: 0.82 }), [-HX, 0, 0], [0, Math.PI / 2, 0]);
-  const suitM = std(0xf1f2ee, 0.85, 0.02);
-  const visorM = new THREE.MeshStandardMaterial({ color: 0xc9962e, roughness: 0.18, metalness: 0.95 });
-  const packM = std(0xdfe1dc, 0.7, 0.1);
-  for (const z of [-0.6, 0.6]) {
-    const x = -HX + 0.42;
-    const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.24, 0.42, 6, 14), suitM);
-    torso.position.set(x, -0.1, z);
-    const helmet = new THREE.Mesh(new THREE.SphereGeometry(0.2, 20, 14), suitM);
-    helmet.position.set(x, 0.5, z);
-    const visor = new THREE.Mesh(new THREE.SphereGeometry(0.16, 18, 12, 0, Math.PI * 2, 0.5, 1.5), visorM);
-    visor.position.set(x + 0.07, 0.5, z);
-    visor.rotation.z = -Math.PI / 2;
-    box(scene, 0.2, 0.62, 0.42, packM, x - 0.26, -0.02, z);
-    for (const s of [-1, 1]) {
-      const arm = new THREE.Mesh(new THREE.CapsuleGeometry(0.075, 0.42, 4, 10), suitM);
-      arm.position.set(x + 0.02, -0.06, z + s * 0.33);
-      const leg = new THREE.Mesh(new THREE.CapsuleGeometry(0.095, 0.48, 4, 10), suitM);
-      leg.position.set(x, -0.74, z + s * 0.13);
-      scene.add(arm, leg);
+/** Panorama lunar que se ve a través del visor: cielo negro, horizonte y regolito. */
+const visorViewTex = (): THREE.CanvasTexture =>
+  tex(1024, 512, (x) => {
+    x.fillStyle = "#01040a";
+    x.fillRect(0, 0, 1024, 512);
+    for (let i = 0; i < 260; i++) {
+      x.fillStyle = `rgba(255,255,255,${0.25 + Math.random() * 0.75})`;
+      const s = Math.random() < 0.9 ? 1.4 : 2.4;
+      x.fillRect(Math.random() * 1024, Math.random() * 250, s, s);
     }
-    box(scene, 0.05, 2 * HY, 0.05, std(0x8d9391, 0.4, 0.7), x - 0.36, 0, z);
-    scene.add(torso, helmet, visor);
+    // La Tierra sobre el horizonte
+    const e = x.createRadialGradient(770, 120, 4, 780, 128, 46);
+    e.addColorStop(0, "#9fd0ff");
+    e.addColorStop(0.55, "#2f73c7");
+    e.addColorStop(1, "#0b2148");
+    x.fillStyle = e;
+    x.beginPath();
+    x.arc(780, 128, 44, 0, 6.3);
+    x.fill();
+    x.fillStyle = "rgba(1,4,10,0.72)";
+    x.beginPath();
+    x.arc(800, 140, 46, 0, 6.3);
+    x.fill();
+    // Colinas lejanas y regolito iluminado por un sol rasante
+    const far = x.createLinearGradient(0, 250, 0, 330);
+    far.addColorStop(0, "#c9c9c4");
+    far.addColorStop(1, "#8d8d8a");
+    x.fillStyle = far;
+    x.beginPath();
+    x.moveTo(0, 290);
+    x.bezierCurveTo(140, 250, 260, 300, 420, 272);
+    x.bezierCurveTo(560, 248, 700, 296, 860, 268);
+    x.bezierCurveTo(930, 258, 990, 280, 1024, 274);
+    x.lineTo(1024, 512);
+    x.lineTo(0, 512);
+    x.fill();
+    const ground = x.createLinearGradient(0, 300, 0, 512);
+    ground.addColorStop(0, "#a3a39f");
+    ground.addColorStop(1, "#4a4a4d");
+    x.fillStyle = ground;
+    x.beginPath();
+    x.moveTo(0, 322);
+    x.bezierCurveTo(200, 300, 420, 334, 640, 312);
+    x.bezierCurveTo(800, 298, 920, 322, 1024, 314);
+    x.lineTo(1024, 512);
+    x.lineTo(0, 512);
+    x.fill();
+    for (let i = 0; i < 46; i++) {
+      const y = 335 + Math.random() * 170, k = (y - 320) / 190;
+      x.fillStyle = `rgba(30,30,34,${0.25 + Math.random() * 0.3})`;
+      x.beginPath();
+      x.ellipse(Math.random() * 1024, y, (8 + Math.random() * 34) * (0.4 + k), (2 + Math.random() * 6) * (0.4 + k), 0, 0, 6.3);
+      x.fill();
+    }
+    // Huellas que se alejan hacia el horizonte
+    x.fillStyle = "rgba(40,40,44,0.5)";
+    for (let i = 0; i < 9; i++) {
+      const k = i / 9;
+      x.beginPath();
+      x.ellipse(470 + (i % 2 ? 14 : -14) * (1 - k) - k * 60, 500 - k * 150, 12 * (1 - k * 0.8), 5 * (1 - k * 0.8), 0, 0, 6.3);
+      x.fill();
+    }
+  });
+
+/**
+ * Interior del traje EVA: la vista es la de quien lo lleva puesto. Se ve el
+ * casco acolchado alrededor, el anillo del cuello, los micrófonos, los propios
+ * guantes y, a través del visor, la superficie lunar. La muestra es un retal de
+ * las capas textiles del traje, expuesto a su atmósfera (O₂ puro a baja presión).
+ * El casco se dibuja ampliado para poder mirar la llama desde cualquier lado.
+ */
+function buildSuitInterior(): Interior {
+  const { scene, fog } = baseScene(0x01040a, 0x6f7479, [0xf4f6fb, 0x6f6c66, 0.82]);
+  const R = 1.7;
+  // Exterior a través del visor
+  const view = new THREE.Mesh(new THREE.SphereGeometry(26, 48, 24), new THREE.MeshBasicMaterial({ map: visorViewTex(), side: THREE.BackSide, fog: false }));
+  view.rotation.y = Math.PI * 0.94;
+  // Se sube el panorama para que el regolito llene la mitad inferior del visor.
+  view.position.y = 7;
+  scene.add(view);
+  // Casco: carcasa acolchada con la abertura del visor hacia −Z
+  const padM = new THREE.MeshStandardMaterial({ map: quiltTex([16, 8]), roughness: 0.95, side: THREE.BackSide });
+  const OPEN = 0.86; // semiancho angular del visor (rad)
+  const TOP = 1.02, BOTTOM = 2.02; // borde superior e inferior del visor (ángulo polar)
+  const front = Math.PI * 1.5;
+  scene.add(new THREE.Mesh(new THREE.SphereGeometry(R, 56, 36, front + OPEN, Math.PI * 2 - 2 * OPEN), padM));
+  scene.add(new THREE.Mesh(new THREE.SphereGeometry(R, 32, 14, front - OPEN, 2 * OPEN, 0, TOP), padM));
+  scene.add(new THREE.Mesh(new THREE.SphereGeometry(R, 32, 14, front - OPEN, 2 * OPEN, BOTTOM, Math.PI - BOTTOM), padM));
+  // Cristal del visor con su tinte dorado y el marco
+  const glass = new THREE.Mesh(
+    new THREE.SphereGeometry(R * 0.995, 40, 20, front - OPEN, 2 * OPEN, TOP, BOTTOM - TOP),
+    new THREE.MeshStandardMaterial({ color: 0xd9a441, roughness: 0.08, metalness: 0.6, transparent: true, opacity: 0.1, side: THREE.BackSide, depthWrite: false }),
+  );
+  scene.add(glass);
+  const rimM = std(0xc3c8cd, 0.45, 0.2);
+  const rimAt = (theta: number): void => {
+    const r = R * Math.sin(theta) * 0.99;
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(r, 0.06, 10, 40, 2 * OPEN), rimM);
+    rim.rotation.x = Math.PI / 2;
+    rim.rotation.z = Math.PI / 2 - OPEN;
+    rim.position.y = R * Math.cos(theta) * 0.99;
+    scene.add(rim);
+  };
+  rimAt(TOP);
+  rimAt(BOTTOM);
+  for (const s of [-1, 1]) {
+    const side = new THREE.Mesh(new THREE.TorusGeometry(R * 0.99, 0.06, 10, 24, BOTTOM - TOP), rimM);
+    side.rotation.y = Math.PI / 2 - s * OPEN;
+    side.rotation.z = Math.PI / 2 - BOTTOM;
+    scene.add(side);
   }
-  // Banco de trabajo con botellas de oxígeno bajo la muestra
-  box(scene, 1.4, 0.05, 0.42, std(0x9aa0a4, 0.5, 0.5), 0.2, -0.56, -HZ + 0.22);
-  const o2M = std(0x2f9e63, 0.5, 0.4);
-  for (let i = 0; i < 3; i++) {
-    const tank = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.5, 14), o2M);
-    tank.position.set(-0.3 + i * 0.19, -0.86, -HZ + 0.16);
-    scene.add(tank);
+  // Anillo del cuello y cuerpo del traje hacia abajo
+  const neck = new THREE.Mesh(new THREE.TorusGeometry(1.08, 0.1, 12, 48), std(0xb9bfc5, 0.4, 0.25));
+  neck.rotation.x = Math.PI / 2;
+  neck.position.y = -1.26;
+  scene.add(neck);
+  const collar = new THREE.Mesh(new THREE.CylinderGeometry(1.0, 0.86, 0.5, 40, 1, true), new THREE.MeshStandardMaterial({ map: quiltTex([12, 2]), roughness: 0.95, side: THREE.BackSide }));
+  collar.position.y = -1.5;
+  scene.add(collar);
+  // Entrada de ventilación en la nuca: de ahí baja el oxígeno sobre la cara
+  box(scene, 0.7, 0.12, 0.05, std(0x8d9391, 0.5, 0.6), 0, 1.02, 1.28);
+  for (let i = 0; i < 5; i++) box(scene, 0.09, 0.07, 0.02, new THREE.MeshBasicMaterial({ color: 0x0b1118 }), -0.26 + i * 0.13, 1.02, 1.25);
+  // Indicadores de estado en el borde inferior del visor
+  const leds = [0x00d49a, 0x00d49a, 0x35d8f2, 0xffc53d];
+  leds.forEach((c, i) => {
+    const led = new THREE.Mesh(new THREE.SphereGeometry(0.022, 8, 6), new THREE.MeshBasicMaterial({ color: c }));
+    const a = front - 0.24 + i * 0.16;
+    led.position.set(-Math.cos(a) * 1.22, -1.02, Math.sin(a) * 1.22);
+    scene.add(led);
+  });
+  // Fuera del visor: los propios guantes, apoyados abajo, lejos de la llama
+  const gloveM = std(0xf1f2ee, 0.85, 0.02);
+  for (const s of [-1, 1]) {
+    const arm = new THREE.Mesh(new THREE.CapsuleGeometry(0.2, 1.1, 6, 14), gloveM);
+    arm.position.set(s * 1.15, -1.75, -3.3);
+    arm.rotation.set(1.2, 0, -s * 0.42);
+    const hand = new THREE.Mesh(new THREE.SphereGeometry(0.22, 16, 12), gloveM);
+    hand.scale.set(1, 0.7, 1.2);
+    hand.position.set(s * 0.82, -1.42, -3.95);
+    scene.add(arm, hand);
   }
+  // Soporte del retal de tejido, anclado al anillo del cuello
+  const postM = std(0xaeb4ba, 0.4, 0.7);
+  for (const s of [-1, 1]) box(scene, 0.02, 0.7, 0.02, postM, s * 0.3, -0.9, -0.58);
   const spec: InteriorSpec = {
-    center: V(0.1, 0, 0),
-    half: V(HX - 0.5, HY - 0.05, HZ - 0.05),
+    center: V(0, -0.05, 0),
+    half: V(1.0, 0.95, 1.0),
     up: V(0, 1, 0),
-    ventDir: V(1, 0, 0),
-    sample: V(0.2, 0.05, -(HZ - 0.04)),
+    // El soporte vital sopla desde la nuca hacia abajo, sobre la cara.
+    ventDir: V(0, -1, 0),
+    sample: V(0, -0.1, -0.55),
     axis: V(0, 1, 0),
     normal: V(0, 0, 1),
-    camera: V(-0.55, 0.12, 0.45),
+    camera: V(0.32, 0.16, 1.2),
     minDist: 0.5,
-    maxDist: 2.0,
-    fog: 0x70747a,
+    maxDist: 1.95,
+    fog: 0x6f7479,
   };
   return { scene, spec, fog };
 }
 
 const BUILDERS: Record<ModuleId, () => Interior> = {
-  traje: buildSuitBay,
+  traje: buildSuitInterior,
   nave: buildSpacecraft,
   estacion: buildStation,
   rover: buildRover,

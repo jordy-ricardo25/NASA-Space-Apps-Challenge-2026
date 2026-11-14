@@ -168,7 +168,9 @@ Notas importantes:
   exploración SEA, 34 % O₂ a 56,5 kPa).
 - **Traje EVA:** el reto fija 100 % de O₂ a 4,3 psi como cota superior. PSI ensayó entre 10 y
   40 % de O₂, así que todo resultado del traje es una extrapolación y la plataforma lo avisa
-  (ALR-09). Se usa igual que los demás módulos: escena, banco de pruebas y laboratorio.
+  (ALR-09). Se usa igual que los demás módulos: escena, interior y laboratorio. El interior se ve
+  desde dentro del casco: el acolchado, el marco del visor y la superficie lunar al otro lado, con
+  un retal de las capas textiles del traje como muestra.
 - **Base en Marte:** ninguna fuente fija todavía la atmósfera de una cabina marciana. La
   plataforma usa la atmósfera de exploración como **hipótesis** y la marca como tal. Al entrar
   al módulo, el mundo 3D cambia a Marte (suelo rojizo, cielo y luz marcianos); el rover, la

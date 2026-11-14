@@ -196,8 +196,8 @@ export const MODULES: ModuleDef[] = [
     investigations: ["cfig", "sofie", "bass2"],
     evidence: l("Fuera del rango ensayado en PSI: 100 % de O₂ (cota superior)", "Outside the range tested in PSI: 100% O₂ (upper bound)"),
     accent: "#b68cff",
-    enterLabel: l("PROBAR LA ATMÓSFERA DEL TRAJE", "TEST THE SUIT ATMOSPHERE"),
-    insideLabel: l("TRAJE", "SUIT"),
+    enterLabel: l("ENTRAR AL TRAJE", "STEP INSIDE THE SUIT"),
+    insideLabel: l("DENTRO DEL CASCO", "INSIDE THE HELMET"),
   },
   {
     id: "base",

@@ -8,9 +8,8 @@ import { MODULE_ROUTE } from "@/content/routes";
 import { worldCtl, worldStore } from "@/features/world/controller";
 import { useLang } from "@/shared/hooks/useLang";
 import { appStore } from "@/shared/lib/appStore";
-import { gravity, num, pressure } from "@/shared/lib/format";
+import { gravity, num } from "@/shared/lib/format";
 import { useStore } from "@/shared/lib/store";
-import { ppO2 } from "@/shared/lib/units";
 import { DragHint } from "@/shared/components/DragHint";
 import styles from "./HomeHud.module.scss";
 
@@ -21,7 +20,6 @@ import styles from "./HomeHud.module.scss";
 export function HomeHud() {
   const { t, lang } = useLang();
   const hovered = useStore(worldStore, (s) => s.hovered);
-  const units = useStore(appStore, (s) => s.units);
   const booted = useStore(appStore, (s) => s.booted);
 
   return (
@@ -59,7 +57,7 @@ export function HomeHud() {
       <section className={styles.board} aria-label={t(l("Ambientes habitables", "Habitable environments"))}>
         <div className={styles.boardHead}>
           <span>{t(l("AMBIENTES HABITABLES", "HABITABLE ENVIRONMENTS"))}</span>
-          <span>{t(l("ATMÓSFERA DE DISEÑO", "DESIGN ATMOSPHERE"))}</span>
+          <span>{t(l("GRAVEDAD · O₂", "GRAVITY · O₂"))}</span>
         </div>
         <ul>
           {MODULES.map((m) => {
@@ -77,8 +75,6 @@ export function HomeHud() {
                   <b>{t(m.name)}</b>
                   <span>{gravity(v.g, lang)}</span>
                   <span>{num(v.o2, v.o2 % 1 ? 1 : 0, lang)} % O₂</span>
-                  <span>{pressure(v.P, units, lang)}</span>
-                  <span className={styles.pp}>ppO₂ {num(ppO2(v.o2, v.P), 1, lang)}</span>
                   <ArrowRight size={14} />
                 </Link>
               </li>

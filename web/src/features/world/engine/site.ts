@@ -292,7 +292,8 @@ export async function buildSite(heightAt: (x: number, z: number) => number, onPr
 
   // ── Traje EVA: astronauta (modelo de NASA) trabajando en la superficie lunar ─
   const eva = new THREE.Group();
-  const ex = 15, ez = 31;
+  // En primer plano y a la izquierda del tablero de ambientes, para que nada lo tape.
+  const ex = -9, ez = 37;
   const suit = modelMesh(models.astronaut, "body", { roughness: 0.8 });
   suit.scale.setScalar(AS);
   suit.rotation.y = -0.5;
@@ -351,9 +352,10 @@ export async function buildSite(heightAt: (x: number, z: number) => number, onPr
   const station = buildStation(models.iss);
   const stationG = new THREE.Group();
   stationG.add(station.group);
-  station.group.scale.setScalar(4.4);
+  station.group.scale.setScalar(5.2);
   station.group.rotation.set(0.5, 0.4, -0.18);
-  const stationPos = new THREE.Vector3(-34, 60, -92);
+  // Dentro del encuadre del inicio en cualquier proporción de pantalla, con su etiqueta visible.
+  const stationPos = new THREE.Vector3(-4, 43, -70);
   stationG.position.copy(stationPos);
   root.add(stationG);
 
@@ -371,7 +373,7 @@ export async function buildSite(heightAt: (x: number, z: number) => number, onPr
     estacion: {
       id: "estacion",
       group: stationG,
-      anchor: stationPos.clone().add(new THREE.Vector3(0, 13, 0)),
+      anchor: stationPos.clone().add(new THREE.Vector3(0, 11, 0)),
       pick: sphere(stationPos.clone(), 22),
       focus: { target: stationPos.clone(), offset: new THREE.Vector3(-44, -13, 52), minDist: 30, maxDist: 150, ground: false, minPolar: 1.25 },
       materials: station.materials,

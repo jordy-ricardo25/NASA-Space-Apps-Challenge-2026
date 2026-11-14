@@ -492,7 +492,6 @@ Antes de dar un cambio por terminado: `npm run check` y revisar la pantalla en C
 | Asistente con Gemini | Código listo, sin probar por falta de clave |
 | Voz clonada | No implementada; se usa la voz del navegador |
 | Música | Solo la estructura del módulo, apagada |
-| Equipo | Roles y enlaces por confirmar con cada integrante |
 | Fidelidad visual | Modelos con color por vértice, sin texturas ni posprocesado |
 | Repositorio y despliegue | Sin repositorio git ni despliegue en Vercel todavía |
 

@@ -4,7 +4,7 @@
   position: fixed;
   inset: calc(var(--topbar-h) + 12px) 12px 12px auto;
   z-index: 45;
-  width: min(360px, calc(100vw - 24px));
+  width: min(410px, calc(100vw - 24px));
   display: flex;
   flex-direction: column;
   gap: var(--gap-3);
@@ -57,13 +57,13 @@
   display: grid;
   // Nombres completos: una columna para que no se corten.
   grid-template-columns: 1fr;
-  gap: 8px;
+  gap: 6px;
 
   li {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 8px;
+    padding: 6px 8px;
     border: 1px solid var(--color-line-soft);
     border-radius: var(--radius-s);
     background: var(--color-panel-raise);
@@ -82,14 +82,53 @@
     font-style: normal;
   }
 
+  div {
+    flex: 1;
+    min-width: 0;
+  }
+
   b {
     display: block;
     font: 600 13px var(--font-display);
   }
 
+  em {
+    display: block;
+    font-size: 11.5px;
+    font-style: normal;
+    color: var(--color-accent);
+  }
+
   span {
+    display: block;
     font-size: 11px;
-    color: var(--color-text-3);
+    line-height: 1.35;
+    color: var(--color-text-2);
+  }
+
+  // Perfil de LinkedIn
+  a {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    flex: none;
+    border: 1px solid var(--color-line-strong);
+    border-radius: var(--radius-s);
+    font: 700 13px var(--font-display);
+    color: var(--color-accent);
+    transition: background 0.15s, color 0.15s;
+
+    &:hover {
+      background: var(--color-accent);
+      color: #04121f;
+      text-decoration: none;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-accent);
+      outline-offset: 2px;
+    }
   }
 }
 
@@ -105,4 +144,37 @@
   color: var(--color-text-3);
   border-top: 1px solid var(--color-line-soft);
   padding-top: var(--gap-2);
+}
+
+// Pantallas bajas: se prioriza la lista de integrantes para que nada se corte.
+@media (max-height: 860px) {
+  .panel {
+    gap: var(--gap-2);
+    padding: var(--gap-3) var(--gap-4);
+  }
+
+  .pitch,
+  .note {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+}
+
+@media (max-height: 780px) {
+  .pitch,
+  .note {
+    display: none;
+  }
+
+  .facts li {
+    padding: 4px 0;
+  }
+
+  .members {
+    gap: 4px;
+
+    li {
+      padding: 4px 8px;
+    }
+  }
 }

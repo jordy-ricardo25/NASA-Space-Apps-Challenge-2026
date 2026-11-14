@@ -126,19 +126,29 @@ const floorTex = (rep: [number, number]): THREE.CanvasTexture =>
     rep,
   );
 
-/** Ventana con el exterior: espacio profundo o superficie lunar. */
-const windowTex = (kind: "space" | "moon"): THREE.CanvasTexture =>
+/** Ventana con el exterior: espacio profundo, superficie lunar o superficie marciana. */
+const windowTex = (kind: "space" | "moon" | "mars"): THREE.CanvasTexture =>
   tex(256, 160, (x) => {
-    x.fillStyle = "#02060d";
-    x.fillRect(0, 0, 256, 160);
-    for (let i = 0; i < 70; i++) {
-      x.fillStyle = `rgba(255,255,255,${0.3 + Math.random() * 0.7})`;
-      x.fillRect(Math.random() * 256, Math.random() * (kind === "moon" ? 90 : 160), 1.4, 1.4);
+    const surface = kind !== "space";
+    if (kind === "mars") {
+      // Cielo diurno de Marte: polvo en suspensión, más claro hacia el horizonte.
+      const sky = x.createLinearGradient(0, 0, 0, 104);
+      sky.addColorStop(0, "#a9805f");
+      sky.addColorStop(1, "#dcb48f");
+      x.fillStyle = sky;
+      x.fillRect(0, 0, 256, 160);
+    } else {
+      x.fillStyle = "#02060d";
+      x.fillRect(0, 0, 256, 160);
+      for (let i = 0; i < 70; i++) {
+        x.fillStyle = `rgba(255,255,255,${0.3 + Math.random() * 0.7})`;
+        x.fillRect(Math.random() * 256, Math.random() * (surface ? 90 : 160), 1.4, 1.4);
+      }
     }
-    if (kind === "moon") {
+    if (surface) {
       const g = x.createLinearGradient(0, 86, 0, 160);
-      g.addColorStop(0, "#b9b9b4");
-      g.addColorStop(1, "#56565a");
+      g.addColorStop(0, kind === "mars" ? "#b0643c" : "#b9b9b4");
+      g.addColorStop(1, kind === "mars" ? "#5e2f1c" : "#56565a");
       x.fillStyle = g;
       x.beginPath();
       x.moveTo(0, 100);
@@ -147,7 +157,7 @@ const windowTex = (kind: "space" | "moon"): THREE.CanvasTexture =>
       x.lineTo(256, 160);
       x.lineTo(0, 160);
       x.fill();
-      x.fillStyle = "rgba(40,40,44,.45)";
+      x.fillStyle = kind === "mars" ? "rgba(70,30,18,.5)" : "rgba(40,40,44,.45)";
       for (let i = 0; i < 9; i++) {
         x.beginPath();
         x.ellipse(Math.random() * 256, 112 + Math.random() * 44, 6 + Math.random() * 16, 2 + Math.random() * 4, 0, 0, 6.3);
@@ -427,7 +437,7 @@ function buildRover(): Interior {
   return { scene, spec, fog };
 }
 
-/** Hábitat de la base: módulo cilíndrico con estaciones de trabajo alrededor. */
+/** Hábitat de la base marciana: módulo cilíndrico con estaciones de trabajo alrededor. */
 function buildBase(): Interior {
   const { scene, fog } = baseScene(0x0c0e11, 0x777a7d, [0xf6f4ee, 0x7a766e, 0.76]);
   const R = 3.0, Y0 = -1.25, Y1 = 1.45;
@@ -471,8 +481,8 @@ function buildBase(): Interior {
   const grow = new THREE.PointLight(0xff7ad9, 1.4, 2.2, 1.6);
   grow.position.set(-2.0, 0.3, -1.2);
   scene.add(grow);
-  // Ventanilla a la superficie
-  const winM = new THREE.MeshBasicMaterial({ map: windowTex("moon") });
+  // Ventanilla a la superficie de Marte
+  const winM = new THREE.MeshBasicMaterial({ map: windowTex("mars") });
   const w = new THREE.Mesh(new THREE.CircleGeometry(0.36, 32), winM);
   w.position.set(2.45, 0.35, -1.68);
   w.rotation.y = -0.97;
@@ -496,7 +506,86 @@ function buildBase(): Interior {
   return { scene, spec, fog };
 }
 
+/**
+ * Banco de pruebas del traje EVA: una esclusa con dos trajes en sus soportes y
+ * la muestra de material expuesta a la atmósfera del traje (O₂ puro a baja presión).
+ */
+function buildSuitBay(): Interior {
+  const { scene, fog } = baseScene(0x0a0c10, 0x70747a, [0xf4f6fb, 0x74706a, 0.78]);
+  const HX = 1.9, HY = 1.15, HZ = 1.25;
+  const wallM = new THREE.MeshStandardMaterial({ map: rackTex(31, "#dadcd6"), roughness: 0.78 });
+  const wallM2 = new THREE.MeshStandardMaterial({ map: rackTex(32, "#d3d6d0"), roughness: 0.78 });
+  for (let i = 0; i < 4; i++) {
+    plane(scene, 0.95, 2 * HY, i % 2 ? wallM : wallM2, [-HX + 0.475 + i * 0.95, 0, -HZ], [0, 0, 0]);
+    plane(scene, 0.95, 2 * HY, i % 2 ? wallM2 : wallM, [-HX + 0.475 + i * 0.95, 0, HZ], [0, Math.PI, 0]);
+  }
+  plane(scene, 2 * HX, 2 * HZ, new THREE.MeshStandardMaterial({ map: floorTex([8, 5]), roughness: 0.85 }), [0, -HY, 0], [-Math.PI / 2, 0, 0]);
+  plane(scene, 2 * HX, 2 * HZ, new THREE.MeshStandardMaterial({ map: quiltTex([7, 4]), roughness: 0.9 }), [0, HY, 0], [Math.PI / 2, 0, 0]);
+  const lm = new THREE.MeshBasicMaterial({ color: 0xfbf6e6 });
+  for (const x of [-0.9, 0.6]) box(scene, 0.8, 0.02, 0.16, lm, x, HY - 0.012, 0);
+  // Escotilla al exterior con ventanilla a la superficie lunar
+  plane(scene, 2 * HZ, 2 * HY, new THREE.MeshStandardMaterial({ color: 0xd4d7d1, roughness: 0.8 }), [HX, 0, 0], [0, -Math.PI / 2, 0]);
+  const hatch = new THREE.Mesh(new THREE.TorusGeometry(0.62, 0.07, 10, 36), std(0x8d9391, 0.4, 0.7));
+  hatch.position.set(HX - 0.04, -0.1, 0);
+  hatch.rotation.y = Math.PI / 2;
+  const door = new THREE.Mesh(new THREE.CircleGeometry(0.6, 36), std(0xc3c7c2, 0.6, 0.3));
+  door.position.set(HX - 0.03, -0.1, 0);
+  door.rotation.y = -Math.PI / 2;
+  const porthole = new THREE.Mesh(new THREE.CircleGeometry(0.2, 28), new THREE.MeshBasicMaterial({ map: windowTex("moon") }));
+  porthole.position.set(HX - 0.045, 0.05, 0);
+  porthole.rotation.y = -Math.PI / 2;
+  scene.add(hatch, door, porthole);
+  // Dos trajes EVA en sus soportes: torso, casco con visor dorado, mochila de soporte vital
+  plane(scene, 2 * HZ, 2 * HY, new THREE.MeshStandardMaterial({ color: 0xcfd2cc, roughness: 0.82 }), [-HX, 0, 0], [0, Math.PI / 2, 0]);
+  const suitM = std(0xf1f2ee, 0.85, 0.02);
+  const visorM = new THREE.MeshStandardMaterial({ color: 0xc9962e, roughness: 0.18, metalness: 0.95 });
+  const packM = std(0xdfe1dc, 0.7, 0.1);
+  for (const z of [-0.6, 0.6]) {
+    const x = -HX + 0.42;
+    const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.24, 0.42, 6, 14), suitM);
+    torso.position.set(x, -0.1, z);
+    const helmet = new THREE.Mesh(new THREE.SphereGeometry(0.2, 20, 14), suitM);
+    helmet.position.set(x, 0.5, z);
+    const visor = new THREE.Mesh(new THREE.SphereGeometry(0.16, 18, 12, 0, Math.PI * 2, 0.5, 1.5), visorM);
+    visor.position.set(x + 0.07, 0.5, z);
+    visor.rotation.z = -Math.PI / 2;
+    box(scene, 0.2, 0.62, 0.42, packM, x - 0.26, -0.02, z);
+    for (const s of [-1, 1]) {
+      const arm = new THREE.Mesh(new THREE.CapsuleGeometry(0.075, 0.42, 4, 10), suitM);
+      arm.position.set(x + 0.02, -0.06, z + s * 0.33);
+      const leg = new THREE.Mesh(new THREE.CapsuleGeometry(0.095, 0.48, 4, 10), suitM);
+      leg.position.set(x, -0.74, z + s * 0.13);
+      scene.add(arm, leg);
+    }
+    box(scene, 0.05, 2 * HY, 0.05, std(0x8d9391, 0.4, 0.7), x - 0.36, 0, z);
+    scene.add(torso, helmet, visor);
+  }
+  // Banco de trabajo con botellas de oxígeno bajo la muestra
+  box(scene, 1.4, 0.05, 0.42, std(0x9aa0a4, 0.5, 0.5), 0.2, -0.56, -HZ + 0.22);
+  const o2M = std(0x2f9e63, 0.5, 0.4);
+  for (let i = 0; i < 3; i++) {
+    const tank = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.5, 14), o2M);
+    tank.position.set(-0.3 + i * 0.19, -0.86, -HZ + 0.16);
+    scene.add(tank);
+  }
+  const spec: InteriorSpec = {
+    center: V(0.1, 0, 0),
+    half: V(HX - 0.5, HY - 0.05, HZ - 0.05),
+    up: V(0, 1, 0),
+    ventDir: V(1, 0, 0),
+    sample: V(0.2, 0.05, -(HZ - 0.04)),
+    axis: V(0, 1, 0),
+    normal: V(0, 0, 1),
+    camera: V(-0.55, 0.12, 0.45),
+    minDist: 0.5,
+    maxDist: 2.0,
+    fog: 0x70747a,
+  };
+  return { scene, spec, fog };
+}
+
 const BUILDERS: Record<ModuleId, () => Interior> = {
+  traje: buildSuitBay,
   nave: buildSpacecraft,
   estacion: buildStation,
   rover: buildRover,

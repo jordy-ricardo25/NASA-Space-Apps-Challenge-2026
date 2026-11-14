@@ -89,7 +89,7 @@ export function ExteriorHud({ module: m }: { module: ModuleDef }) {
         <div className={styles.cta}>
           <button type="button" className={styles.primary} onClick={() => go({ view: "cabina", panel: null })}>
             <DoorOpen size={16} />
-            {t(l("ENTRAR A LA CABINA", "ENTER THE CABIN"))}
+            {t(m.enterLabel ?? l("ENTRAR A LA CABINA", "ENTER THE CABIN"))}
           </button>
           <Link href={href({ panel: details ? null : "details" })} className={styles.secondary} scroll={false}>
             {t(l("VER DETALLES", "VIEW DETAILS"))}

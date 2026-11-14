@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Box, FileText, X } from "lucide-react";
 import { l, type L } from "@/content/i18n";
-import { MODULES, getModule } from "@/content/modules";
+import { MODULES, getModule, getVariant } from "@/content/modules";
 import { AlertList } from "@/features/alerts/components/AlertList";
 import type { DropletCurve } from "@/features/fire/engine/analysis";
 import { MATERIAL_LIST, MATERIALS } from "@/features/fire/engine/materials";
@@ -66,6 +66,7 @@ export function LabView({ initialBoundary, initialDroplet }: Props) {
   const first = useRef(true);
   const m = getModule(s.env)!;
   const mat = MATERIALS[s.mat];
+  const variant = getVariant(m, s.atm);
   const payload = body(s);
 
   const set = useCallback((patch: Record<string, string | number | null>) => {
@@ -116,8 +117,8 @@ export function LabView({ initialBoundary, initialDroplet }: Props) {
         {(s.tab === "map" || s.tab === "droplet") && (
           <Segmented wrap label={t(l("Material", "Material"))} value={s.mat} options={materials.map((x) => ({ value: x.id, label: t(x.short), title: t(x.name) }))} onChange={(id) => set({ mat: id })} />
         )}
-        <Slider label={t(l("Oxígeno", "Oxygen"))} display={`${num(s.o2, 1, lang)} %`} value={s.o2} min={12} max={45} step={0.5} onChange={(v) => set({ o2: v })} hint={`ppO₂ ${num(ppO2(s.o2, s.p), 1, lang)} kPa · ${gravity(s.g, lang)}`} warn={s.o2 > 40} />
-        <Slider label={t(l("Presión", "Pressure"))} display={pressure(s.p, units, lang)} value={s.p} min={40} max={101.3} step={0.5} onChange={(v) => set({ p: v })} />
+        <Slider label={t(l("Oxígeno", "Oxygen"))} display={`${num(s.o2, 1, lang)} %`} value={s.o2} min={12} max={Math.max(45, variant.o2)} step={0.5} onChange={(v) => set({ o2: v })} hint={`ppO₂ ${num(ppO2(s.o2, s.p), 1, lang)} kPa · ${gravity(s.g, lang)}`} warn={s.o2 > 40} />
+        <Slider label={t(l("Presión", "Pressure"))} display={pressure(s.p, units, lang)} value={s.p} min={Math.min(40, Math.floor(variant.P) - 5)} max={101.3} step={0.5} onChange={(v) => set({ p: v })} />
         <Slider label={t(l("Ventilación", "Ventilation"))} display={`${num(s.flow, 0, lang)} cm/s`} value={s.flow} min={0} max={40} step={1} onChange={(v) => set({ flow: v })} />
         {(s.tab === "map" || s.tab === "droplet") && (
           <>

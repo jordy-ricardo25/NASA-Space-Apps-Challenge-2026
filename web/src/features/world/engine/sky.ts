@@ -64,6 +64,35 @@ export function buildEarth(map: THREE.Texture): THREE.Group {
   return g;
 }
 
+export const MARS_POS = new THREE.Vector3(-300, 205, -640);
+
+/** Marte en el cielo lunar (disco estilizado dibujado por código): es la puerta a la base marciana. */
+export function buildMars(): THREE.Mesh {
+  const c = document.createElement("canvas");
+  c.width = 256;
+  c.height = 128;
+  const x = c.getContext("2d")!;
+  x.fillStyle = "#b5532c";
+  x.fillRect(0, 0, 256, 128);
+  const rnd = mulberry32(4);
+  for (let i = 0; i < 260; i++) {
+    const dark = rnd() > 0.55;
+    x.fillStyle = dark ? `rgba(92,38,22,${0.1 + rnd() * 0.22})` : `rgba(228,150,96,${0.08 + rnd() * 0.2})`;
+    x.beginPath();
+    x.ellipse(rnd() * 256, 14 + rnd() * 100, 4 + rnd() * 26, 2 + rnd() * 9, rnd() * 3, 0, 6.3);
+    x.fill();
+  }
+  x.fillStyle = "rgba(245,240,235,0.9)";
+  x.fillRect(0, 0, 256, 7);
+  x.fillRect(0, 123, 256, 5);
+  const map = new THREE.CanvasTexture(c);
+  map.colorSpace = THREE.SRGBColorSpace;
+  const mars = new THREE.Mesh(new THREE.SphereGeometry(21, 40, 24), new THREE.MeshStandardMaterial({ map, roughness: 0.95, metalness: 0, emissive: 0x3a1408, emissiveIntensity: 0.5 }));
+  mars.position.copy(MARS_POS);
+  mars.rotation.set(0.2, 0.6, 0.3);
+  return mars;
+}
+
 export interface Lights {
   sun: THREE.DirectionalLight;
   fill: THREE.HemisphereLight;

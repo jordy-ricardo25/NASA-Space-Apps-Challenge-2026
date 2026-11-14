@@ -18,6 +18,14 @@ const TITLES: Record<BoundaryPanel["id"], L> = {
   moon: l("LUNA · 0,165 g", "MOON · 0.165 g"),
   earth: l("TIERRA · 1 g", "EARTH · 1 g"),
 };
+const MARS_TITLE = l("MARTE · 0,38 g", "MARS · 0.38 g");
+/** Título del panel: el de gravedad parcial cambia con la gravedad del escenario. */
+const titleOf = (panel: BoundaryPanel): L => {
+  if (panel.id !== "moon" || Math.abs(panel.g - 0.165) < 0.02) return TITLES[panel.id];
+  if (Math.abs(panel.g - 0.38) < 0.03) return MARS_TITLE;
+  const g = panel.g.toFixed(2);
+  return l(`GRAVEDAD PARCIAL · ${g.replace(".", ",")} g`, `PARTIAL GRAVITY · ${g} g`);
+};
 
 interface Props {
   panel: BoundaryPanel;
@@ -62,11 +70,11 @@ export function FlammabilityMap({ panel, flow, o2, active, featured = false, onP
   return (
     <figure className={`${styles.map} ${active ? styles.active : ""} ${featured ? styles.featured : ""}`}>
       <figcaption>
-        <b>{t(TITLES[panel.id])}</b>
+        <b>{t(titleOf(panel))}</b>
         <EvidenceBadge level={panel.evidence} compact />
       </figcaption>
       <div ref={ref} className={styles.plotArea} data-ready={ready}>
-      <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} onClick={pick} role="img" aria-label={t(TITLES[panel.id])}>
+      <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} onClick={pick} role="img" aria-label={t(titleOf(panel))}>
         {c.length > 0 ? (
           <>
             <path d={fire(c) ?? ""} className={styles.fire} />

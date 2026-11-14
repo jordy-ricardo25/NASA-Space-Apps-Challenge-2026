@@ -41,7 +41,7 @@ export function GuideView({ investigations }: { investigations: Investigation[] 
   const { t, lang } = useLang();
   const sp = useSearchParams();
   const tab = (TABS.find((x) => x.id === sp.get("tab"))?.id ?? "library") as Tab;
-  const envId = getModule(sp.get("env"))?.id ?? "base";
+  const envId = getModule(sp.get("env"))?.id ?? "rover";
   const pillar = (sp.get("pillar") as Pillar | null) && sp.get("pillar")! in PILLAR_LABEL ? (sp.get("pillar") as Pillar) : null;
   const family = sp.get("family") && sp.get("family")! in FAMILY_LABEL ? (sp.get("family") as Family) : null;
   const page = Math.max(0, Number(sp.get("page") ?? 0) || 0);

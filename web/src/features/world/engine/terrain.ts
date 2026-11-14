@@ -1,6 +1,7 @@
 /**
- * Superficie lunar generada por código: relieve suave, cráteres y colinas en
- * el horizonte. No se descarga ninguna malla; el color sale por vértice.
+ * Superficie generada por código: relieve suave, cráteres y colinas en el
+ * horizonte. No se descarga ninguna malla; el color sale por vértice. La misma
+ * forma sirve para el sitio lunar (regolito gris) y para Marte (polvo rojizo).
  */
 import * as THREE from "three";
 
@@ -58,7 +59,15 @@ export interface Terrain {
   heightAt: (x: number, z: number) => number;
 }
 
-export function buildTerrain(): Terrain {
+export type Palette = "moon" | "mars";
+
+/** Tinte por canal de cada paleta (se multiplica por el tono de gris del relieve). */
+const TINT: Record<Palette, [number, number, number, number]> = {
+  moon: [1.0, 0.985, 0.95, 1],
+  mars: [1.72, 0.92, 0.56, 1.55],
+};
+
+export function buildTerrain(palette: Palette = "moon"): Terrain {
   const rnd = mulberry32(20260714);
   const craters: Crater[] = [];
   while (craters.length < 70) {
@@ -109,9 +118,11 @@ export function buildTerrain(): Terrain {
     const mare = fbm(x * 0.006 - 3, z * 0.006 + 9, 3);
     let g = 0.2 + 0.13 * n + 0.07 * mare + THREE.MathUtils.clamp(h * 0.01, -0.06, 0.08);
     g *= 0.86 + 0.14 * flatness(x, z);
-    col[i * 3] = g * 1.0;
-    col[i * 3 + 1] = g * 0.985;
-    col[i * 3 + 2] = g * 0.95;
+    const [tr, tg, tb, gain] = TINT[palette];
+    g *= gain;
+    col[i * 3] = g * tr;
+    col[i * 3 + 1] = g * tg;
+    col[i * 3 + 2] = g * tb;
   }
   geo.setAttribute("color", new THREE.BufferAttribute(col, 3));
   geo.computeVertexNormals();

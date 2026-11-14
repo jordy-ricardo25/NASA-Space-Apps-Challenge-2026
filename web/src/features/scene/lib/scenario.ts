@@ -14,7 +14,7 @@ const schema = z.object({
   view: z.enum(["exterior", "cabina"]).catch("exterior"),
   atm: z.string().max(24).optional().catch(undefined),
   mat: z.enum(materialIds).optional().catch(undefined),
-  o2: z.coerce.number().min(8).max(60).optional().catch(undefined),
+  o2: z.coerce.number().min(8).max(100).optional().catch(undefined),
   p: z.coerce.number().min(20).max(120).optional().catch(undefined),
   vent: z.coerce.number().min(0).max(40).optional().catch(undefined),
   mode: z.enum(["concurrent", "opposed"]).catch("concurrent"),

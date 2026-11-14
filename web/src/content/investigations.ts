@@ -109,7 +109,7 @@ export const INVESTIGATIONS: Investigation[] = [
     conditions: l("10–40 % O₂; 20–152 kPa; 0–30 cm/s; radiación externa", "10–40% O₂; 20–152 kPa; 0–30 cm/s; external radiation"),
     findings: l("Amplía el dominio ensayado en O₂ y presión hasta las atmósferas de exploración.", "Extends the tested O₂ and pressure domain up to exploration atmospheres."),
     limitations: l("Resultados en publicación; escala de laboratorio.", "Results being published; bench scale."),
-    regime: "micro", o2: [10, 40], p: [20, 152], flow: [0, 30], scale: "bench", data: 1, vars: V("yyynynynnn"), sources: ["SOFIE"], modules: ["estacion", "rover", "base"],
+    regime: "micro", o2: [10, 40], p: [20, 152], flow: [0, 30], scale: "bench", data: 1, vars: V("yyynynynnn"), sources: ["SOFIE"], modules: ["estacion", "rover", "base", "traje"],
   },
   {
     id: "flex", name: "FLEX / FLEX-2", full: "Flame Extinguishment Experiment", psi: l("PSI-69", "PSI-69"),
@@ -139,7 +139,7 @@ export const INVESTIGATIONS: Investigation[] = [
     conditions: l("O₂ hasta 85 %", "O₂ up to 85%"),
     findings: l("Es el O₂ más alto ensayado en PSI; la llama puede arder “de adentro hacia afuera”.", "The highest O₂ tested in PSI; the flame can burn “inside out”."),
     limitations: l("Quemador de gas: no es una medición directa de un material sólido.", "Gas burner: not a direct measurement of a solid material."),
-    regime: "micro", o2: [21, 85], p: null, flow: null, scale: "bench", data: 1, vars: V("ynnn-nynnn"), sources: ["B3", "CHALLENGE"], modules: ["rover", "base"],
+    regime: "micro", o2: [21, 85], p: null, flow: null, scale: "bench", data: 1, vars: V("ynnn-nynnn"), sources: ["B3", "CHALLENGE"], modules: ["rover", "base", "traje"],
   },
   {
     id: "efield", name: "ACME · E-FIELD Flames", full: "Electric-Field Effects on Laminar Diffusion Flames", psi: l("Datos publicados en PSI", "Data published in PSI"),

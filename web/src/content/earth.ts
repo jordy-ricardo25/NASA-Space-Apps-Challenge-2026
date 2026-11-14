@@ -14,6 +14,8 @@ export interface EarthCase {
   kind: "documented" | "possible";
   /** Investigación o lección espacial relacionada. */
   link: L;
+  /** Dónde se usa esta misma evidencia dentro de la plataforma y por qué importa al proyecto. */
+  platform: { href: string; label: L; why: L };
   sources: string[];
   stat: { value: string; label: L };
 }
@@ -27,6 +29,7 @@ export const EARTH_CASES: EarthCase[] = [
     impact: l("El mismo aire con 26 lb en lugar de 41 lb; los grandes fabricantes adoptaron la tecnología.", "The same air at 26 lb instead of 41 lb; major manufacturers adopted the technology."),
     kind: "documented",
     link: l("Recipientes a presión: la lección del Apolo 13", "Pressure vessels: the Apollo 13 lesson"),
+    platform: { href: "/guia?tab=history", label: l("Lecciones históricas en la Guía", "Historical lessons in the Guide"), why: l("Es la misma lección del Apolo 13 que la Guía usa para explicar por qué un recipiente de oxígeno a presión es un riesgo de incendio.", "It is the same Apollo 13 lesson the Guide uses to explain why a pressurised oxygen vessel is a fire hazard.") },
     sources: ["SP-TANK"],
     stat: { value: "−37 %", label: l("de peso", "weight") },
   },
@@ -38,6 +41,7 @@ export const EARTH_CASES: EarthCase[] = [
     impact: l("Los bomberos de Nueva York la especificaron en 1994 para sus trajes.", "The New York City Fire Department specified it for its gear in 1994."),
     kind: "documented",
     link: l("Selección de materiales por límite de oxígeno", "Materials selection by oxygen limit"),
+    platform: { href: "/laboratorio?env=traje&mat=nomex", label: l("Mapa de inflamabilidad de tejidos", "Flammability map for fabrics"), why: l("El Laboratorio calcula el margen de oxígeno de los tejidos resistentes al fuego: el mismo criterio con el que se eligió esta fibra.", "The Laboratory computes the oxygen margin of fire-resistant fabrics: the same criterion that selected this fibre.") },
     sources: ["SP-PBI", "AP1"],
     stat: { value: "1967", label: l("desarrollo tras Apolo 1", "developed after Apollo 1") },
   },
@@ -49,6 +53,7 @@ export const EARTH_CASES: EarthCase[] = [
     impact: l("Evaluado para operaciones mineras; el objetivo de detección espacial es la fase de pirólisis.", "Evaluated for mining operations; the space detection target is the pyrolysis stage."),
     kind: "documented",
     link: l("SAME: firma de humo por material", "SAME: smoke signature by material"),
+    platform: { href: "/laboratorio?tab=smoke", label: l("Humo y detección en el Laboratorio", "Smoke and detection in the Laboratory"), why: l("Usa los tamaños de partícula de SAME que el Laboratorio compara con la sensibilidad del detector de la ISS.", "It uses the SAME particle sizes that the Laboratory compares with the ISS detector sensitivity.") },
     sources: ["SP-DET", "B12"],
     stat: { value: "200–400 nm", label: l("humo típico en SAME", "typical SAME smoke") },
   },
@@ -60,6 +65,7 @@ export const EARTH_CASES: EarthCase[] = [
     impact: l("Producto comercial para equipos de bomberos.", "Commercial product for fire crews."),
     kind: "documented",
     link: l("Llamas azules y llamas frías: que no se vea no significa que no arda", "Blue and cool flames: unseen does not mean not burning"),
+    platform: { href: "/laboratorio?tab=droplet", label: l("Gotas y llamas frías en el Laboratorio", "Droplets and cool flames in the Laboratory"), why: l("Las llamas azules y frías que el Laboratorio muestra con datos de FLEX son las que una cámara infrarroja permite ver.", "The blue and cool flames the Laboratory shows with FLEX data are the ones an infrared camera makes visible.") },
     sources: ["SP-FIRESCAPE", "FLEX15"],
     stat: { value: "IR", label: l("ve llamas sin luz visible", "sees flames with no visible light") },
   },
@@ -71,6 +77,7 @@ export const EARTH_CASES: EarthCase[] = [
     impact: l("Supresión sin efectos ambientales ni para la salud; válvulas usadas en sistemas industriales.", "Suppression with no environmental or health effects; valves used in industrial systems."),
     kind: "possible",
     link: l("Mist (STS-107) y el extintor de niebla fina de la ISS", "Mist (STS-107) and the ISS fine water mist extinguisher"),
+    platform: { href: "/radar", label: l("Diseño de supresión en el Radar", "Suppression design in the Radar"), why: l("Es la tecnología de supresión que el Radar deriva de FLEX y del experimento Mist: enfriar sin añadir CO₂ a la cabina.", "It is the suppression technology the Radar derives from FLEX and the Mist experiment: cooling without adding CO₂ to the cabin.") },
     sources: ["SP-MIST", "B18", "B16"],
     stat: { value: "≈20 µm", label: l("gotas de la niebla", "mist droplets") },
   },

@@ -34,14 +34,19 @@ const PANELS: { id: BoundaryPanel["id"]; g: number }[] = [
 export function predictSolidBoundary(q: PredictBody): ApiEnvelope<BoundaryResult> {
   const m = MATERIALS[q.mat];
   const assessment = assess({ mat: q.mat, g: q.g, o2: q.o2, P: q.p, vent: q.flow, co2: q.co2, he: q.he, undefinedAtmosphere: q.undefinedAtmosphere });
+  // El panel intermedio usa la gravedad parcial del escenario (Luna 0,165 g o
+  // Marte 0,38 g). Los ensayos publicados son lunares: solo se dibujan ahí.
+  const partial = q.g > 0.02 && q.g < 0.9 ? q.g : 0.165;
   const panels = PANELS.map((p) => {
-    const a = assess({ mat: q.mat, g: p.g, o2: q.o2, P: q.p, vent: q.flow });
+    const g = p.id === "moon" ? partial : p.g;
+    const a = assess({ mat: q.mat, g, o2: q.o2, P: q.p, vent: q.flow });
+    const lunarRefs = p.id !== "moon" || Math.abs(g - 0.165) < 0.02;
     return {
       id: p.id,
-      g: p.g,
-      curve: boundaryCurve(q.mat, p.g, q.p, q.co2, q.he),
+      g,
+      curve: boundaryCurve(q.mat, g, q.p, q.co2, q.he),
       evidence: a.evidence,
-      refs: REFERENCE_POINTS.filter((r) => r.mat === q.mat && r.panel === p.id),
+      refs: lunarRefs ? REFERENCE_POINTS.filter((r) => r.mat === q.mat && r.panel === p.id) : [],
     };
   });
   return envelope(

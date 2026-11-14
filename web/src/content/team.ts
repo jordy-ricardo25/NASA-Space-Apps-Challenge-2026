@@ -15,8 +15,8 @@ export interface TeamMember {
 export const TEAM = {
   project: "Flame in Freefall",
   pitch: l(
-    "Convertimos décadas de experimentos de combustión en microgravedad de NASA en decisiones de seguridad contra incendios para naves, estaciones, rovers y bases lunares.",
-    "We turn decades of NASA microgravity combustion experiments into fire-safety decisions for spacecraft, stations, rovers and lunar bases.",
+    "Convertimos décadas de experimentos de combustión en microgravedad de NASA en decisiones de seguridad contra incendios para naves, estaciones, rovers, trajes y bases en la Luna y Marte.",
+    "We turn decades of NASA microgravity combustion experiments into fire-safety decisions for spacecraft, stations, rovers, suits and bases on the Moon and Mars.",
   ),
   challenge: l("Reto: Flame in Freefall · NASA Space Apps Challenge 2026", "Challenge: Flame in Freefall · NASA Space Apps Challenge 2026"),
   event: l("Evento local: NASA Space Apps Riobamba", "Local event: NASA Space Apps Riobamba"),

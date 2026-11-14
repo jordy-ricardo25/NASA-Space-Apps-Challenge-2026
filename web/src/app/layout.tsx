@@ -10,7 +10,7 @@ const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains-mo
 export const metadata: Metadata = {
   title: "Flame in Freefall · Fire Safety Command Center",
   description:
-    "Mission command center that turns NASA's low-gravity combustion research into fire-safety decisions for spacecraft, stations, pressurised rovers and lunar bases.",
+    "Mission command center that turns NASA's low-gravity combustion research into fire-safety decisions for spacecraft, stations, pressurised rovers, EVA suits and bases on the Moon and Mars.",
 };
 
 export const viewport: Viewport = { themeColor: "#071525", width: "device-width", initialScale: 1 };

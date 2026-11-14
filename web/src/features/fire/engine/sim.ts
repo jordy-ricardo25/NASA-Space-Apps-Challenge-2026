@@ -164,6 +164,30 @@ export function makeState(cfg: SimConfig): SimState {
   };
 }
 
+/** Aplica los controles del escenario sin esperar a la evolución temporal. */
+export function configureState(S: SimState | null, cfg: SimConfig): SimState {
+  if (!S || S.cfg.mat !== cfg.mat || S.cfg.volume !== cfg.volume || S.cfg.mode !== cfg.mode || S.cfg.g !== cfg.g) {
+    const next = makeState(cfg);
+    step(next, 0);
+    if (S?.cfg.volume === cfg.volume && (S.fire === "burning" || S.fire === "cool")) {
+      ignite(next);
+      step(next, 0);
+    }
+    return next;
+  }
+
+  if (S.cfg.o2 !== cfg.o2) {
+    S.cab.O2 = cfg.o2;
+    S.O2l = cfg.o2;
+  }
+  if (S.cfg.P !== cfg.P && !S.act.venting) S.P = cfg.P;
+  if (S.cfg.vent !== cfg.vent && !S.act.ventOff) S.ventA = cfg.vent;
+  S.cfg = { ...cfg };
+  // Recalcula margen, color y potencia incluso en pausa, sin consumir muestra.
+  step(S, 0);
+  return S;
+}
+
 const note = (S: SimState, key: LogKey): void => {
   S.log.push({ t: S.t, key });
   if (S.log.length > 40) S.log.shift();
@@ -239,7 +263,7 @@ export function step(S: SimState, dt: number): void {
   const W = a.powerCut ? 0 : c.heater;
   const T0 = S.Ts;
   S.Ts = surfStep(S.Ts, W, U, S.P, dt);
-  S.dTs = (S.Ts - T0) / dt;
+  S.dTs = dt > 0 ? (S.Ts - T0) / dt : 0;
 
   // ── Zona de la llama (0,25 m³) ────────────────────────────────────────────
   const nLoc = gasMoles(S.P, 0.25);

@@ -1,0 +1,52 @@
+// Tokens de diseño (paleta y tipografía de la ficha de Zuleica + estados de alerta).
+// Se exponen como variables CSS en :root desde globals.scss. Ningún componente
+// escribe un color o tamaño directamente: usa estas variables.
+
+@mixin root-tokens {
+  // Paleta base
+  --color-bg: #071525;
+  --color-bg-deep: #030a14;
+  --color-surface: #123653;
+  --color-accent: #35d8f2;
+  --color-accent-soft: rgba(53, 216, 242, 0.14);
+  --color-success: #00d49a;
+  --color-text: #eaf3f8;
+  --color-text-2: #a9c3d6;
+  --color-text-3: #6d8aa1;
+  --color-warm: #ff8738;
+  --color-flame-blue: #5b9dff;
+
+  // Superficies translúcidas del centro de mando
+  --color-panel: rgba(6, 19, 35, 0.9);
+  --color-panel-strong: rgba(5, 15, 28, 0.96);
+  --color-panel-raise: rgba(18, 54, 83, 0.55);
+  --color-line: rgba(53, 216, 242, 0.2);
+  --color-line-soft: rgba(169, 195, 214, 0.14);
+  --color-line-strong: rgba(53, 216, 242, 0.55);
+
+  // Estados de análisis (alertas). "Sin evidencia" nunca es verde.
+  --color-risk-low: #00d49a;
+  --color-risk-caution: #ffc53d;
+  --color-risk-high: #ff5c6c;
+  --color-info: #6cb6ff;
+  --color-evidence-none: #8497a8;
+
+  // Tipografía
+  --font-display: var(--font-space-grotesk), "Segoe UI", sans-serif;
+  --font-body: var(--font-inter), "Segoe UI", sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, Consolas, monospace;
+
+  // Medidas
+  --radius-s: 6px;
+  --radius-m: 10px;
+  --radius-l: 16px;
+  --gap-1: 4px;
+  --gap-2: 8px;
+  --gap-3: 12px;
+  --gap-4: 16px;
+  --gap-5: 24px;
+  --topbar-h: 52px;
+  --sidebar-w: 64px;
+  --shadow-panel: 0 18px 50px rgba(0, 0, 0, 0.45);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}

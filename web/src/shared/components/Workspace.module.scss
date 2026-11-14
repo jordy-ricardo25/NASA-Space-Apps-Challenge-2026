@@ -1,0 +1,122 @@
+@use "mixins";
+
+.workspace {
+  position: absolute;
+  inset: 12px;
+  display: flex;
+  flex-direction: column;
+  @include mixins.panel;
+  pointer-events: auto;
+  overflow: hidden;
+  animation: enter 0.5s var(--ease-out);
+}
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 20px;
+  padding: 14px 18px 10px;
+}
+
+.titles {
+  min-width: 0;
+
+  span {
+    @include mixins.eyebrow;
+    color: var(--color-accent);
+  }
+
+  h1 {
+    font-size: clamp(20px, 2vw, 26px);
+    line-height: 1.15;
+  }
+
+  p {
+    margin-top: 3px;
+    max-width: 880px;
+    font-size: 12.5px;
+    color: var(--color-text-2);
+  }
+}
+
+.aside {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+}
+
+.tabs {
+  display: flex;
+  gap: 2px;
+  padding: 0 18px;
+  border-bottom: 1px solid var(--color-line);
+
+  button {
+    padding: 8px 14px 9px;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    font: 600 12px var(--font-display);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-text-3);
+    transition: color 0.15s, border-color 0.15s;
+
+    &:hover {
+      color: var(--color-text);
+    }
+
+    &[aria-pressed="true"] {
+      color: var(--color-accent);
+      border-bottom-color: var(--color-accent);
+    }
+  }
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  padding: 14px 18px 14px;
+  display: flex;
+  flex-direction: column;
+}
+
+.pager {
+  display: flex;
+  gap: 4px;
+
+  button {
+    min-width: 28px;
+    height: 28px;
+    padding: 0 8px;
+    border: 1px solid var(--color-line-soft);
+    border-radius: var(--radius-s);
+    @include mixins.mono;
+    font-size: 12px;
+    color: var(--color-text-2);
+
+    &:hover:not(:disabled) {
+      border-color: var(--color-line-strong);
+      color: var(--color-accent);
+    }
+
+    &[aria-pressed="true"] {
+      background: var(--color-accent);
+      border-color: var(--color-accent);
+      color: #04121f;
+    }
+
+    &:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+  }
+}
+
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}

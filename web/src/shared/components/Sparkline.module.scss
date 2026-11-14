@@ -1,0 +1,76 @@
+@use "mixins";
+
+.spark {
+  position: relative;
+  margin: 0;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 9px 12px 8px;
+  border-left: 1px solid var(--color-line-soft);
+
+  &:first-child {
+    border-left: 0;
+  }
+
+  figcaption {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+
+    span {
+      @include mixins.eyebrow;
+      @include mixins.truncate;
+    }
+
+    output {
+      @include mixins.mono;
+      font-size: 20px;
+      font-weight: 600;
+      line-height: 1.1;
+      color: var(--tone, var(--color-text));
+      white-space: nowrap;
+    }
+  }
+
+  svg {
+    display: block;
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    margin-top: 4px;
+  }
+}
+
+.warn {
+  --tone: var(--color-risk-caution);
+}
+
+.bad {
+  --tone: var(--color-risk-high);
+}
+
+.grid {
+  stroke: rgba(169, 195, 214, 0.09);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.legend {
+  position: absolute;
+  right: 10px;
+  bottom: 8px;
+  display: flex;
+  gap: 8px;
+
+  span {
+    @include mixins.mono;
+    font-size: 11px;
+    color: var(--c);
+
+    &::before {
+      content: "┄ ";
+    }
+  }
+}

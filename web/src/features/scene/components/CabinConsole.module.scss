@@ -1,0 +1,441 @@
+@use "mixins";
+
+$left: 292px;
+$right: 332px;
+$charts: 212px;
+$gap: 12px;
+
+.console {
+  position: absolute;
+  inset: 0;
+  animation: enter 0.6s var(--ease-out) 0.25s both;
+
+  h3 {
+    margin-bottom: 6px;
+    @include mixins.eyebrow;
+
+    em {
+      margin-left: 6px;
+      padding: 0 6px;
+      border-radius: 999px;
+      background: var(--color-accent-soft);
+      font-style: normal;
+      color: var(--color-accent);
+    }
+  }
+}
+
+.bar {
+  position: absolute;
+  top: $gap;
+  left: calc(#{$left} + #{$gap * 2});
+  right: calc(#{$right} + #{$gap * 2});
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  background: var(--color-panel);
+  backdrop-filter: blur(12px);
+  pointer-events: auto;
+}
+
+.back {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border: 1px solid var(--color-line);
+  border-radius: 50%;
+  color: var(--color-text);
+
+  &:hover {
+    color: var(--color-accent);
+    border-color: var(--color-line-strong);
+  }
+}
+
+.where {
+  min-width: 0;
+  line-height: 1.15;
+
+  span {
+    display: block;
+    @include mixins.eyebrow;
+    font-size: 9.5px;
+    color: var(--accent);
+  }
+
+  b {
+    font: 600 13px var(--font-display);
+    @include mixins.truncate;
+  }
+}
+
+.state {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-left: auto;
+  padding: 4px 11px;
+  border: 1px solid var(--c);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--c) 12%, transparent);
+  @include mixins.eyebrow;
+  color: var(--c);
+  white-space: nowrap;
+
+  i {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--c);
+    box-shadow: 0 0 9px var(--c);
+  }
+}
+
+.idle {
+  --c: var(--color-text-3);
+}
+
+.warn {
+  --c: var(--color-risk-caution);
+}
+
+.hot {
+  --c: var(--color-warm);
+
+  i {
+    animation: beat 0.7s ease-in-out infinite;
+  }
+}
+
+.cool {
+  --c: #b68cff;
+}
+
+.ok {
+  --c: var(--color-success);
+}
+
+.transport,
+.cam {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+
+  button {
+    display: grid;
+    place-items: center;
+    min-width: 28px;
+    height: 28px;
+    padding: 0 6px;
+    border-radius: 999px;
+    @include mixins.mono;
+    font-size: 11px;
+    color: var(--color-text-2);
+
+    &:hover {
+      background: var(--color-accent-soft);
+      color: var(--color-accent);
+    }
+
+    &[aria-pressed="true"] {
+      background: var(--color-accent);
+      color: #04121f;
+    }
+  }
+
+  time {
+    min-width: 46px;
+    @include mixins.mono;
+    font-size: 12.5px;
+    text-align: right;
+    color: var(--color-text);
+  }
+}
+
+.cam {
+  padding-left: 8px;
+  border-left: 1px solid var(--color-line-soft);
+
+  button[aria-pressed="true"] {
+    background: var(--color-accent-soft);
+    color: var(--color-accent);
+  }
+}
+
+.left,
+.right {
+  position: absolute;
+  top: $gap;
+  display: flex;
+  flex-direction: column;
+  @include mixins.panel;
+  pointer-events: auto;
+}
+
+.left {
+  left: $gap;
+  bottom: $gap;
+  width: $left;
+  gap: 9px;
+  padding: 12px 14px;
+  overflow: hidden;
+  border-top: 2px solid var(--accent);
+}
+
+.matNote {
+  font-size: 11px;
+  line-height: 1.35;
+  color: var(--color-text-3);
+  @include mixins.clamp(3);
+
+  b {
+    color: var(--accent);
+    font-weight: 500;
+  }
+}
+
+.ignite {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  height: 40px;
+  margin-top: auto;
+  flex: none;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ff9a4d, #ff6a2a);
+  font: 700 12px var(--font-display);
+  letter-spacing: 0.14em;
+  color: #1c0a00;
+  box-shadow: 0 0 24px rgba(255, 135, 56, 0.4);
+  transition: all 0.18s;
+
+  &:hover:not(:disabled) {
+    box-shadow: 0 0 34px rgba(255, 135, 56, 0.75);
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    background: rgba(132, 151, 168, 0.25);
+    color: var(--color-text-3);
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+}
+
+.right {
+  right: $gap;
+  bottom: $gap;
+  width: $right;
+  gap: 10px;
+  padding: 12px 14px;
+
+  section {
+    min-height: 0;
+  }
+}
+
+.alertBox {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 60px;
+}
+
+.scroll {
+  flex: 1;
+  min-height: 0;
+  @include mixins.inner-scroll;
+  padding-right: 3px;
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    min-width: 0;
+    padding: 7px 9px;
+    border: 1px solid var(--color-line-soft);
+    border-radius: var(--radius-s);
+    background: rgba(3, 10, 20, 0.35);
+    font-size: 11.5px;
+    text-align: left;
+    color: var(--color-text);
+    transition: all 0.15s;
+
+    span {
+      @include mixins.truncate;
+    }
+
+    svg {
+      flex: none;
+      color: var(--color-accent);
+    }
+
+    &:hover {
+      border-color: var(--color-line-strong);
+      background: var(--color-accent-soft);
+    }
+
+    &[aria-pressed="true"] {
+      border-color: var(--color-success);
+      background: color-mix(in srgb, var(--color-success) 16%, transparent);
+
+      svg {
+        color: var(--color-success);
+      }
+    }
+  }
+
+  .wide {
+    grid-column: 1 / -1;
+  }
+}
+
+.log {
+  margin-top: 7px;
+  min-height: 3.9em;
+  font-size: 11px;
+  line-height: 1.3;
+  color: var(--color-text-2);
+
+  li {
+    display: flex;
+    gap: 8px;
+    @include mixins.truncate;
+
+    &:first-child {
+      color: var(--color-text);
+    }
+  }
+
+  time {
+    @include mixins.mono;
+    color: var(--color-text-3);
+  }
+}
+
+.inset {
+  position: absolute;
+  top: 64px;
+  right: calc(#{$right} + #{$gap * 2});
+  width: 128px;
+  margin: 0;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-s);
+  overflow: hidden;
+  // El recuadro es transparente: el mundo 3D dibuja la llama terrestre justo detrás.
+  pointer-events: none;
+
+  div {
+    height: 138px;
+  }
+
+  figcaption {
+    padding: 4px 6px;
+    background: var(--color-panel-strong);
+    border-top: 1px solid var(--color-line-soft);
+    font: 500 10px/1.25 var(--font-display);
+    letter-spacing: 0.04em;
+    text-align: center;
+    color: var(--color-text-2);
+  }
+}
+
+.charts {
+  position: absolute;
+  left: calc(#{$left} + #{$gap * 2});
+  right: calc(#{$right} + #{$gap * 2});
+  bottom: $gap;
+  height: $charts;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: minmax(0, 1fr) auto;
+  @include mixins.panel;
+  pointer-events: auto;
+}
+
+.kpis {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-top: 1px solid var(--color-line-soft);
+
+  div {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    padding: 7px 12px;
+    border-left: 1px solid var(--color-line-soft);
+
+    &:first-child {
+      border-left: 0;
+    }
+  }
+
+  span {
+    @include mixins.eyebrow;
+    font-size: 9.5px;
+  }
+
+  b {
+    @include mixins.mono;
+    font-size: 13.5px;
+    font-weight: 400;
+    color: var(--color-text);
+    white-space: nowrap;
+  }
+}
+
+@keyframes enter {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes beat {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@include mixins.compact-h {
+  .left {
+    gap: 6px;
+    padding: 9px 12px;
+  }
+
+  .matNote {
+    display: none;
+  }
+
+  .ignite {
+    height: 34px;
+  }
+
+  .inset div {
+    height: 96px;
+  }
+}
+
+@include mixins.narrow {
+  .cam,
+  .where {
+    display: none;
+  }
+
+  .inset {
+    display: none;
+  }
+}

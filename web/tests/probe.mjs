@@ -1,0 +1,25 @@
+// Sonda de QA: carga inicial, chat y arrastre 3D. node tests/probe.mjs <salida>
+import { chromium } from "@playwright/test";
+const out = process.argv[2];
+const base = process.env.BASE ?? "http://localhost:3000";
+const browser = await chromium.launch({ channel: "chrome", args: ["--enable-gpu", "--ignore-gpu-blocklist"] });
+const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+const problems = [];
+page.on("console", (m) => m.type() === "error" && problems.push(`console: ${m.text()}`));
+page.on("pageerror", (e) => problems.push(`pageerror: ${e.message}`));
+await page.goto(base + "/", { waitUntil: "commit" });
+await page.waitForTimeout(900);
+await page.screenshot({ path: `${out}/boot1.png` });
+await page.waitForTimeout(1200);
+await page.screenshot({ path: `${out}/boot2.png` });
+await page.waitForTimeout(5000);
+await page.keyboard.press("/");
+await page.waitForTimeout(900);
+await page.screenshot({ path: `${out}/chat1.png` });
+const input = page.locator("input[maxlength]").last();
+await input.fill("¿Por qué la llama es esférica en microgravedad?");
+await input.press("Enter");
+await page.waitForTimeout(3500);
+await page.screenshot({ path: `${out}/chat2.png` });
+console.log(problems.join("\n") || "sin errores");
+await browser.close();

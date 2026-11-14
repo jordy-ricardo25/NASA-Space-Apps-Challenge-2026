@@ -1,0 +1,115 @@
+@use "mixins";
+
+.dock {
+  position: fixed;
+  z-index: 35;
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  pointer-events: none;
+
+  > * {
+    pointer-events: auto;
+  }
+}
+
+.floating {
+  left: calc(var(--sidebar-w) + 14px);
+  bottom: 10px;
+}
+
+.docked {
+  left: 10px;
+  bottom: 8px;
+}
+
+.mascot {
+  display: block;
+  line-height: 0;
+  border-radius: 50%;
+  transition: transform 0.2s var(--ease-out);
+
+  &:hover {
+    transform: scale(1.07);
+  }
+}
+
+.bubble {
+  max-width: min(330px, 46vw);
+  margin-bottom: 12px;
+  padding: 10px 30px 10px 14px;
+  @include mixins.panel-box(true);
+  border-color: color-mix(in srgb, var(--color-warm) 55%, transparent);
+  animation: pop 0.4s var(--ease-out);
+
+  &::before,
+  &::after {
+    border-color: var(--color-warm);
+  }
+
+  p {
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--color-text);
+  }
+}
+
+// En las escenas 3D el mensaje no debe tapar la barra de controles de cámara.
+.floating .bubble {
+  max-width: min(292px, 44vw);
+}
+
+.docked .bubble {
+  margin-left: 8px;
+}
+
+// En la cabina el mensaje sale sobre la telemetría para no tapar los controles.
+.cabin .bubble {
+  position: fixed;
+  left: calc(var(--sidebar-w) + 330px);
+  bottom: 236px;
+  margin: 0;
+}
+
+.who {
+  @include mixins.eyebrow;
+  color: var(--color-warm);
+}
+
+.actions {
+  margin-top: 8px;
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border: 1px solid var(--color-line-strong);
+    border-radius: 999px;
+    @include mixins.eyebrow;
+    color: var(--color-accent);
+    transition: background 0.15s;
+
+    &:hover {
+      background: var(--color-accent-soft);
+    }
+  }
+}
+
+.close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  color: var(--color-text-3);
+
+  &:hover {
+    color: var(--color-text);
+  }
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+}

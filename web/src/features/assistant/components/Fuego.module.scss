@@ -1,0 +1,147 @@
+.fuego {
+  display: inline-block;
+  width: var(--size);
+  height: calc(var(--size) * 1.166);
+  flex: none;
+  filter: drop-shadow(0 0 calc(var(--size) * 0.14) var(--glow));
+  animation: bob 4.2s ease-in-out infinite;
+  transform-origin: 50% 66%;
+}
+
+.svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.halo {
+  animation: pulse 3s ease-in-out infinite;
+  transform-origin: 60px 92px;
+}
+
+.body {
+  transform-origin: 60px 126px;
+  animation: flicker 2.6s ease-in-out infinite;
+}
+
+.eyes {
+  transform-origin: 60px 91px;
+  animation: blink 4.6s infinite;
+}
+
+.mouthTalk {
+  transform-origin: 60px 104px;
+  animation: talk 0.32s ease-in-out infinite alternate;
+}
+
+.listen .halo {
+  animation: pulse 0.9s ease-in-out infinite;
+}
+
+.think {
+  animation: bob 4.2s ease-in-out infinite, tilt 1.8s ease-in-out infinite;
+}
+
+.happy .body {
+  animation: hop 0.6s ease-in-out 2;
+}
+
+// Entrada: la llama cae (caída libre) y aterriza convertida en esfera.
+.intro {
+  animation: fall 1.75s cubic-bezier(0.5, 0, 0.9, 0.4) both, bob 4.2s ease-in-out 1.9s infinite;
+}
+
+@keyframes fall {
+  0% {
+    transform: translateY(-78vh) scale(0.8, 1.15);
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  72% {
+    transform: translateY(0) scale(1.14, 0.84);
+    animation-timing-function: cubic-bezier(0.2, 0.8, 0.3, 1);
+  }
+  86% {
+    transform: translateY(-9%) scale(0.96, 1.05);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes bob {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -5%;
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(0.94);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
+}
+
+@keyframes flicker {
+  0%,
+  100% {
+    transform: skewX(0deg) scaleY(1);
+  }
+  30% {
+    transform: skewX(-1.6deg) scaleY(1.015);
+  }
+  65% {
+    transform: skewX(1.4deg) scaleY(0.99);
+  }
+}
+
+@keyframes blink {
+  0%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+  95% {
+    transform: scaleY(0.12);
+  }
+}
+
+@keyframes talk {
+  from {
+    transform: scaleY(0.45);
+  }
+  to {
+    transform: scaleY(1.2);
+  }
+}
+
+@keyframes tilt {
+  0%,
+  100% {
+    rotate: -4deg;
+  }
+  50% {
+    rotate: 4deg;
+  }
+}
+
+@keyframes hop {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8%);
+  }
+}

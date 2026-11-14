@@ -1,0 +1,190 @@
+@use "mixins";
+
+// Colores por etapa: evidencia → hallazgo → brecha → tecnología.
+.grid [data-stage="evidence"] {
+  --c: var(--color-accent);
+}
+
+.grid [data-stage="finding"] {
+  --c: var(--color-flame-blue);
+}
+
+.grid [data-stage="gap"] {
+  --c: var(--color-warm);
+}
+
+.grid [data-stage="technology"] {
+  --c: var(--color-success);
+}
+
+.grid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 148px repeat(4, minmax(0, 1fr));
+  grid-template-rows: auto repeat(var(--rows), minmax(0, 1fr));
+  gap: 10px 12px;
+}
+
+.stage {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid var(--c);
+  font: 700 13px var(--font-display);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--c);
+
+  i {
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border: 1.5px solid var(--c);
+    border-radius: 50%;
+    @include mixins.mono;
+    font-size: 12px;
+    font-style: normal;
+  }
+}
+
+.lane {
+  display: contents;
+}
+
+.laneName {
+  align-self: center;
+  font: 700 clamp(15px, 1.25vw, 18px) / 1.2 var(--font-display);
+  color: var(--color-text);
+}
+
+.node {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-height: 0;
+  padding: 11px 14px 10px;
+  border: 1px solid var(--color-line-soft);
+  border-left: 3px solid var(--c);
+  border-radius: var(--radius-m);
+  background: var(--color-panel-raise);
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  h3 {
+    font: 600 clamp(13.5px, 1.05vw, 15.5px) / 1.25 var(--font-display);
+    color: var(--color-text);
+  }
+
+  p {
+    flex: none;
+    margin-bottom: auto;
+    font-size: clamp(12px, 0.92vw, 13.5px);
+    line-height: 1.45;
+    color: var(--color-text-2);
+    @include mixins.clamp(3);
+  }
+
+  @include mixins.compact-h {
+    padding: 8px 12px;
+
+    p {
+      @include mixins.clamp(2);
+    }
+  }
+}
+
+.src {
+  flex: none;
+  overflow: hidden;
+
+  > span {
+    flex-wrap: nowrap;
+  }
+}
+
+.arrow {
+  position: absolute;
+  left: -17px;
+  top: 50%;
+  margin-top: -9px;
+  color: var(--c);
+  overflow: visible;
+}
+
+// ── Mapa de brechas ──────────────────────────────────────────────────────────
+.gaps {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.gap {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-height: 0;
+  padding: 18px 22px 16px;
+  border: 1px solid var(--color-line-soft);
+  border-radius: var(--radius-m);
+  background: var(--color-panel-raise);
+  overflow: hidden;
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 4px;
+  }
+
+  h2 {
+    font-size: clamp(20px, 1.9vw, 27px);
+  }
+
+  h3 {
+    @include mixins.eyebrow;
+  }
+
+  p {
+    font-size: clamp(13.5px, 1.05vw, 15.5px);
+    line-height: 1.45;
+    color: var(--color-text-2);
+  }
+}
+
+.closes {
+  display: flex;
+  gap: 12px;
+  margin: auto 0 4px;
+  padding: 12px 14px;
+  border: 1px solid rgba(0, 212, 154, 0.35);
+  border-radius: var(--radius-s);
+  background: rgba(0, 212, 154, 0.07);
+
+  svg {
+    flex: none;
+    margin-top: 2px;
+    color: var(--color-success);
+  }
+
+  h3 {
+    color: var(--color-success);
+  }
+
+  p {
+    color: var(--color-text);
+    font-weight: 600;
+  }
+}

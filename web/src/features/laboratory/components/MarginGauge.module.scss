@@ -1,0 +1,155 @@
+@use "mixins";
+
+.gauge {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.high {
+  --c: var(--color-risk-high);
+}
+
+.caution {
+  --c: var(--color-risk-caution);
+}
+
+.low {
+  --c: var(--color-risk-low);
+}
+
+.none {
+  --c: var(--color-evidence-none);
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  output {
+    margin-left: auto;
+    @include mixins.mono;
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--c);
+    text-shadow: 0 0 16px color-mix(in srgb, var(--c) 50%, transparent);
+  }
+}
+
+.icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  flex: none;
+  border-radius: 50%;
+  border: 1px solid var(--c);
+  background: color-mix(in srgb, var(--c) 14%, transparent);
+  color: var(--c);
+}
+
+.verdict {
+  min-width: 0;
+
+  b {
+    display: block;
+    font: 600 12.5px/1.25 var(--font-display);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--c);
+  }
+
+  span {
+    display: block;
+    font-size: 11px;
+    line-height: 1.35;
+    color: var(--color-text-3);
+  }
+}
+
+.bar {
+  position: relative;
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, rgba(0, 212, 154, 0.2) 0%, rgba(0, 212, 154, 0.2) 27.7%, rgba(255, 197, 61, 0.24) 27.7%, rgba(255, 197, 61, 0.24) 38.8%, rgba(255, 92, 108, 0.22) 38.8%);
+  border: 1px solid var(--color-line-soft);
+
+  i {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+  }
+}
+
+.band {
+  left: var(--a);
+  width: calc(var(--b) - var(--a));
+  min-width: 3px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--c) 55%, transparent);
+  transition: left 0.3s var(--ease-out), width 0.3s var(--ease-out);
+}
+
+.extra .band {
+  background: repeating-linear-gradient(90deg, color-mix(in srgb, var(--c) 60%, transparent) 0 5px, color-mix(in srgb, var(--c) 22%, transparent) 5px 9px);
+  outline: 1px dashed var(--c);
+}
+
+.pointer {
+  left: var(--x);
+  width: 3px;
+  margin: -4px 0 -4px -1.5px;
+  border-radius: 2px;
+  background: #fff;
+  box-shadow: 0 0 10px 2px var(--c);
+  transition: left 0.3s var(--ease-out);
+}
+
+.zero {
+  left: var(--x);
+  width: 1px;
+  margin: -3px 0;
+  background: var(--color-text);
+  opacity: 0.8;
+}
+
+.hatch {
+  inset: 0;
+  border-radius: 6px;
+  background: repeating-linear-gradient(135deg, rgba(132, 151, 168, 0.5) 0 5px, rgba(132, 151, 168, 0.12) 5px 10px);
+}
+
+.scale {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  @include mixins.mono;
+  font-size: 9.5px;
+  color: var(--color-text-3);
+
+  span:nth-child(2) {
+    position: absolute;
+    left: var(--x);
+    translate: -50% 0;
+    color: var(--color-text-2);
+  }
+}
+
+.foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.loc {
+  @include mixins.mono;
+  font-size: 11px;
+  color: var(--color-text-3);
+
+  b {
+    color: var(--color-text);
+    font-weight: 500;
+  }
+}

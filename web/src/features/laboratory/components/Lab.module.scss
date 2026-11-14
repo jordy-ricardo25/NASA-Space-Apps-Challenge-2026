@@ -1,0 +1,555 @@
+@use "mixins";
+
+.lab {
+  position: absolute;
+  inset: 12px;
+  display: grid;
+  grid-template-columns: 276px minmax(0, 1fr) 306px;
+  gap: 12px;
+  animation: enter 0.5s var(--ease-out);
+
+  h3 {
+    @include mixins.eyebrow;
+
+    em {
+      margin-left: 6px;
+      padding: 0 6px;
+      border-radius: 999px;
+      background: var(--color-accent-soft);
+      font-style: normal;
+      color: var(--color-accent);
+    }
+  }
+}
+
+.left,
+.main,
+.right {
+  position: relative;
+  min-height: 0;
+  @include mixins.panel;
+  pointer-events: auto;
+}
+
+.left {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 12px 14px 12px;
+  // Deja libre la esquina donde vive el guía.
+  padding-bottom: 12px;
+  overflow: hidden;
+
+  header {
+    span {
+      @include mixins.eyebrow;
+      color: var(--color-accent);
+    }
+
+    h1 {
+      font-size: 21px;
+      line-height: 1.15;
+    }
+  }
+}
+
+.toScene {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 36px;
+  margin-top: auto;
+  flex: none;
+  border: 1px solid var(--color-line-strong);
+  border-radius: 999px;
+  font: 600 11px var(--font-display);
+  letter-spacing: 0.14em;
+  color: var(--color-text);
+  transition: all 0.15s;
+
+  &:hover {
+    background: var(--color-accent-soft);
+    color: var(--color-accent);
+    text-decoration: none;
+  }
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-bottom: 1px solid var(--color-line);
+
+  button {
+    padding: 9px 12px 8px;
+    border-left: 1px solid var(--color-line-soft);
+    border-bottom: 2px solid transparent;
+    font: 600 13px var(--font-display);
+    text-align: left;
+    color: var(--color-text-3);
+    transition: all 0.15s;
+    @include mixins.truncate;
+
+    &:first-child {
+      border-left: 0;
+    }
+
+    em {
+      display: block;
+      @include mixins.eyebrow;
+      font-size: 9.5px;
+      font-style: normal;
+    }
+
+    &:hover {
+      color: var(--color-text);
+    }
+
+    &[aria-pressed="true"] {
+      color: var(--color-text);
+      border-bottom-color: var(--color-accent);
+      background: linear-gradient(180deg, transparent, var(--color-accent-soft));
+
+      em {
+        color: var(--color-accent);
+      }
+    }
+  }
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 14px 10px;
+}
+
+.lede {
+  font-size: 12.5px;
+  color: var(--color-text-2);
+
+  b {
+    color: var(--color-text);
+    font-weight: 600;
+  }
+}
+
+.maps {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  // Mapa del ambiente activo en grande; los otros dos regímenes a la derecha.
+  grid-template-columns: minmax(0, 1.9fr) minmax(0, 1fr);
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  font-size: 11px;
+  color: var(--color-text-2);
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    &::before {
+      content: "";
+      width: 16px;
+      height: 8px;
+      flex: none;
+    }
+  }
+}
+
+.lgLine::before {
+  height: 2px !important;
+  background: #fff;
+}
+
+.lgBand::before {
+  background: rgba(255, 197, 61, 0.5);
+}
+
+.lgPred::before {
+  background: rgba(255, 135, 56, 0.25);
+  outline: 1px dashed var(--color-warm);
+}
+
+.lgSpread::before {
+  width: 0 !important;
+  height: 0 !important;
+  border: 5px solid transparent;
+  border-bottom: 8px solid var(--color-risk-high);
+  border-top: 0;
+}
+
+.lgNo::before {
+  width: 8px !important;
+  border: 1.6px solid var(--color-risk-low);
+  border-radius: 50%;
+}
+
+.lgLimit::before {
+  width: 3px !important;
+  height: 12px !important;
+  background: #b68cff;
+}
+
+.lgCabin::before {
+  width: 9px !important;
+  height: 9px !important;
+  border-radius: 50%;
+  background: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(53, 216, 242, 0.25);
+}
+
+.split {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 10px;
+}
+
+.plot {
+  min-height: 0;
+  padding: 8px;
+  border: 1px solid var(--color-line-soft);
+  border-radius: var(--radius-m);
+  background: rgba(3, 10, 20, 0.45);
+}
+
+.facts {
+  min-height: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px 12px;
+  align-items: start;
+
+  > div {
+    padding: 7px 10px;
+    border: 1px solid var(--color-line-soft);
+    border-radius: var(--radius-s);
+  }
+
+  > h3,
+  > ul,
+  > p,
+  > span {
+    grid-column: 1 / -1;
+  }
+
+  dt {
+    @include mixins.eyebrow;
+    font-size: 9.5px;
+  }
+
+  dd {
+    margin: 2px 0 0;
+    @include mixins.mono;
+    font-size: 15px;
+    color: var(--color-text);
+  }
+
+  p {
+    font-size: 12px;
+    line-height: 1.45;
+    color: var(--color-text-2);
+  }
+}
+
+.mode {
+  font: 600 12.5px var(--font-display) !important;
+  color: var(--color-warm) !important;
+}
+
+.bars {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+
+  li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 4px 8px;
+    font-size: 12px;
+
+    i {
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
+  }
+
+  i {
+    position: relative;
+    height: 8px;
+    border-radius: 4px;
+    background: rgba(169, 195, 214, 0.14);
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: var(--value);
+      border-radius: 4px;
+      background: var(--c);
+    }
+  }
+
+  b {
+    @include mixins.mono;
+    font-weight: 400;
+    text-align: right;
+  }
+}
+
+.keys {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+  font-size: 12px;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    &::before {
+      content: "";
+      width: 22px;
+      height: 9px;
+      border-radius: 2px;
+      flex: none;
+    }
+  }
+}
+
+.kMeasured::before {
+  background: #ffc53d;
+}
+
+.kDerived::before {
+  background: repeating-linear-gradient(135deg, #ff8738 0 2px, rgba(255, 135, 56, 0.22) 2px 6px);
+  outline: 1px dashed #ff8738;
+}
+
+.right {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 12px 14px;
+}
+
+.derived {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0;
+
+  div {
+    padding: 6px 8px;
+    border: 1px solid var(--color-line-soft);
+    border-radius: var(--radius-s);
+  }
+
+  dt {
+    @include mixins.eyebrow;
+    font-size: 9px;
+    @include mixins.truncate;
+  }
+
+  dd {
+    margin: 0;
+    @include mixins.mono;
+    font-size: 13px;
+  }
+}
+
+.scroll {
+  flex: 1;
+  min-height: 0;
+  @include mixins.inner-scroll;
+  padding-right: 3px;
+}
+
+.cardBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-s);
+  font: 600 11px var(--font-display);
+  letter-spacing: 0.12em;
+  color: var(--color-text);
+  transition: all 0.15s;
+
+  code {
+    margin-left: auto;
+    @include mixins.mono;
+    font-size: 10px;
+    letter-spacing: 0;
+    color: var(--color-text-3);
+  }
+
+  &:hover {
+    border-color: var(--color-line-strong);
+    color: var(--color-accent);
+  }
+}
+
+.overlay {
+  position: absolute;
+  inset: -12px;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(2, 6, 13, 0.72);
+  backdrop-filter: blur(6px);
+  pointer-events: auto;
+  animation: fade 0.25s ease;
+}
+
+.modal {
+  position: relative;
+  width: min(980px, 100%);
+  max-height: 100%;
+  padding: 18px 20px;
+  @include mixins.panel(true);
+  @include mixins.inner-scroll;
+}
+
+.close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  color: var(--color-text-2);
+
+  &:hover {
+    color: var(--color-accent);
+  }
+}
+
+.card {
+  header {
+    margin-bottom: 12px;
+
+    span {
+      @include mixins.eyebrow;
+      color: var(--color-accent);
+    }
+
+    h2 {
+      font-size: 20px;
+    }
+  }
+
+  h3 {
+    margin: 10px 0 3px;
+
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+
+  p {
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--color-text-2);
+  }
+
+  table {
+    width: 100%;
+    margin: 4px 0 8px;
+    border-collapse: collapse;
+    font-size: 11.5px;
+  }
+
+  th {
+    padding: 4px 6px;
+    @include mixins.eyebrow;
+    font-size: 9.5px;
+    text-align: left;
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  td {
+    padding: 4px 6px;
+    border-bottom: 1px solid var(--color-line-soft);
+    color: var(--color-text-2);
+
+    &:not(:first-child) {
+      @include mixins.mono;
+      color: var(--color-text);
+      white-space: nowrap;
+    }
+  }
+}
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  gap: 22px;
+}
+
+.cardNote {
+  margin-bottom: 8px;
+  font-size: 11px !important;
+  color: var(--color-text-3) !important;
+}
+
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@include mixins.compact-h {
+  .left {
+    gap: 6px;
+  }
+
+  .legend {
+    display: none;
+  }
+}
+
+@include mixins.narrow {
+  .lab {
+    grid-template-columns: 250px minmax(0, 1fr);
+  }
+
+  .right {
+    display: none;
+  }
+
+  .maps {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .cardGrid {
+    grid-template-columns: 1fr;
+  }
+}

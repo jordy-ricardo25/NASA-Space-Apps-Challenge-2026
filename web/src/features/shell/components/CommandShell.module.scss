@@ -1,0 +1,63 @@
+@use "mixins";
+
+.shell {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+}
+
+// Viñeta sobre el 3D: da profundidad y mejora la lectura de los paneles.
+.vignette {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(140% 100% at 50% 40%, transparent 55%, rgba(2, 6, 13, 0.55) 100%),
+    linear-gradient(180deg, rgba(2, 6, 13, 0.35) 0%, transparent 18%, transparent 72%, rgba(2, 6, 13, 0.5) 100%);
+}
+
+.fallback {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(60% 50% at 78% 22%, rgba(53, 216, 242, 0.18), transparent 70%),
+    radial-gradient(120% 60% at 50% 110%, #5c6570 0%, #2b323b 42%, transparent 70%),
+    linear-gradient(180deg, #030a14, #071525);
+}
+
+// Área de contenido: las rutas colocan aquí sus paneles sobre el 3D.
+.content {
+  position: fixed;
+  inset: var(--topbar-h) 0 0 var(--sidebar-w);
+  z-index: 10;
+  pointer-events: none;
+  overflow: hidden;
+
+  > * {
+    pointer-events: none;
+  }
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  top: calc(var(--topbar-h) + 14px);
+  z-index: 40;
+  translate: -50% -12px;
+  padding: 7px 16px;
+  border: 1px solid var(--color-line-strong);
+  border-radius: 999px;
+  background: var(--color-panel-strong);
+  @include mixins.eyebrow;
+  color: var(--color-accent);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s, translate 0.25s var(--ease-out);
+}
+
+.toastOn {
+  opacity: 1;
+  translate: -50% 0;
+}

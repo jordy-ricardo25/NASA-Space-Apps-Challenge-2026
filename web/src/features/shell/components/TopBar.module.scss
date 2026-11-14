@@ -1,0 +1,190 @@
+@use "mixins";
+
+.bar {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 30;
+  height: var(--topbar-h);
+  display: flex;
+  align-items: center;
+  gap: var(--gap-4);
+  padding: 0 var(--gap-4) 0 0;
+  background: linear-gradient(180deg, rgba(5, 15, 28, 0.94), rgba(5, 15, 28, 0.72));
+  border-bottom: 1px solid var(--color-line);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 100%;
+  padding: 0 var(--gap-4) 0 18px;
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14.5px;
+  letter-spacing: 0.22em;
+  white-space: nowrap;
+
+  &:hover {
+    text-decoration: none;
+  }
+
+  svg {
+    width: 28px;
+    height: 28px;
+    flex: none;
+  }
+
+  span {
+    color: var(--color-text);
+  }
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: var(--gap-4);
+  border-left: 1px solid var(--color-line-soft);
+  @include mixins.eyebrow;
+  color: var(--color-success);
+  white-space: nowrap;
+
+  i {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 10px currentColor;
+    animation: beat 2.4s ease-in-out infinite;
+  }
+
+  &.off {
+    color: var(--color-risk-caution);
+  }
+}
+
+.env {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+  padding: 5px 12px;
+  border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  @include mixins.mono;
+  font-size: 11.5px;
+  color: var(--color-text-2);
+  white-space: nowrap;
+
+  i {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+  }
+
+  b {
+    font-family: var(--font-display);
+    letter-spacing: 0.12em;
+    color: var(--color-text);
+  }
+
+  span + span {
+    padding-left: 10px;
+    border-left: 1px solid var(--color-line-soft);
+  }
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+
+  a,
+  button {
+    padding: 4px 13px;
+    @include mixins.eyebrow;
+    font-size: 11px;
+    color: var(--color-text-2);
+    transition: color 0.15s;
+
+    &:hover {
+      color: var(--color-accent);
+      text-decoration: none;
+    }
+  }
+
+  > * + * {
+    border-left: 1px solid var(--color-line-soft);
+  }
+}
+
+.lang {
+  display: flex;
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  overflow: hidden;
+
+  button {
+    padding: 3px 9px;
+    @include mixins.mono;
+    font-size: 10.5px;
+    color: var(--color-text-3);
+
+    &[aria-pressed="true"] {
+      background: var(--color-accent);
+      color: #04121f;
+      font-weight: 700;
+    }
+  }
+}
+
+.clock {
+  @include mixins.mono;
+  font-size: 13px;
+  color: var(--color-text);
+  min-width: 68px;
+  text-align: right;
+}
+
+.team {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--color-line);
+  border-radius: 50%;
+  color: var(--color-text-2);
+  transition: all 0.15s;
+
+  &:hover {
+    color: var(--color-accent);
+    border-color: var(--color-line-strong);
+  }
+}
+
+@keyframes beat {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@include mixins.narrow {
+  .status,
+  .nav {
+    display: none;
+  }
+
+  .brand span {
+    display: none;
+  }
+}

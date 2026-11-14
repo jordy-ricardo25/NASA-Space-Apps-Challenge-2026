@@ -1,0 +1,680 @@
+@use "mixins";
+
+// Guía (O1): biblioteca, ranking, comparador, cobertura y lecciones.
+// Todo cabe en el cuerpo del panel; nada desplaza la página.
+
+.note {
+  flex: none;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--color-text-3);
+}
+
+.fam {
+  @include mixins.eyebrow;
+  color: var(--c, var(--color-accent));
+
+  &[data-family="solid"] {
+    --c: var(--color-warm);
+  }
+
+  &[data-family="liquid"] {
+    --c: var(--color-accent);
+  }
+
+  &[data-family="gas"] {
+    --c: var(--color-flame-blue);
+  }
+
+  &[data-family="smoke"] {
+    --c: var(--color-text-2);
+  }
+}
+
+// ── Biblioteca ───────────────────────────────────────────────────────────────
+.library {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: none;
+}
+
+.count {
+  margin-left: auto;
+  @include mixins.mono;
+  font-size: 12px;
+  color: var(--color-text-3);
+}
+
+.cards {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+
+  @include mixins.narrow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 0;
+  padding: 14px 16px 12px;
+  border: 1px solid var(--color-line-soft);
+  border-radius: var(--radius-m);
+  background: var(--color-panel-raise);
+  text-align: left;
+  overflow: hidden;
+  transition: border-color 0.15s, transform 0.15s, background 0.15s;
+  @include mixins.focus-ring;
+
+  &:hover {
+    border-color: var(--color-line-strong);
+    background: rgba(18, 54, 83, 0.8);
+    transform: translateY(-2px);
+  }
+
+  b {
+    font: 700 clamp(17px, 1.5vw, 21px) var(--font-display);
+    color: var(--color-text);
+  }
+
+  em {
+    font-size: 11.5px;
+    font-style: normal;
+    color: var(--color-text-3);
+    @include mixins.truncate;
+  }
+
+  p {
+    flex: 1;
+    min-height: 0;
+    margin-top: 4px;
+    font-size: clamp(13px, 1.02vw, 15px);
+    line-height: 1.45;
+    color: var(--color-text-2);
+    @include mixins.clamp(4);
+
+    @include mixins.compact-h {
+      @include mixins.clamp(2);
+    }
+  }
+}
+
+.facts {
+  flex: none;
+  display: grid;
+  gap: 3px;
+  margin: 0 0 4px;
+
+  div {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding-top: 3px;
+    border-top: 1px dashed var(--color-line-soft);
+  }
+
+  dt {
+    @include mixins.eyebrow;
+  }
+
+  dd {
+    margin: 0;
+    @include mixins.mono;
+    font-size: 12px;
+    text-align: right;
+    color: var(--color-text);
+    @include mixins.truncate;
+  }
+
+  @include mixins.compact-h {
+    display: none;
+  }
+}
+
+.foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex: none;
+  padding-top: 8px;
+  border-top: 1px solid var(--color-line-soft);
+  font-size: 11.5px;
+  color: var(--color-text-3);
+
+  > span:first-child {
+    @include mixins.truncate;
+  }
+}
+
+.dots {
+  display: flex;
+  gap: 3px;
+  flex: none;
+
+  i {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    border: 1px solid var(--color-text-3);
+
+    &[data-on="true"] {
+      background: var(--color-accent);
+      border-color: var(--color-accent);
+    }
+  }
+}
+
+// ── Ranking ──────────────────────────────────────────────────────────────────
+.ranking {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 18px;
+
+  aside {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    min-height: 0;
+    padding-right: 16px;
+    border-right: 1px solid var(--color-line-soft);
+    @include mixins.inner-scroll;
+
+    h3 {
+      margin-top: 4px;
+      @include mixins.eyebrow;
+    }
+  }
+}
+
+.weight input[type="range"] {
+  accent-color: var(--c);
+}
+
+.rankList {
+  min-height: 0;
+  display: grid;
+  grid-auto-rows: minmax(0, 1fr);
+  gap: 6px;
+  list-style: none;
+
+  li {
+    display: grid;
+    grid-template-columns: 30px minmax(150px, 240px) minmax(0, 1fr) 46px 40px;
+    align-items: center;
+    gap: 12px;
+    min-height: 0;
+    padding: 0 12px;
+    border: 1px solid var(--color-line-soft);
+    border-radius: var(--radius-s);
+    background: var(--color-panel-raise);
+
+    &:first-child {
+      border-color: var(--color-line-strong);
+    }
+
+    > i {
+      @include mixins.mono;
+      font-size: 15px;
+      font-style: normal;
+      color: var(--color-accent);
+    }
+
+    > button {
+      min-width: 0;
+      text-align: left;
+      @include mixins.focus-ring;
+
+      b {
+        display: block;
+        font: 600 15px var(--font-display);
+        color: var(--color-text);
+      }
+
+      span {
+        display: block;
+        font-size: 11.5px;
+        color: var(--color-text-3);
+        @include mixins.truncate;
+      }
+
+      &:hover b {
+        color: var(--color-accent);
+      }
+    }
+
+    output {
+      @include mixins.mono;
+      font-size: 20px;
+      font-weight: 600;
+      text-align: right;
+      color: var(--color-text);
+    }
+  }
+}
+
+.stack {
+  display: flex;
+  height: 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+
+  span {
+    width: var(--w);
+    background: var(--c);
+    transition: width 0.3s var(--ease-out);
+  }
+}
+
+.cov {
+  @include mixins.mono;
+  font-size: 11.5px;
+  text-align: right;
+  color: var(--color-text-3);
+}
+
+// ── Comparador ───────────────────────────────────────────────────────────────
+.compare {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pick {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+
+  > span {
+    margin-right: 4px;
+    font-size: 12px;
+    color: var(--color-text-3);
+  }
+
+  button {
+    padding: 4px 11px;
+    border: 1px solid var(--color-line-soft);
+    border-radius: 999px;
+    font: 600 11.5px var(--font-display);
+    color: var(--color-text-2);
+    transition: all 0.15s;
+    @include mixins.focus-ring;
+
+    &:hover:not(:disabled) {
+      border-color: var(--color-line-strong);
+      color: var(--color-text);
+    }
+
+    &[aria-pressed="true"] {
+      background: var(--color-accent);
+      border-color: var(--color-accent);
+      color: #04121f;
+    }
+
+    &:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.table {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 13px;
+
+  th,
+  td {
+    padding: 5px 12px;
+    border-bottom: 1px solid var(--color-line-soft);
+    text-align: left;
+    vertical-align: middle;
+    line-height: 1.35;
+  }
+
+  thead th {
+    border-bottom-color: var(--color-line);
+
+    b {
+      display: block;
+      font: 700 17px var(--font-display);
+      color: var(--color-text);
+    }
+
+    span {
+      @include mixins.mono;
+      font-size: 11.5px;
+      color: var(--color-text-3);
+    }
+  }
+
+  th:first-child {
+    width: 128px;
+    @include mixins.eyebrow;
+  }
+
+  td {
+    color: var(--color-text-2);
+    @include mixins.clamp(3);
+    display: table-cell;
+  }
+
+  tr[data-diff="true"] td {
+    background: rgba(255, 135, 56, 0.07);
+    color: var(--color-text);
+  }
+}
+
+.diffKey {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 4px;
+  border-radius: 2px;
+  background: rgba(255, 135, 56, 0.45);
+  vertical-align: -1px;
+}
+
+// ── Cobertura ────────────────────────────────────────────────────────────────
+.coverage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  table {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    height: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+
+  thead th {
+    padding: 4px 6px 8px;
+    @include mixins.eyebrow;
+    font-size: 10px;
+    text-align: center;
+
+    &:first-child {
+      width: 150px;
+      text-align: left;
+    }
+  }
+
+  tbody tr {
+    cursor: pointer;
+    transition: background 0.12s;
+
+    &:hover {
+      background: var(--color-accent-soft);
+    }
+  }
+
+  tbody th {
+    padding: 0 6px;
+    border-top: 1px solid var(--color-line-soft);
+    font: 600 13px var(--font-display);
+    text-align: left;
+    color: var(--color-text);
+  }
+
+  td {
+    border-top: 1px solid var(--color-line-soft);
+    font-size: 15px;
+    line-height: 1;
+    text-align: center;
+    color: var(--color-text-3);
+
+    &[data-v="yes"] {
+      color: var(--color-accent);
+    }
+
+    &[data-v="na"] {
+      opacity: 0.45;
+    }
+  }
+
+  // La columna de gravedad parcial es la brecha que el reto pide mostrar.
+  td:nth-child(5)[data-v="yes"] {
+    color: var(--color-warm);
+  }
+}
+
+// ── Lecciones históricas ─────────────────────────────────────────────────────
+.history {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+
+  article {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-height: 0;
+    padding: 18px 20px 16px;
+    border: 1px solid var(--color-line-soft);
+    border-radius: var(--radius-m);
+    background: var(--color-panel-raise);
+    @include mixins.inner-scroll;
+
+    h2 {
+      font-size: clamp(20px, 1.8vw, 26px);
+    }
+
+    h3 {
+      margin-top: 8px;
+      @include mixins.eyebrow;
+      color: var(--color-accent);
+    }
+
+    p {
+      font-size: 13.5px;
+      line-height: 1.5;
+      color: var(--color-text-2);
+    }
+  }
+}
+
+.year {
+  @include mixins.mono;
+  font-size: 13px;
+  color: var(--color-warm);
+}
+
+.lesson {
+  font-weight: 600;
+  color: var(--color-text) !important;
+}
+
+.rule {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: auto 0 8px;
+  padding: 10px 12px;
+  border: 1px solid rgba(0, 212, 154, 0.35);
+  border-radius: var(--radius-s);
+  background: rgba(0, 212, 154, 0.08);
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--color-text);
+
+  svg {
+    flex: none;
+    margin-top: 2px;
+    color: var(--color-success);
+  }
+}
+
+// ── Ficha de una investigación (panel sobre la guía, sin ventana nueva) ──────
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(3, 10, 20, 0.72);
+  backdrop-filter: blur(6px);
+  animation: fade 0.2s ease-out;
+}
+
+.detail {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: min(1080px, 100%);
+  max-height: 100%;
+  padding: 20px 24px 18px;
+  @include mixins.panel(true);
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+
+    h2 {
+      font-size: clamp(24px, 2.4vw, 32px);
+      line-height: 1.1;
+    }
+
+    em {
+      font-size: 13px;
+      font-style: normal;
+      color: var(--color-text-3);
+    }
+
+    button {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      flex: none;
+      border: 1px solid var(--color-line-soft);
+      border-radius: 50%;
+      color: var(--color-text-2);
+      @include mixins.focus-ring;
+
+      &:hover {
+        border-color: var(--color-line-strong);
+        color: var(--color-accent);
+      }
+    }
+  }
+}
+
+.detailGrid {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  @include mixins.inner-scroll;
+
+  dt {
+    margin-top: 10px;
+    @include mixins.eyebrow;
+    color: var(--color-accent);
+
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+
+  dd {
+    margin-top: 2px;
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--color-text-2);
+  }
+}
+
+.mono {
+  @include mixins.mono;
+  font-size: 12.5px !important;
+}
+
+.varChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+
+  span,
+  a {
+    padding: 2px 9px;
+    border: 1px solid var(--color-line-soft);
+    border-radius: 999px;
+    font-size: 11.5px;
+    color: var(--color-text-2);
+  }
+
+  a {
+    border-color: var(--color-line);
+    color: var(--color-accent);
+
+    &:hover {
+      background: var(--color-accent-soft);
+      text-decoration: none;
+    }
+  }
+}
+
+.copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  align-self: flex-start;
+  flex: none;
+  height: 32px;
+  padding: 0 14px;
+  border: 1px solid var(--color-line-strong);
+  border-radius: 999px;
+  font: 600 11.5px var(--font-display);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text);
+  @include mixins.focus-ring;
+
+  &:hover {
+    background: var(--color-accent-soft);
+    color: var(--color-accent);
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}

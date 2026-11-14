@@ -8,7 +8,7 @@ import { kpaToPsi, o2EnrichmentPct, ppO2, psiToKpa } from "@/shared/lib/units";
 import { MATERIALS, type FrontierModel } from "./materials";
 import { buoyFlow, dropletK, effFlow, frontier, heatRelease, massMeanDiameter, richardson, spreadRate, surfEq } from "./physics";
 import { assess, dropletCurve } from "./analysis";
-import { ignite, makeState, step, type SimConfig } from "./sim";
+import { act, configureState, ignite, makeState, step, type SimConfig } from "./sim";
 
 const loc = (id: keyof typeof MATERIALS, g: number, vent: number, P = 101.3): number =>
   frontier(MATERIALS[id].frontier!, { g, U: effFlow(vent, g), P }).loc;
@@ -154,6 +154,85 @@ describe("interpretación (§13.7)", () => {
 
 describe("escenario temporal", () => {
   const cfg: SimConfig = { g: 1e-6, o2: 21.7, P: 101.3, vent: 20, mat: "sibal", mode: "concurrent", heater: 0, volume: 16.7, exchange: 0, auto: false };
+  const burning = () => {
+    const S = configureState(null, cfg);
+    ignite(S);
+    for (let i = 0; i < 100; i++) step(S, 0.1);
+    return S;
+  };
+
+  it.each([
+    { o2: 30 },
+    { P: 60 },
+    { vent: 35 },
+  ])("actualiza la llama al editar %o sin avanzar el tiempo", (patch) => {
+    const S = burning();
+    const before = structuredClone(S);
+    expect(configureState(S, { ...cfg, ...patch })).toBe(S);
+    expect(S.M).not.toBe(before.M);
+    expect(S.soot).not.toBe(before.soot);
+    expect(S.Q).not.toBe(before.Q);
+    expect(S.t).toBe(before.t);
+    expect(S.x).toBe(before.x);
+    expect(S.burned).toBe(before.burned);
+    expect(S.Ts).toBe(before.Ts);
+    expect(S.flame).toBe(before.flame);
+    expect(Number.isFinite(S.dTs)).toBe(true);
+    if (patch.o2) expect([S.O2l, S.cab.O2]).toEqual([patch.o2, patch.o2]);
+    else expect([S.O2l, S.cab.O2]).toEqual([before.O2l, before.cab.O2]);
+    expect(S.P).toBe(patch.P ?? before.P);
+    expect(S.ventA).toBe(patch.vent ?? before.ventA);
+  });
+
+  it("recalcula el efecto de la sobrecarga sobre Nomex incluso sin avanzar el tiempo", () => {
+    const c: SimConfig = { ...cfg, mat: "nomex", o2: 25 };
+    const S = configureState(null, c);
+    expect(ignite(S)).toBe(true);
+    step(S, 1);
+    const before = structuredClone(S);
+    configureState(S, { ...c, heater: 200 });
+    expect(S.M).toBeGreaterThan(before.M);
+    expect(S.soot).toBeGreaterThan(before.soot);
+    expect(S.Q).toBeGreaterThan(before.Q);
+    expect(S.Ts).toBe(before.Ts);
+    expect(S.t).toBe(before.t);
+  });
+
+  it("los controles respetan el corte de ventilación y la despresurización", () => {
+    const S = burning();
+    act(S, "vent");
+    act(S, "venting");
+    step(S, 1);
+    const { ventA, P } = S;
+    configureState(S, { ...cfg, vent: 35, P: 60 });
+    expect(S.ventA).toBe(ventA);
+    expect(S.P).toBe(P);
+    expect(S.act.ventOff).toBe(true);
+    expect(S.act.venting).toBe(true);
+  });
+
+  it.each<Partial<SimConfig>>([
+    { mat: "pmma" },
+    { mode: "opposed" },
+    { g: 0.165 },
+  ])("mantiene la muestra encendida al cambiar %o si el ambiente lo permite", (patch) => {
+    const S = burning();
+    const next = configureState(S, { ...cfg, ...patch });
+    expect(next).not.toBe(S);
+    expect(next.fire).toBe("burning");
+    expect(next.flame).toBeGreaterThan(0);
+    expect(next.soot).toBeGreaterThan(0);
+    expect(next.t).toBe(0);
+    expect(Number.isFinite(next.dTs)).toBe(true);
+  });
+
+  it("no enciende materiales sin frontera ni otro compartimento", () => {
+    const S = burning();
+    expect(configureState(S, { ...cfg, mat: "wire" }).fire).toBe("none");
+    expect(configureState(S, { ...cfg, volume: 50 }).fire).toBe("none");
+    expect(configureState(null, cfg).fire).toBe("none");
+  });
+
   it("Saffire: el fuego crece con la ventilación y la cabina acumula CO₂ y CO", () => {
     const S = makeState(cfg);
     step(S, 0.1);

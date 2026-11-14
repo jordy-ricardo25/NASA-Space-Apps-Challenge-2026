@@ -25,7 +25,7 @@ export const TEAM = {
     { name: "Jordy Ricardo Carrión Chávez", role: l("Dirección técnica · frontend", "Technical lead · frontend") },
     { name: "Zuleyka Naomi Ortiz Salazar", role: l("Diseño UX/UI", "UX/UI design") },
     { name: "Lisbeth Aracelly Escudero Coba", role: l("Modelos predictivos", "Predictive models") },
-    { name: "Johnatan Moisés Ley Guacho", role: l("Equipo", "Team") },
+    { name: "Johnatan Moises Ley Guacho", role: l("Equipo", "Team") },
     { name: "Wagner Nolasco Ramírez Klínger", role: l("Equipo", "Team") },
   ] satisfies TeamMember[],
   disclaimer: l(

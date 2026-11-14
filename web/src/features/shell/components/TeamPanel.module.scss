@@ -55,7 +55,8 @@
 
 .members {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  // Nombres completos: una columna para que no se corten.
+  grid-template-columns: 1fr;
   gap: 8px;
 
   li {

@@ -1,0 +1,23 @@
+// Sonda de QA: fuego dentro del traje EVA y panel del equipo. node tests/probe3.mjs <salida>
+import { chromium } from "@playwright/test";
+const out = process.argv[2];
+const base = process.env.BASE ?? "http://localhost:3000";
+const browser = await chromium.launch({ channel: "chrome", args: ["--enable-gpu", "--ignore-gpu-blocklist"] });
+const page = await browser.newPage({ viewport: { width: 1917, height: 880 } });
+const problems = [];
+page.on("console", (m) => m.type() === "error" && problems.push(`console: ${m.text().slice(0, 600)}`));
+page.on("pageerror", (e) => problems.push(`pageerror: ${e.message}`));
+await page.goto(base + "/modulos/traje?view=cabina", { waitUntil: "load" });
+await page.waitForTimeout(16000);
+await page.screenshot({ path: `${out}/suit_idle.png` });
+await page.getByRole("button", { name: /ENCENDER|IGNITE/i }).click();
+await page.waitForTimeout(5000);
+await page.screenshot({ path: `${out}/suit_fire.png` });
+await page.goto(base + "/tierra?case=mist", { waitUntil: "load" });
+await page.waitForTimeout(7000);
+await page.screenshot({ path: `${out}/tierra_low.png` });
+await page.getByRole("button", { name: /Equipo|Team/ }).first().click();
+await page.waitForTimeout(900);
+await page.screenshot({ path: `${out}/team.png` });
+console.log(problems.join("\n") || "sin errores");
+await browser.close();

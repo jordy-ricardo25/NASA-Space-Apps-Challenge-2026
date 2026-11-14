@@ -12,7 +12,7 @@ async function expectNoScroll(page: Page): Promise<void> {
   expect(sw).toBeLessThanOrEqual(iw);
 }
 
-const ROUTES = ["/", "/modulos", "/modulos/nave", "/modulos/estacion", "/modulos/rover", "/modulos/base", "/modulos/base?view=cabina", "/laboratorio", "/laboratorio?tab=droplet", "/laboratorio?tab=smoke", "/laboratorio?tab=cabin", "/guia", "/guia?tab=ranking", "/guia?tab=compare", "/guia?tab=coverage", "/guia?tab=history", "/radar", "/radar?tab=gaps", "/tierra", "/referencias", "/ajustes", "/mapa"];
+const ROUTES = ["/", "/modulos", "/modulos/nave", "/modulos/estacion", "/modulos/rover", "/modulos/base", "/modulos/base?view=cabina", "/modulos/traje", "/modulos/traje?view=cabina", "/laboratorio?env=traje&mat=nomex", "/referencias?q=saffire&mission=saffire", "/laboratorio", "/laboratorio?tab=droplet", "/laboratorio?tab=smoke", "/laboratorio?tab=cabin", "/guia", "/guia?tab=ranking", "/guia?tab=compare", "/guia?tab=coverage", "/guia?tab=history", "/radar", "/radar?tab=gaps", "/tierra", "/referencias", "/ajustes", "/mapa"];
 
 test("todas las rutas cargan sin errores de consola ni desplazamiento", async ({ page }) => {
   test.setTimeout(300_000);
@@ -29,7 +29,7 @@ test("todas las rutas cargan sin errores de consola ni desplazamiento", async ({
   expect(problems).toEqual([]);
 });
 
-test("recorrido de la demo: inicio → base lunar → cabina → fuego → laboratorio → asistente", async ({ page }) => {
+test("recorrido de la demo: inicio → base en Marte → cabina → fuego → laboratorio → asistente", async ({ page }) => {
   await page.goto("/");
   await booted(page);
 
@@ -37,7 +37,7 @@ test("recorrido de la demo: inicio → base lunar → cabina → fuego → labor
   // Fila del tablero de ambientes (la etiqueta sobre el 3D lleva al mismo sitio).
   await page.getByRole("link", { name: /SPX-004/ }).last().click();
   await expect(page).toHaveURL(/\/modulos\/base/);
-  await expect(page.getByRole("heading", { level: 1 })).toContainText(/Base lunar|Lunar base/);
+  await expect(page.getByRole("heading", { level: 1 })).toContainText(/Base marciana|Mars base/);
 
   // Entrar a la cabina y encender la muestra
   await page.getByRole("button", { name: /ENTRAR A LA CABINA|ENTER THE CABIN/i }).click();

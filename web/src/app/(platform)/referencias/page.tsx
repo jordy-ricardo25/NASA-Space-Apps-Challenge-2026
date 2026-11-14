@@ -10,7 +10,7 @@ export default function ReferencesPage() {
   const { value } = listReferences();
   return (
     <Suspense fallback={null}>
-      <ReferencesView groups={value} />
+      <ReferencesView groups={value.groups} missions={value.missions} />
     </Suspense>
   );
 }

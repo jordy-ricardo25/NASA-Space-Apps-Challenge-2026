@@ -1,0 +1,13 @@
+Flame in Freefall
+Proyecto independiente para NASA Space Apps Challenge 2026. No implica aval de NASA.
+
+Recursos de terceros
+--------------------
+- NASA 3D Resources (https://github.com/nasa/NASA-3D-Resources): modelos de la ISS
+  (IGOAL), Space Exploration Vehicle, Habitat Demonstration Unit, Saturn V, Mobile
+  Launcher y astronauta, reducidos para la web con scripts/bake-model.mjs.
+- NASA Scientific Visualization Studio: texturas Blue Marble (SVS 2915) y CGI Moon
+  Kit (SVS 4720).
+- NASA PSI y NTRS: datos y reportes citados en /referencias.
+- three.js, Next.js, React, d3-scale, d3-shape, lucide, Zod: licencias MIT / ISC.
+- Space Grotesk, Inter y JetBrains Mono: SIL Open Font License 1.1.

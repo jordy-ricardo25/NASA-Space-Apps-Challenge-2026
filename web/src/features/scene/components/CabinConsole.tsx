@@ -88,7 +88,7 @@ export function CabinConsole({ module: m }: { module: ModuleDef }) {
         </Link>
         <div className={styles.where}>
           <span>
-            {m.code} · {t(l("CABINA", "CABIN"))}
+            {m.code} · {t(m.insideLabel ?? l("CABINA", "CABIN"))}
           </span>
           <b>{t(m.name)}</b>
         </div>
@@ -147,8 +147,8 @@ export function CabinConsole({ module: m }: { module: ModuleDef }) {
         <p className={styles.matNote}>
           <b>{t(mat.tag)}</b> · {t(mat.note)}
         </p>
-        <Slider label={t(l("Oxígeno", "Oxygen"))} display={`${num(s.o2, 1, lang)} %`} value={s.o2} min={12} max={45} step={0.5} onChange={(v) => set({ o2: v === s.variant.o2 ? null : v })} hint={outO2 ? t(l("Fuera del rango ensayado (10–40 %)", "Outside the tested range (10–40%)")) : `ppO₂ ${num(ppO2(s.o2, s.p), 1, lang)} kPa`} warn={outO2} />
-        <Slider label={t(l("Presión", "Pressure"))} display={pressure(s.p, units, lang)} value={s.p} min={40} max={101.3} step={0.5} onChange={(v) => set({ p: Math.abs(v - s.variant.P) < 0.26 ? null : v })} />
+        <Slider label={t(l("Oxígeno", "Oxygen"))} display={`${num(s.o2, 1, lang)} %`} value={s.o2} min={12} max={Math.max(45, s.variant.o2)} step={0.5} onChange={(v) => set({ o2: v === s.variant.o2 ? null : v })} hint={outO2 ? t(l("Fuera del rango ensayado (10–40 %)", "Outside the tested range (10–40%)")) : `ppO₂ ${num(ppO2(s.o2, s.p), 1, lang)} kPa`} warn={outO2} />
+        <Slider label={t(l("Presión", "Pressure"))} display={pressure(s.p, units, lang)} value={s.p} min={Math.min(40, Math.floor(s.variant.P) - 5)} max={101.3} step={0.5} onChange={(v) => set({ p: Math.abs(v - s.variant.P) < 0.26 ? null : v })} />
         <Slider label={t(l("Ventilación", "Ventilation"))} display={`${num(s.vent, 0, lang)} cm/s`} value={s.vent} min={0} max={40} step={1} onChange={(v) => set({ vent: v === (droplet ? 0 : m.vent) ? null : v })} hint={`${t(l("Flujo efectivo", "Effective flow"))} ${num(base.U, 1, lang)} cm/s · ${gravity(s.g, lang)}`} />
         <Slider label={t(l("Sobrecarga eléctrica", "Electrical overload"))} display={`${num(s.heat, 0, lang)} W`} value={s.heat} min={0} max={250} step={5} onChange={(v) => set({ heat: v || null })} hint={snap ? `${t(l("Superficie", "Surface"))} ${num(snap.Ts, 0, lang)} °C · ${t(l("ignición", "ignition"))} ${num(snap.tig, 0, lang)} °C` : undefined} warn={!!heating} />
         {!droplet && mat.frontier && (

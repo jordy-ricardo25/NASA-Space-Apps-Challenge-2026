@@ -15,11 +15,14 @@ import { tigNow } from "@/features/fire/engine/physics";
 import { emptyHistory, fireStore, type FireHistory, type FireSnapshot } from "@/features/fire/store";
 import { FireRig, flameMaterial } from "./flame";
 import { buildInterior, type Interior } from "./interiors";
-import { buildEarth, buildLights, buildStars } from "./sky";
-import { buildSite, type Site } from "./site";
+import { SUN_DIR, buildEarth, buildLights, buildStars, type Lights } from "./sky";
+import { MARS_X, buildSite, type Site } from "./site";
 import { buildTerrain } from "./terrain";
 
 export type ViewMode = "overview" | "focus" | "cabin" | "ambient";
+/** Lugar del mundo que se está mirando: el sitio lunar o el sitio de la base en Marte. */
+type Zone = "moon" | "mars";
+const MARS_SKY = 0xc39a78;
 
 export interface ViewState {
   mode: ViewMode;
@@ -94,6 +97,10 @@ export class World {
   private readonly home = OVERVIEW.target.clone();
   private panRadius = 40;
   private heightAt: ((x: number, z: number) => number) | null = null;
+  private zone: Zone = "moon";
+  private stars: THREE.Points | null = null;
+  private lights: Lights | null = null;
+  private readonly fog = new THREE.Fog(0x000000, 1e5, 2e5);
 
   constructor(private readonly canvas: HTMLCanvasElement, private readonly hooks: WorldHooks) {
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: "high-performance" });
@@ -105,6 +112,8 @@ export class World {
     this.dpr = Math.min(window.devicePixelRatio || 1, hooks.quality === "low" ? 1 : 2);
     this.steps = hooks.quality === "low" ? 20 : 30;
     this.scene.background = new THREE.Color(0x01040a);
+    // La niebla existe siempre (lejísima en la Luna) para no recompilar materiales al ir a Marte.
+    this.scene.fog = this.fog;
 
     this.cam.position.copy(OVERVIEW.pos);
     this.cam.lookAt(this.target);
@@ -158,16 +167,22 @@ export class World {
     const terrain = buildTerrain();
     this.heightAt = terrain.heightAt;
     this.scene.add(terrain.mesh);
-    this.scene.add(buildStars());
+    // Segundo terreno, con polvo marciano, lejos del sitio lunar: ahí vive la base.
+    const mars = buildTerrain("mars");
+    mars.mesh.position.x = MARS_X;
+    this.scene.add(mars.mesh);
+    this.stars = buildStars();
+    this.scene.add(this.stars);
     this.earth = buildEarth(earthMap);
     this.scene.add(this.earth);
     const lights = buildLights(this.renderer.shadowMap.enabled);
+    this.lights = lights;
     this.scene.add(lights.sun, lights.sun.target, lights.fill);
     onProgress(0.28, { es: "Cargando modelos de NASA", en: "Loading NASA models" });
     const labels: Record<string, L> = {
       iss: { es: "Estación espacial acoplada", en: "Space station docked" },
       rover: { es: "Rover presurizado listo", en: "Pressurised rover ready" },
-      "habitat-a": { es: "Hábitat lunar desplegado", en: "Lunar habitat deployed" },
+      "habitat-a": { es: "Hábitat marciano desplegado", en: "Mars habitat deployed" },
       "habitat-b": { es: "Módulos de la base en línea", en: "Base modules online" },
       rocket: { es: "Nave en plataforma", en: "Spacecraft on the pad" },
       tower: { es: "Torre de servicio conectada", en: "Service tower connected" },
@@ -202,21 +217,60 @@ export class World {
     else this.updateOffset();
   }
 
+  /** La base está en Marte: su escena y su cabina se miran en el sitio marciano. */
+  private zoneFor(v: ViewState): Zone {
+    return (v.mode === "focus" || v.mode === "cabin") && v.module === "base" ? "mars" : "moon";
+  }
+
+  /** Cambia cielo, niebla y luz entre el sitio lunar y el marciano. */
+  private setZone(zone: Zone): void {
+    if (zone === this.zone) return;
+    this.zone = zone;
+    const mars = zone === "mars";
+    (this.scene.background as THREE.Color).setHex(mars ? MARS_SKY : 0x01040a);
+    this.fog.color.setHex(mars ? MARS_SKY : 0x000000);
+    this.fog.near = mars ? 70 : 1e5;
+    this.fog.far = mars ? 470 : 2e5;
+    if (this.stars) this.stars.visible = !mars;
+    if (this.earth) this.earth.visible = !mars;
+    this.site?.moonOnly.forEach((o) => (o.visible = !mars));
+    const L = this.lights;
+    if (L) {
+      const ox = mars ? MARS_X : 0;
+      L.sun.position.copy(SUN_DIR).multiplyScalar(160).setX(SUN_DIR.x * 160 + ox);
+      L.sun.target.position.set(ox, 0, 0);
+      L.sun.target.updateMatrixWorld();
+      L.sun.color.setHex(mars ? 0xffe6cc : 0xfff3e2);
+      L.sun.intensity = mars ? 2.5 : 3.1;
+      L.fill.color.setHex(mars ? 0xe2b594 : 0x9fc0ea);
+      L.fill.groundColor.setHex(mars ? 0x7a4a30 : 0x3a342c);
+      L.fill.intensity = mars ? 1.25 : 0.62;
+    }
+  }
+
   private applyView(instant: boolean): void {
     const v = this.view;
     const wantCabin = v.mode === "cabin" && !!v.module;
-    if (wantCabin !== (this.shown === "cabin") || (wantCabin && this.cabinModule !== v.module)) {
-      if (instant) this.swapScene(wantCabin);
+    const cabinChange = wantCabin !== (this.shown === "cabin") || (wantCabin && this.cabinModule !== v.module);
+    const zoneChange = this.zoneFor(v) !== this.zone;
+    if (cabinChange || zoneChange) {
+      // Entrar o salir de una cabina, o viajar entre la Luna y Marte, se hace con un fundido.
+      const swap = (): void => {
+        this.setZone(this.zoneFor(this.view));
+        this.swapScene(this.view.mode === "cabin" && !!this.view.module);
+      };
+      if (instant) swap();
       else {
+        this.ctrl.enabled = false;
+        this.tween = null;
         this.hooks.fade.style.opacity = "1";
         setTimeout(() => {
           if (this.disposed) return;
-          this.swapScene(this.view.mode === "cabin" && !!this.view.module);
+          swap();
           this.hooks.fade.style.opacity = "0";
         }, 320);
       }
-    }
-    if (!wantCabin) this.flyTo(instant || this.shown === "cabin");
+    } else if (!wantCabin) this.flyTo(instant);
     this.updateOffset();
     this.setHover(null);
   }
@@ -314,7 +368,7 @@ export class World {
       this.cam.position.add(d);
     }
     if (this.heightAt) {
-      const floor = this.heightAt(this.cam.position.x, this.cam.position.z) + 1.8;
+      const floor = this.heightAt(this.cam.position.x - (this.zone === "mars" ? MARS_X : 0), this.cam.position.z) + 1.8;
       if (this.cam.position.y < floor) this.cam.position.y = floor;
     }
   }
@@ -622,7 +676,7 @@ export class World {
       const m = this.site.modules[el.dataset.anchor as ModuleId];
       if (!m) continue;
       this.tmp2.copy(m.anchor);
-      if (m.id === "estacion") this.tmp2.y = m.group.position.y + 13;
+      if (m.id === "estacion") this.tmp2.y = m.group.position.y + 11;
       this.tmp2.project(this.cam);
       const visible = this.tmp2.z < 1 && Math.abs(this.tmp2.x) < 1.1 && Math.abs(this.tmp2.y) < 1.1;
       const x = ((this.tmp2.x + 1) / 2) * r.width, y = ((1 - this.tmp2.y) / 2) * r.height;

@@ -15,18 +15,18 @@ export interface TeamMember {
 export const TEAM = {
   project: "Flame in Freefall",
   pitch: l(
-    "Convertimos décadas de experimentos de combustión en microgravedad de NASA en decisiones de seguridad contra incendios para naves, estaciones, rovers y bases lunares.",
-    "We turn decades of NASA microgravity combustion experiments into fire-safety decisions for spacecraft, stations, rovers and lunar bases.",
+    "Convertimos décadas de experimentos de combustión en microgravedad de NASA en decisiones de seguridad contra incendios para naves, estaciones, rovers, trajes y bases en la Luna y Marte.",
+    "We turn decades of NASA microgravity combustion experiments into fire-safety decisions for spacecraft, stations, rovers, suits and bases on the Moon and Mars.",
   ),
   challenge: l("Reto: Flame in Freefall · NASA Space Apps Challenge 2026", "Challenge: Flame in Freefall · NASA Space Apps Challenge 2026"),
   event: l("Evento local: NASA Space Apps Riobamba", "Local event: NASA Space Apps Riobamba"),
   members: [
-    { name: "Juan", role: l("Coordinación y revisión", "Coordination and review") },
-    { name: "Ricardo", role: l("Dirección técnica · frontend", "Technical lead · frontend") },
-    { name: "Zuleica", role: l("Diseño UX/UI", "UX/UI design") },
-    { name: "Aracelly", role: l("Modelos predictivos", "Predictive models") },
-    { name: "Johnatan", role: l("Equipo", "Team") },
-    { name: "Nolasco", role: l("Equipo", "Team") },
+    { name: "Juan Stalin Quezada Ruiz", role: l("Coordinación y revisión", "Coordination and review") },
+    { name: "Jordy Ricardo Carrión Chávez", role: l("Dirección técnica · frontend", "Technical lead · frontend") },
+    { name: "Zuleyka Naomi Ortiz Salazar", role: l("Diseño UX/UI", "UX/UI design") },
+    { name: "Lisbeth Aracelly Escudero Coba", role: l("Modelos predictivos", "Predictive models") },
+    { name: "Johnatan Moises Ley Guacho", role: l("Equipo", "Team") },
+    { name: "Wagner Nolasco Ramírez Klínger", role: l("Equipo", "Team") },
   ] satisfies TeamMember[],
   disclaimer: l(
     "Proyecto independiente para NASA Space Apps. Usa datos y modelos abiertos de NASA; no implica aval de NASA.",

@@ -21,7 +21,7 @@ export function investigationById(id: string): ApiEnvelope<Investigation> | null
 
 /** Ranking por ambiente y pilar con pesos explícitos. */
 export function rankFor(envId: string | undefined, pillar: Pillar | null, weights: RankWeights = DEFAULT_WEIGHTS): ApiEnvelope<Ranked[]> {
-  const m = getModule(envId) ?? getModule("base")!;
+  const m = getModule(envId) ?? getModule("rover")!;
   const v = m.variants[0]!;
   return envelope(rankInvestigations({ o2: v.o2, p: v.P, g: v.g, pillar }, weights), { data_mode: "real", kind: "derived", sources: [{ id: "PSI" }] });
 }

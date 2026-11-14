@@ -4,8 +4,8 @@ import { chromium } from "@playwright/test";
 import sharp from "sharp";
 
 const base = process.env.BASE ?? "http://localhost:3000";
-const SCENES = { home: "/", nave: "/modulos/nave", estacion: "/modulos/estacion", rover: "/modulos/rover", base: "/modulos/base" };
-const SCREENS = { lab: "/laboratorio", radar: "/radar", earth: "/tierra" };
+const SCENES = { home: "/", nave: "/modulos/nave", estacion: "/modulos/estacion", rover: "/modulos/rover", traje: "/modulos/traje", base: "/modulos/base" };
+const SCREENS = { guide: "/guia", lab: "/laboratorio", radar: "/radar", earth: "/tierra" };
 const HIDE = "header, nav, main, aside, [role=status], [class*=dock], [class*=vignette], [class*=toast] { visibility: hidden !important; }";
 
 const browser = await chromium.launch({ channel: "chrome", args: ["--enable-gpu", "--ignore-gpu-blocklist"] });

@@ -3,7 +3,7 @@
 Plataforma web para el reto **Flame in Freefall** (NASA Space Apps Challenge 2026).
 Convierte décadas de experimentos de combustión en microgravedad de NASA (PSI) en
 decisiones de seguridad contra incendios para naves, estaciones, rovers presurizados
-y bases lunares.
+trajes de exploración y bases en la Luna y Marte.
 
 Toda la aplicación es un **centro de mando en una sola pantalla** (100vh, sin
 desplazamiento): un mundo 3D persistente y paneles que cambian con la ruta.
@@ -38,20 +38,22 @@ Variables de entorno: copiar `.env.example` como `.env.local`. Ninguna es obliga
 
 | Ruta | Pantalla | Objetivo del reto |
 |---|---|---|
-| `/` | Sitio lunar 3D con los cuatro ambientes habitables | — |
+| `/` | Sitio lunar 3D con los cinco ambientes | — |
 | `/modulos` | Tarjetas de módulos y herramientas | — |
-| `/modulos/[id]` | Escena del ambiente (nave, estación, rover, base) | Selector de contexto |
+| `/modulos/[id]` | Escena del ambiente (nave, estación, rover, traje EVA, base en Marte) | Selector de contexto |
 | `/modulos/[id]?view=cabina` | Cabina: llama en tiempo real, telemetría y respuesta de la tripulación | O2 |
 | `/laboratorio` | Mapa de inflamabilidad, gotas (ley d²), humo y CO de cabina | O2 |
 | `/guia` | Biblioteca PSI, ranking por ambiente, comparador, cobertura y lecciones | O1 |
 | `/radar` | Evidencia → hallazgo → brecha → tecnología y mapa de brechas | O3 |
 | `/tierra` | Transferencia tecnológica a la Tierra | O4 |
-| `/referencias` | Fuentes, licencias y uso de IA | — |
+| `/referencias` | Buscador de citas (texto y misión), licencias y uso de IA | — |
 | `/ajustes` · `/mapa` | Preferencias y mapa del sitio | — |
 
 - **Vistas 3D**: arrastrar para girar, rueda para acercar y clic derecho (o Mayús + arrastrar) para desplazar.
 - **Atajos**: `H` inicio · `M` módulos · `L` laboratorio · `G` guía · `R` radar · `T` Tierra · `/` asistente · `Esc` cierra paneles.
 - **FUEGO**, la mascota y asistente: una llama con carita que cae y se vuelve esfera; su forma sigue la gravedad del ambiente activo.
+
+La documentación completa está en [docs/documentacion-proyecto.md](docs/documentacion-proyecto.md).
 
 ## Arquitectura
 

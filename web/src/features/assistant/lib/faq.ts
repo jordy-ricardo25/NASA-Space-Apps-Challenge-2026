@@ -19,8 +19,8 @@ export const FAQ: PreparedQuestion[] = [
   {
     q: l("¿Qué es esta plataforma?", "What is this platform?"),
     a: l(
-      "Es un centro de mando de seguridad contra incendios para ambientes habitables: naves, estaciones, rovers presurizados y bases lunares. Reúne las investigaciones de combustión en microgravedad de NASA, calcula el margen de inflamabilidad de cada material en cada atmósfera y te muestra la llama respondiendo en tiempo real a la gravedad, el oxígeno, la presión y la ventilación.",
-      "It is a fire-safety command centre for habitable environments: spacecraft, stations, pressurised rovers and lunar bases. It gathers NASA's microgravity combustion investigations, computes each material's flammability margin in each atmosphere and shows the flame responding in real time to gravity, oxygen, pressure and ventilation.",
+      "Es un centro de mando de seguridad contra incendios para ambientes habitables: naves, estaciones, rovers presurizados, trajes EVA y bases en la Luna y Marte. Reúne las investigaciones de combustión en microgravedad de NASA, calcula el margen de inflamabilidad de cada material en cada atmósfera y te muestra la llama respondiendo en tiempo real a la gravedad, el oxígeno, la presión y la ventilación.",
+      "It is a fire-safety command centre for habitable environments: spacecraft, stations, pressurised rovers, EVA suits and bases on the Moon and Mars. It gathers NASA's microgravity combustion investigations, computes each material's flammability margin in each atmosphere and shows the flame responding in real time to gravity, oxygen, pressure and ventilation.",
     ),
     sources: ["CHALLENGE", "PSI"],
     featured: true,

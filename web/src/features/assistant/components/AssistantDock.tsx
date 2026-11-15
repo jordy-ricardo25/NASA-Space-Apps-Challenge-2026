@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { ArrowRight, MessageCircle, X } from "lucide-react";
 import { l, type L } from "@/content/i18n";
 import { TOUR } from "@/content/tour";
@@ -36,6 +37,7 @@ const TIPS: Record<Exclude<ActiveEnv["section"], "module" | "cabin">, L> = {
  */
 export function AssistantDock() {
   const env = useActiveEnv();
+  const router = useRouter();
   const { t } = useLang();
   const booted = useStore(appStore, (s) => s.booted);
   const chatOpen = useStore(appStore, (s) => s.chatOpen);
@@ -68,6 +70,13 @@ export function AssistantDock() {
   useEffect(() => {
     if (introDone && !toured && appStore.get().tour === null) appStore.set({ tour: 0 });
   }, [introDone, toured]);
+
+  // El recorrido abre la pantalla de la que habla cada paso. Solo depende del
+  // paso: si la persona navega por su cuenta, el recorrido no la devuelve.
+  useEffect(() => {
+    const href = tour !== null ? TOUR[tour]?.href : undefined;
+    if (href && window.location.pathname !== href) router.push(href);
+  }, [tour, router]);
 
   // Cada sección trae un mensaje nuevo, que se recoge solo tras unos segundos.
   useEffect(() => {

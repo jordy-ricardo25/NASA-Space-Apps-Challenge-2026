@@ -1,7 +1,7 @@
 /**
  * Recorrido inicial de Flamey: una vuelta corta por las partes del sitio para
- * quien entra por primera vez. Cada paso resalta en la navegación la sección
- * de la que habla (claves de src/content/routes.ts).
+ * quien entra por primera vez. Cada paso abre la pantalla de la que habla y
+ * resalta su sección en la navegación (claves de src/content/routes.ts).
  */
 import { l, type L } from "./i18n";
 
@@ -9,6 +9,8 @@ export interface TourStep {
   text: L;
   /** Secciones que se resaltan en la barra de navegación durante el paso. */
   routes: string[];
+  /** Pantalla que se abre al llegar al paso. */
+  href: string;
 }
 
 export const TOUR: TourStep[] = [
@@ -18,10 +20,12 @@ export const TOUR: TourStep[] = [
       "Hi! I'm Flamey, a flame in freefall. Let me show you around in a minute. This is the command centre: a 3D lunar site you can rotate, with six habitable environments.",
     ),
     routes: ["home"],
+    href: "/",
   },
   {
     text: l("En Nuestro Reto está lo que pidió NASA: convertir décadas de experimentos de fuego sin gravedad en respuestas claras.", "Our challenge shows what NASA asked for: turning decades of fire experiments without gravity into clear answers."),
     routes: ["challenge"],
+    href: "/reto",
   },
   {
     text: l(
@@ -29,10 +33,12 @@ export const TOUR: TourStep[] = [
       "In Modules you enter each environment and its cabin. There you change oxygen, pressure and material, ignite a sample and watch the flame respond.",
     ),
     routes: ["modules"],
+    href: "/modulos",
   },
   {
     text: l("El Laboratorio te dice si un material arde en esa atmósfera, con su margen y su nivel de evidencia.", "The Laboratory tells you whether a material burns in that atmosphere, with its margin and its evidence level."),
     routes: ["lab"],
+    href: "/laboratorio",
   },
   {
     text: l(
@@ -40,9 +46,12 @@ export const TOUR: TourStep[] = [
       "The Guide gathers and compares NASA's investigations. The Radar shows which technology is missing, and Earth how all this already protects firefighters.",
     ),
     routes: ["guide", "radar", "earth"],
+    href: "/guia",
   },
   {
     text: l("Y yo me quedo aquí. Tócame cuando quieras y pregúntame, escribiendo o con el micrófono. ¡A explorar!", "And I'll stay right here. Tap me whenever you like and ask me, by typing or with the microphone. Let's explore!"),
     routes: [],
+    // El recorrido termina donde empezó: en el centro de mando.
+    href: "/",
   },
 ];

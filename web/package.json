@@ -16,7 +16,8 @@
     "ingest": "node --env-file=.env.local scripts/ingest.mjs",
     "knowledge-doc": "node scripts/knowledge-doc.mjs",
     "brand": "node scripts/make-brand.mjs",
-    "media": "node scripts/make-media.mjs"
+    "media": "node scripts/make-media.mjs",
+    "psi-snapshot": "node --env-file=.env.local scripts/snapshot-psi.mjs"
   },
   "dependencies": {
     "@google/genai": "^3.3.0",

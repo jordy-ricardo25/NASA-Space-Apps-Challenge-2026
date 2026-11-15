@@ -13,7 +13,7 @@ Versión del documento: 14 de noviembre de 2026.
 2. [Cómo responde a los objetivos del reto](#2-cómo-responde-a-los-objetivos-del-reto)
 3. [Cómo ponerlo en marcha](#3-cómo-ponerlo-en-marcha)
 4. [Recorrido por la plataforma](#4-recorrido-por-la-plataforma)
-5. [Los cinco ambientes](#5-los-cinco-ambientes)
+5. [Los seis ambientes](#5-los-seis-ambientes)
 6. [La física: qué calcula y de dónde sale](#6-la-física-qué-calcula-y-de-dónde-sale)
 7. [Evidencia y alertas](#7-evidencia-y-alertas)
 8. [El mundo 3D](#8-el-mundo-3d)
@@ -119,7 +119,7 @@ Variables de entorno (ninguna es obligatoria; copiar `.env.example` como `.env.l
 | Ruta | Pantalla | Qué se hace |
 |---|---|---|
 | `/` | **Inicio** | Sitio lunar en 3D con los ambientes; cada etiqueta o fila lleva a su módulo |
-| `/modulos` | **Módulos** | Tarjetas de los cinco ambientes y de las herramientas |
+| `/modulos` | **Módulos** | Tarjetas de los seis ambientes y de las herramientas |
 | `/modulos/<id>` | **Escena** | Modelo 3D del ambiente, descripción, componentes y su atmósfera de diseño. "Ver detalles" muestra alertas e investigaciones relevantes |
 | `/modulos/<id>?view=cabina` | **Cabina** | Se enciende una muestra y se ve la llama, la telemetría y el efecto de cada respuesta de la tripulación |
 | `/laboratorio` | **Laboratorio** | Cuatro análisis: mapa de inflamabilidad, gotas (ley d²), humo y detección, CO de cabina |
@@ -149,7 +149,7 @@ La búsqueda queda en la URL (`?q=` y `?mission=`), así que un resultado se pue
 
 ---
 
-## 5. Los cinco ambientes
+## 5. Los seis ambientes
 
 Cada módulo es un ambiente habitable y funciona como selector de contexto: al cambiarlo
 cambian el ranking, el margen, las alertas, la forma de la llama y el contexto del asistente.
@@ -160,7 +160,8 @@ cambian el ranking, el margen, las alertas, la forma de la llama y el contexto d
 | Estación | SPX-002 | Estación espacial (ISS) | µg | 21 % | 101,3 kPa | 21,3 kPa | Directa (aquí se midieron los datos de PSI) |
 | Rover | SPX-003 | Rover lunar presurizado | 0,165 g | 30 % | 70,3 kPa | 21,1 kPa | Sin datos directos: gravedad parcial |
 | Traje EVA | SPX-005 | Traje de exploración | 0,165 g o µg | 100 % | 29,6 kPa | 29,6 kPa | Fuera del rango ensayado (cota superior del reto) |
-| Base · Marte | SPX-004 | Hábitat en la superficie de Marte | 0,38 g | 34 % (hipótesis) | 56,5 kPa (hipótesis) | 19,2 kPa | Sin evidencia: gravedad marciana y atmósfera sin definir |
+| Base · Luna | SPX-004 | Hábitat en la superficie lunar | 0,165 g | 34 % | 56,5 kPa | 19,2 kPa | Sin datos directos: gravedad parcial |
+| Base · Marte | SPX-006 | Hábitat en la superficie de Marte | 0,38 g | 34 % (hipótesis) | 56,5 kPa (hipótesis) | 19,2 kPa | Sin evidencia: gravedad marciana y atmósfera sin definir |
 
 Notas importantes:
 
@@ -171,10 +172,13 @@ Notas importantes:
   (ALR-09). Se usa igual que los demás módulos: escena, interior y laboratorio. El interior se ve
   desde dentro del casco: el acolchado, el marco del visor y la superficie lunar al otro lado, con
   un retal de las capas textiles del traje como muestra.
+- **Dos bases independientes:** la lunar y la marciana comparten modelo y estructura, pero
+  cada una tiene su gravedad, su atmósfera, su evidencia y sus alertas. La base lunar (0,165 g)
+  usa la atmósfera de exploración SEA o la del reto y se ve en el sitio lunar.
 - **Base en Marte:** ninguna fuente fija todavía la atmósfera de una cabina marciana. La
   plataforma usa la atmósfera de exploración como **hipótesis** y la marca como tal. Al entrar
-  al módulo, el mundo 3D cambia a Marte (suelo rojizo, cielo y luz marcianos); el rover, la
-  nave y el traje siguen en el sitio lunar.
+  al módulo, el mundo 3D cambia a Marte (suelo rojizo, cielo y luz marcianos); la base lunar,
+  el rover, la nave y el traje siguen en el sitio lunar.
 - **El "Cohete" del diseño original** es aquí la cabina tripulada de una nave: el reto excluye
   motores y propelentes.
 
@@ -365,9 +369,32 @@ npm run ingest
 - Modelo: `gemini-3.5-flash-lite` (variable `GEMINI_MODEL`).
 - En Vercel hay que definir `GEMINI_API_KEY`, `GEMINI_MODEL` y `FILE_SEARCH_STORE`.
 
-Cada respuesta muestra su origen, sus fuentes y su nivel de evidencia. El micrófono nunca
-envía solo: llena el campo de texto y la persona pulsa Enviar. El dictado usa la Web Speech
-API, que funciona en Chrome y Edge; Brave la bloquea y el chat lo avisa.
+Cada respuesta muestra su origen, sus fuentes y su nivel de evidencia, y va **en el idioma
+de la pregunta**: el propio modelo responde en ese idioma en una sola petición (no hay una
+segunda llamada de traducción). Si la pregunta es demasiado corta para reconocer su idioma,
+se usa el de la conversación. El idioma de la interfaz no cambia por esto.
+
+El micrófono llena el campo de texto en vivo. Con **Envío automático** (activo por defecto,
+interruptor en el chat) la pregunta se envía sola tras 1,8 s sin voz; apagado, la persona
+pulsa Enviar. El selector ES / EN del chat es el idioma del dictado, no traduce respuestas.
+El dictado usa la Web Speech API, que funciona en Chrome y Edge; Brave la bloquea y el chat
+lo avisa.
+
+### Datos reales del backend (emberwatch API)
+
+`API_BASE_URL` apunta al backend del equipo (https://emberwatch-api.devcoreinc.com). Lo usan:
+
+| Dato | Endpoint del backend | Dónde se ve | Si el backend no responde |
+|---|---|---|---|
+| Estado del servicio | `GET /health` | Indicador de la barra superior | Se marca como no disponible |
+| Mitos y hechos | `GET /api/rules` | Guía → Mitos y hechos | Copia tipada de `src/content/myths.ts` |
+| Hallazgos por ambiente (índice RPI) | `GET /api/findings` | Guía → Datos PSI | Copia de respaldo |
+| Cobertura y brechas declaradas | `GET /api/gaps` | Guía → Datos PSI | Copia de respaldo |
+| Ambientes del backend | `GET /api/meta` | Guía → Datos PSI | Copia de respaldo |
+
+La copia de respaldo vive en `src/features/psi/server/snapshot.json` y se actualiza con
+`npm run psi-snapshot`. Módulos y ambientes del backend: nave y estación → `iss`, rover →
+`rover`, traje → `eva`, base lunar → `lunar`, base marciana → `mars`.
 
 La respuesta se lee en voz alta al terminar (interruptor "Lectura automática"). Por defecto
 usa la voz del navegador; con `FISH_API_KEY`, `FISH_VOICE_ID` y `FISH_MODEL` en el servidor
@@ -512,7 +539,7 @@ Antes de dar un cambio por terminado: `npm run check` y revisar la pantalla en C
 
 ## 15. Guion sugerido para la demo
 
-1. **Inicio.** Girar el sitio lunar con el ratón y presentar los cinco ambientes.
+1. **Inicio.** Girar el sitio lunar con el ratón y presentar los seis ambientes.
 2. **Estación → cabina.** Encender una gota de heptano: la llama es una esfera azul. Compararla con la vela terrestre del recuadro.
 3. **Rover → cabina.** Encender PMMA: la llama se inclina y aparece ALR-04 (gravedad parcial sin datos directos). Cortar la ventilación: en la Luna la flotabilidad la mantiene viva.
 4. **Laboratorio.** Mover el oxígeno y el flujo sobre el mapa de inflamabilidad; mostrar el margen con su intervalo.

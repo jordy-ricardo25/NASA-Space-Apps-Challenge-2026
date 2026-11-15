@@ -21,7 +21,7 @@ const SHOTS = [
   ["home", "/", 9000],
   ["challenge", "/reto", 4000],
   ["modules", "/modulos", 5000],
-  ["cabin", "/modulos/base?view=cabina", 9000],
+  ["cabin", "/modulos/marte?view=cabina", 9000],
   ["laboratory", "/laboratorio", 6000],
   ["guide", "/guia", 4000],
   ["radar", "/radar", 4000],

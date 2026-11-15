@@ -10,7 +10,7 @@ import { useLang } from "@/shared/hooks/useLang";
 import styles from "./SiteMap.module.scss";
 
 const GROUPS: { goal: RouteDef["goal"][]; title: L; text: L }[] = [
-  { goal: ["core"], title: l("Centro de mando", "Command centre"), text: l("El sitio lunar y los cuatro ambientes habitables.", "The lunar site and the four habitable environments.") },
+  { goal: ["core"], title: l("Centro de mando", "Command centre"), text: l("El sitio lunar y los ambientes habitables.", "The lunar site and the habitable environments.") },
   { goal: ["O1"], title: l("O1 · Encontrar y comparar", "O1 · Find and compare"), text: l("Investigaciones relevantes para cada ambiente.", "Investigations relevant to each environment.") },
   { goal: ["O2"], title: l("O2 · Datos y modelos", "O2 · Data and models"), text: l("Datos limpios para modelos de inflamabilidad.", "Clean data for flammability models.") },
   { goal: ["O3", "O4"], title: l("O3 · O4 · Tecnología y Tierra", "O3 · O4 · Technology and Earth"), text: l("Controles de próxima generación y su uso en la Tierra.", "Next-generation controls and their use on Earth.") },

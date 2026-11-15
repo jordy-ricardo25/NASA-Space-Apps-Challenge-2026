@@ -12,7 +12,7 @@ async function expectNoScroll(page: Page): Promise<void> {
   expect(sw).toBeLessThanOrEqual(iw);
 }
 
-const ROUTES = ["/", "/modulos", "/modulos/nave", "/modulos/estacion", "/modulos/rover", "/modulos/base", "/modulos/base?view=cabina", "/modulos/traje", "/modulos/traje?view=cabina", "/laboratorio?env=traje&mat=nomex", "/referencias?q=saffire&mission=saffire", "/laboratorio", "/laboratorio?tab=droplet", "/laboratorio?tab=smoke", "/laboratorio?tab=cabin", "/guia", "/guia?tab=ranking", "/guia?tab=compare", "/guia?tab=coverage", "/guia?tab=myths", "/guia?tab=history", "/radar", "/radar?tab=gaps", "/tierra", "/referencias", "/ajustes", "/mapa"];
+const ROUTES = ["/", "/modulos", "/modulos/nave", "/modulos/estacion", "/modulos/rover", "/modulos/base", "/modulos/base?view=cabina", "/modulos/marte", "/modulos/marte?view=cabina", "/modulos/traje", "/modulos/traje?view=cabina", "/laboratorio?env=traje&mat=nomex", "/referencias?q=saffire&mission=saffire", "/laboratorio", "/laboratorio?tab=droplet", "/laboratorio?tab=smoke", "/laboratorio?tab=cabin", "/guia", "/guia?tab=ranking", "/guia?tab=compare", "/guia?tab=coverage", "/guia?tab=myths", "/guia?tab=history", "/radar", "/radar?tab=gaps", "/tierra", "/referencias", "/ajustes", "/mapa"];
 
 test("todas las rutas cargan sin errores de consola ni desplazamiento", async ({ page }) => {
   test.setTimeout(300_000);
@@ -35,8 +35,8 @@ test("recorrido de la demo: inicio → base en Marte → cabina → fuego → la
 
   // Inicio → módulo (navegación sin recargar el centro de mando)
   // Fila del tablero de ambientes (la etiqueta sobre el 3D lleva al mismo sitio).
-  await page.getByRole("link", { name: /SPX-004/ }).last().click();
-  await expect(page).toHaveURL(/\/modulos\/base/);
+  await page.getByRole("link", { name: /SPX-006/ }).last().click();
+  await expect(page).toHaveURL(/\/modulos\/marte/);
   await expect(page.getByRole("heading", { level: 1 })).toContainText(/Base marciana|Mars base/);
 
   // Entrar a la cabina y encender la muestra
@@ -47,7 +47,7 @@ test("recorrido de la demo: inicio → base en Marte → cabina → fuego → la
   // La gravedad parcial siempre avisa de la falta de datos directos (ALR-04).
   await expect(page.getByText("ALR-04").first()).toBeVisible();
 
-  // Laboratorio con el escenario lunar en la URL
+  // Laboratorio con el escenario de la base lunar en la URL
   await page.goto("/laboratorio?env=base&mat=pmma&o2=34&p=56.5&flow=10");
   await booted(page);
   await expect(page.getByText("ALR-03").first()).toBeVisible();

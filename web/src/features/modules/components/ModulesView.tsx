@@ -26,9 +26,10 @@ interface Card {
 const route = (id: string) => ROUTES.find((r) => r.id === id)!;
 
 /**
- * Selector de módulos: los cuatro ambientes habitables del reto y las
+ * Selector de módulos: los ambientes habitables del reto y las
  * herramientas de análisis, en un carrusel de tarjetas con el botón "Entrar".
- * Toda la tarjeta lleva a su módulo (el enlace "Entrar" la cubre entera).
+ * Llevan al módulo la imagen y el botón "Entrar"; el texto de la tarjeta se
+ * puede seleccionar con el cursor normal.
  */
 export function ModulesView() {
   const { t, lang } = useLang();
@@ -66,10 +67,11 @@ export function ModulesView() {
               </h2>
               <code>{c.code}</code>
             </header>
-            <div className={styles.shot}>
+            {/* La imagen también entra al módulo; el teclado usa el botón "Entrar". */}
+            <Link href={c.href} className={styles.shot} tabIndex={-1} aria-hidden="true" draggable={false}>
               {/* Miniaturas ya optimizadas (WebP de 720 px): se sirven tal cual. */}
-              <Image src={c.image} alt="" fill sizes="(max-width: 640px) 100vw, (max-width: 1100px) 50vw, 33vw" priority={i < 3} unoptimized />
-            </div>
+              <Image src={c.image} alt="" fill sizes="(max-width: 640px) 100vw, (max-width: 1100px) 50vw, 33vw" priority={i < 3} unoptimized draggable={false} />
+            </Link>
             <ClampText lines={3}>{t(c.text)}</ClampText>
             <footer>
               <span className={styles.chips}>
@@ -77,7 +79,7 @@ export function ModulesView() {
                   <i key={x}>{x}</i>
                 ))}
               </span>
-              <Link href={c.href} className={styles.enter} aria-label={`${t(l("Entrar", "Enter"))}: ${t(c.title)}`}>
+              <Link href={c.href} className={styles.enter} draggable={false} aria-label={`${t(l("Entrar", "Enter"))}: ${t(c.title)}`}>
                 {t(l("Entrar", "Enter"))}
                 <ArrowRight size={15} aria-hidden="true" />
               </Link>

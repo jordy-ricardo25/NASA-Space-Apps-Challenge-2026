@@ -13,7 +13,7 @@ import type { ApiEnvelope, EvidenceLevel } from "@/shared/types/api";
 import { useDictation } from "../hooks/useDictation";
 import { useSpeech } from "../hooks/useSpeech";
 import { featuredQuestions } from "../lib/faq";
-import { Fuego, type FuegoMood } from "./Fuego";
+import { Flamey, type FlameyMood } from "./Flamey";
 import { VoiceBar } from "./VoiceBar";
 import styles from "./ChatPanel.module.scss";
 
@@ -31,7 +31,7 @@ const MAX_QUESTION = 400;
 type ChatValue = { text: string; origin: Message["origin"]; citations: Message["citations"] };
 
 /**
- * Chat del asistente FUEGO: respuestas con origen, fuentes y nivel de
+ * Chat del asistente Flamey: respuestas con origen, fuentes y nivel de
  * evidencia; dictado controlado (el micrófono llena el campo de texto y la
  * persona pulsa Enviar) y lectura automática de la respuesta en voz alta.
  * Mientras el asistente habla, el micrófono queda deshabilitado.
@@ -111,7 +111,7 @@ export function ChatPanel({ env }: { env: ActiveEnv }) {
     if (!on) stopSpeaking();
   };
 
-  const mood: FuegoMood = listening ? "listen" : busy ? "think" : speaking ? "talk" : "idle";
+  const mood: FlameyMood = listening ? "listen" : busy ? "think" : speaking ? "talk" : "idle";
   const suggestions = [...featuredQuestions(lang)];
   if (env.scenario && env.module) {
     const mat = MATERIALS[env.scenario.mat].short[lang];
@@ -119,11 +119,11 @@ export function ChatPanel({ env }: { env: ActiveEnv }) {
   }
 
   return (
-    <aside className={styles.panel} aria-label={t(l("Asistente FUEGO", "FUEGO assistant"))}>
+    <aside className={styles.panel} aria-label={t(l("Asistente Flamey", "Flamey assistant"))}>
       <header className={styles.head}>
-        <Fuego gravity={env.g} size={54} mood={mood} />
+        <Flamey gravity={env.g} size={54} mood={mood} />
         <div>
-          <h2>FUEGO</h2>
+          <h2>Flamey</h2>
           <span>
             {listening
               ? t(l("Escuchando…", "Listening…"))

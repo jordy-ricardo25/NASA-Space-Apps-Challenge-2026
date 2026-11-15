@@ -36,7 +36,8 @@
   height: 42px;
   border: 1px solid transparent;
   border-radius: var(--radius-m);
-  color: var(--color-text-3);
+  // Íconos inactivos en el gris claro: se distinguen bien sobre la barra translúcida.
+  color: var(--color-text-2);
   transition: color 0.15s, background 0.15s, border-color 0.15s, box-shadow 0.15s;
 
   &:hover {

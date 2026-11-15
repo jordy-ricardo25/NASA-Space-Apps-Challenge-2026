@@ -52,7 +52,7 @@ Variables de entorno: copiar `.env.example` como `.env.local`. Ninguna es obliga
 
 - **Vistas 3D**: arrastrar para girar, rueda para acercar y clic derecho (o Mayús + arrastrar) para desplazar.
 - **Atajos**: `H` inicio · `M` módulos · `L` laboratorio · `G` guía · `R` radar · `T` Tierra · `/` asistente · `Esc` cierra paneles.
-- **FUEGO**, la mascota y asistente: una llama con carita que cae y se vuelve esfera; su forma sigue la gravedad del ambiente activo.
+- **Flamey**, la mascota y asistente: una llama con carita que cae y se vuelve esfera; su forma sigue la gravedad del ambiente activo.
 
 La documentación completa está en [docs/documentacion-proyecto.md](docs/documentacion-proyecto.md).
 
@@ -71,7 +71,7 @@ src/
 │   ├── scene/      Escena de cada módulo y consola de cabina
 │   ├── laboratory/ Mapa de inflamabilidad y gráficas
 │   ├── investigations/ · radar/ · earth/ · references/
-│   ├── assistant/  Mascota FUEGO y chat con fuentes
+│   ├── assistant/  Mascota Flamey y chat con fuentes
 │   └── shell/      Barras, pantalla de carga y contenedor
 ├── shared/         Componentes, hooks, estilos (tokens) y utilidades
 └── content/        Textos y catálogos tipados (ES/EN), con su fuente

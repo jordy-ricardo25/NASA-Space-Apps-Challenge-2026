@@ -46,7 +46,7 @@ PROHIBIDO: Tailwind, Bootstrap, TanStack.
   de 12 px o más.
 - La interfaz no usa las palabras "simulación" ni "demo": los resultados del
   modelo físico se presentan con su intervalo y su nivel de evidencia.
-- La mascota y asistente es FUEGO: una llama que cae y se vuelve esfera.
+- La mascota y asistente es Flamey: una llama que cae y se vuelve esfera.
 
 ## Antes de dar algo por terminado
 npm run check (lint, typecheck, pruebas y build) y revisar la pantalla en

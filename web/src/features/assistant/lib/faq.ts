@@ -38,15 +38,15 @@ export const FAQ: PreparedQuestion[] = [
   {
     q: l("Hola", "Hello"),
     a: l(
-      "¡Hola! Soy FUEGO, una llama en caída libre. Pregúntame sobre seguridad contra incendios en el espacio.",
-      "Hi! I'm FUEGO, a flame in freefall. Ask me about fire safety in space.",
+      "¡Hola! Soy Flamey, una llama en caída libre. Pregúntame sobre seguridad contra incendios en el espacio.",
+      "Hi! I'm Flamey, a flame in freefall. Ask me about fire safety in space.",
     ),
   },
   {
     q: l("¿Quién eres?", "Who are you?"),
     a: l(
-      "Soy FUEGO, el asistente de este centro de mando. En la Tierra soy una gota amarilla que sube; en caída libre me vuelvo una esfera azul, igual que una llama real sin flotabilidad.",
-      "I'm FUEGO, this command centre's assistant. On Earth I'm a yellow teardrop that rises; in freefall I become a blue sphere, just like a real flame without buoyancy.",
+      "Soy Flamey, el asistente de este centro de mando. En la Tierra soy una gota amarilla que sube; en caída libre me vuelvo una esfera azul, igual que una llama real sin flotabilidad.",
+      "I'm Flamey, this command centre's assistant. On Earth I'm a yellow teardrop that rises; in freefall I become a blue sphere, just like a real flame without buoyancy.",
     ),
   },
 ];

@@ -1,15 +1,15 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import styles from "./Fuego.module.scss";
+import styles from "./Flamey.module.scss";
 
-export type FuegoMood = "idle" | "talk" | "think" | "listen" | "happy";
+export type FlameyMood = "idle" | "talk" | "think" | "listen" | "happy";
 
-interface FuegoProps {
+interface FlameyProps {
   /** Gravedad del ambiente activo (en g₀): decide la forma de la llama. */
   gravity: number;
   size?: number;
-  mood?: FuegoMood;
+  mood?: FlameyMood;
   /** Reproduce la entrada: una llama que cae y se vuelve esfera. */
   intro?: boolean;
   className?: string;
@@ -31,11 +31,11 @@ function bodyPath(s: number, r: number, cx: number, cy: number): string {
 export const shapeFor = (g: number): number => Math.min(1, Math.cbrt(Math.max(g, 0)));
 
 /**
- * FUEGO, la mascota y asistente de la plataforma: una llama con carita que
+ * Flamey, la mascota y asistente de la plataforma: una llama con carita que
  * cambia de forma con la gravedad del ambiente. En la Tierra es una gota
  * amarilla; en caída libre se vuelve una esfera azul, igual que una llama real.
  */
-export function Fuego({ gravity, size = 96, mood = "idle", intro = false, className }: FuegoProps) {
+export function Flamey({ gravity, size = 96, mood = "idle", intro = false, className }: FlameyProps) {
   const target = shapeFor(gravity);
   const [s, setS] = useState(intro ? 1 : target);
   const sRef = useRef(s);
@@ -67,7 +67,7 @@ export function Fuego({ gravity, size = 96, mood = "idle", intro = false, classN
 
   return (
     <span
-      className={[styles.fuego, intro ? styles.intro : "", styles[mood], className ?? ""].join(" ")}
+      className={[styles.flamey, intro ? styles.intro : "", styles[mood], className ?? ""].join(" ")}
       style={{ "--size": `${size}px`, "--glow": glow } as React.CSSProperties}
       aria-hidden="true"
     >

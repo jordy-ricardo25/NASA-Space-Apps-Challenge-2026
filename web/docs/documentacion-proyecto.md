@@ -17,7 +17,7 @@ Versión del documento: 14 de noviembre de 2026.
 6. [La física: qué calcula y de dónde sale](#6-la-física-qué-calcula-y-de-dónde-sale)
 7. [Evidencia y alertas](#7-evidencia-y-alertas)
 8. [El mundo 3D](#8-el-mundo-3d)
-9. [El asistente FUEGO](#9-el-asistente-fuego)
+9. [El asistente Flamey](#9-el-asistente-flamey)
 10. [Arquitectura del código](#10-arquitectura-del-código)
 11. [API](#11-api)
 12. [Estado en la URL](#12-estado-en-la-url)
@@ -324,9 +324,9 @@ modelos pesan menos de 1 MB en total.
 
 ---
 
-## 9. El asistente FUEGO
+## 9. El asistente Flamey
 
-FUEGO es la mascota y el asistente: una llama con carita que **cae y se vuelve esfera**, y
+Flamey es la mascota y el asistente: una llama con carita que **cae y se vuelve esfera**, y
 cuya forma sigue la gravedad del ambiente activo (gota amarilla en 1 g, esfera azul en
 microgravedad).
 
@@ -392,7 +392,7 @@ src/
 │   ├── investigations/   Guía: biblioteca, ranking, comparador, cobertura
 │   ├── radar/ · earth/ · references/ · modules/ · sitemap/ · preferences/
 │   ├── alerts/           Presentación de las alertas
-│   ├── assistant/        FUEGO y el chat
+│   ├── assistant/        Flamey y el chat
 │   ├── shell/            Barras, pantalla de carga y contenedor
 │   └── audio/            Estructura del módulo de música (apagado)
 ├── shared/               Componentes, hooks, estilos y utilidades comunes
@@ -473,7 +473,7 @@ Ejemplo para la demo: `/laboratorio?env=rover&mat=pmma&o2=30&p=70.3&flow=10`.
 | Acento | `#35D8F2` |
 | Éxito | `#00D49A` |
 | Texto | `#EAF3F8` |
-| Cálido (FUEGO y telemetría) | `#FF8738` |
+| Cálido (Flamey y telemetría) | `#FF8738` |
 | Riesgo bajo / precaución / alto | `#00D49A` / `#FFC53D` / `#FF5C6C` |
 | Sin evidencia | `#8497A8`, con patrón rayado |
 | Títulos | Space Grotesk |
@@ -508,7 +508,7 @@ Antes de dar un cambio por terminado: `npm run check` y revisar la pantalla en C
 5. **Traje EVA.** 100 % de O₂: la plataforma avisa que está fuera del rango ensayado.
 6. **Base en Marte.** El mundo cambia a Marte y la evidencia pasa a "sin evidencia": es una brecha real.
 7. **Radar.** Qué misión cerrará cada brecha (LUCI, FM2).
-8. **FUEGO.** Una pregunta del jurado, con su fuente.
+8. **Flamey.** Una pregunta del jurado, con su fuente.
 
 ---
 

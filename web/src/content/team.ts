@@ -16,6 +16,9 @@ export interface TeamMember {
 }
 
 export const TEAM = {
+  /** Nombre del equipo: es el título del panel "Quiénes somos". */
+  name: "Andora Labs",
+  /** Reto en el que participa; va en una línea debajo del nombre del equipo. */
   project: "Flame in Freefall",
   pitch: l(
     "Convertimos décadas de experimentos de combustión en microgravedad de NASA en decisiones de seguridad contra incendios para naves, estaciones, rovers, trajes y bases en la Luna y Marte.",

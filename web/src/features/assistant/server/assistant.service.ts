@@ -164,7 +164,7 @@ async function askGemini(question: string, card: KnowledgeCard | null, lang: Lan
   const model = process.env.GEMINI_MODEL ?? "gemini-3.5-flash-lite";
   const store = process.env.FILE_SEARCH_STORE?.trim();
   const system = [
-    "You are FUEGO, the assistant of the Flame in Freefall fire-safety command centre.",
+    "You are Flamey, the assistant of the Flame in Freefall fire-safety command centre.",
     "Answer ONLY with the provided context and the file-search documents. Never invent figures, dates or names.",
     "Always search the file-search documents before answering. They are written in English: search with English terms and acronyms even when the question is in Spanish.",
     `If the information is missing, answer exactly: "${NO_ANSWER[lang]}"`,

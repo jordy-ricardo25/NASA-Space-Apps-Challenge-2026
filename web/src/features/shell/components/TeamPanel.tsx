@@ -9,7 +9,10 @@ import { appStore } from "@/shared/lib/appStore";
 import { useStore } from "@/shared/lib/store";
 import styles from "./TeamPanel.module.scss";
 
-/** Panel lateral del Equipo: se abre sin salir de la pantalla actual. */
+/**
+ * Panel lateral "Quiénes somos": el equipo (Andora Labs) como título y, debajo,
+ * la línea del reto. Se abre sin salir de la pantalla actual.
+ */
 export function TeamPanel() {
   const { t } = useLang();
   const open = useStore(appStore, (s) => s.teamOpen);
@@ -19,7 +22,8 @@ export function TeamPanel() {
       <header>
         <div>
           <span className={styles.eyebrow}>{t(l("QUIÉNES SOMOS", "WHO WE ARE"))}</span>
-          <h2>{TEAM.project}</h2>
+          <h2>{TEAM.name}</h2>
+          <p className={styles.challenge}>{t(TEAM.challenge)}</p>
         </div>
         <button type="button" onClick={close} aria-label={t(l("Cerrar", "Close"))} tabIndex={open ? 0 : -1}>
           <X size={18} />
@@ -27,7 +31,6 @@ export function TeamPanel() {
       </header>
       <p className={styles.pitch}>{t(TEAM.pitch)}</p>
       <ul className={styles.facts}>
-        <li>{t(TEAM.challenge)}</li>
         <li>{t(TEAM.event)}</li>
       </ul>
       <span className={styles.eyebrow}>{t(l("INTEGRANTES", "MEMBERS"))}</span>

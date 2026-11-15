@@ -1,5 +1,5 @@
 /**
- * Ingesta del corpus del asistente FUEGO en Gemini File Search.
+ * Ingesta del corpus del asistente Flamey en Gemini File Search.
  *
  * Uso (desde web/):  npm run ingest
  *

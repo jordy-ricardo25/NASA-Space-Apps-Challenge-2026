@@ -151,7 +151,8 @@ export async function answerQuestion(question: string, lang: Lang, ctx: ChatCont
   if (analysis) return analysis;
   const found = searchCards(question);
   const generated = await askGemini(question, found?.card ?? null, lang);
-  if (generated && generated !== NO_ANSWER[lang]) {
+  // Si el modelo se abstiene (aunque sea a medias), vale más la ficha verificada que una respuesta parcial.
+  if (generated && !generated.includes(NO_ANSWER[lang])) {
     return { text: generated, origin: "documents", sources: cite(found?.card.sources ?? []), evidence: found?.card.evidence };
   }
   if (found) return { text: found.card.text[lang], origin: "documents", sources: cite(found.card.sources), evidence: found.card.evidence };

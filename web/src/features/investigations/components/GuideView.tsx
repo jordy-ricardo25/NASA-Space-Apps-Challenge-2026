@@ -10,6 +10,7 @@ import { FAMILY_LABEL, PILLAR_LABEL, VAR_KEYS, VAR_LABEL, type Family, type Inve
 import { MODULES, getModule } from "@/content/modules";
 import type { Myth } from "@/content/myths";
 import { getSource } from "@/content/sources";
+import { PsiPanel } from "@/features/psi/components/PsiPanel";
 import { patchQuery } from "@/features/scene/lib/scenario";
 import { ClampText } from "@/shared/components/ClampText";
 import { Segmented, Slider } from "@/shared/components/Controls";
@@ -20,9 +21,10 @@ import { num, pct } from "@/shared/lib/format";
 import { CRITERIA, CRITERION_LABEL, DEFAULT_WEIGHTS, rankInvestigations, type Criterion, type RankWeights } from "../lib/ranking";
 import styles from "./Guide.module.scss";
 
-type Tab = "library" | "ranking" | "compare" | "coverage" | "myths" | "history";
+type Tab = "library" | "psi" | "ranking" | "compare" | "coverage" | "myths" | "history";
 const TABS: { id: Tab; label: L }[] = [
   { id: "library", label: l("Biblioteca PSI", "PSI library") },
+  { id: "psi", label: l("Datos PSI", "PSI data") },
   { id: "ranking", label: l("Ranking por ambiente", "Ranking by environment") },
   { id: "compare", label: l("Comparador", "Comparator") },
   { id: "coverage", label: l("Cobertura", "Coverage") },
@@ -36,7 +38,8 @@ const SCALE: Record<Investigation["scale"], L> = { bench: l("Laboratorio", "Benc
 const PER_PAGE = 8;
 
 /**
- * Guía (objetivo O1): biblioteca de investigaciones, ranking por ambiente con
+ * Guía (objetivo O1): biblioteca de investigaciones, datos de PSI del backend
+ * del equipo (hallazgos por ambiente), ranking por ambiente con
  * pesos visibles, comparador lado a lado, matriz de cobertura y lecciones
  * históricas. El estado vive en la URL.
  */
@@ -140,6 +143,9 @@ export function GuideView({ investigations, myths }: { investigations: Investiga
                 </dl>
                 <span className={styles.foot}>
                   <span>{t(i.platform)}</span>
+                  <button type="button" className={styles.more} onClick={() => set({ id: i.id })} aria-label={`${t(l("Ver ficha", "Open record"))}: ${i.name}`}>
+                    {t(l("Ver ficha", "Open record"))}
+                  </button>
                   <span className={styles.dots} title={t(DATA_LABEL[i.data]!)}>
                     {[1, 2, 3].map((d) => (
                       <i key={d} data-on={i.data >= d} />
@@ -151,6 +157,8 @@ export function GuideView({ investigations, myths }: { investigations: Investiga
           </div>
         </div>
       )}
+
+      {tab === "psi" && <PsiPanel envId={envId} onEnv={(id) => set({ env: id, page: null })} page={page} onPage={(p) => set({ page: p || null })} />}
 
       {tab === "ranking" && (
         <div className={styles.ranking}>

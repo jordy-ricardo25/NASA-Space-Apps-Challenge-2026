@@ -7,6 +7,11 @@
  *  4. (Opcional) Gemini con File Search, si hay claves configuradas en el servidor;
  *     recibe la ficha como contexto y, si falla o responde sin apoyo, se usa la ficha.
  *  5. Sin evidencia → se abstiene.
+ *
+ * Si la persona fijó un hallazgo de NASA PSI en la Guía, la pregunta se
+ * responde sobre ese hallazgo con el paquete del backend del equipo (factores
+ * del índice y filas del CSV): con Gemini si hay clave y, si no, con las
+ * cifras del paquete ordenadas.
  */
 import { KNOWLEDGE, type KnowledgeCard } from "@/content/knowledge";
 import type { Lang } from "@/content/i18n";
@@ -15,9 +20,11 @@ import { getModule } from "@/content/modules";
 import { getSource } from "@/content/sources";
 import { assess } from "@/features/fire/engine/analysis";
 import { MATERIALS, type MaterialId } from "@/features/fire/engine/materials";
+import { findingPack } from "@/features/psi/server/psi.service";
 import type { EvidenceLevel } from "@/shared/types/api";
 import { detectLang } from "../lib/detectLang";
 import { FAQ, NO_ANSWER, findPrepared, normalize } from "../lib/faq";
+import { findingBlock, findingSummary } from "../lib/findingText";
 import { PERSONA, RULES } from "../lib/persona";
 
 export interface ChatContext {
@@ -27,15 +34,21 @@ export interface ChatContext {
   o2?: number;
   p?: number;
   vent?: number;
+  /** Hallazgo de NASA PSI fijado en la Guía: su clave y el módulo para el que se calculó. */
+  finding?: { key: string; env: string };
+  /** La pregunta pide explicar el escenario que se acaba de probar en la pestaña de materiales. */
+  explain?: boolean;
 }
 
 export interface ChatAnswer {
   text: string;
   /** Idioma de la respuesta: el de la pregunta. */
   lang: Lang;
-  origin: "prepared" | "analysis" | "documents" | "none";
+  origin: "prepared" | "analysis" | "documents" | "psi" | "none";
   sources: { id: string; short: string; url: string }[];
   evidence?: EvidenceLevel;
+  /** Filas del CSV de NASA PSI que respaldan una respuesta sobre un hallazgo. */
+  rows?: { file: string; row: number; quality: number }[];
 }
 
 const STOP = new Set("de la el en y a los las un una que por para con del al se es lo como mas the of and to in is a for on with what why how does do it an are que cual como cuando donde por si no me te su sus this that puede podria".split(" "));
@@ -115,6 +128,15 @@ function analyse(question: string, ctx: ChatContext, lang: Lang): Omit<ChatAnswe
   const hit = MATERIAL_WORDS.find(([, words]) => words.some((w) => n.includes(w)));
   const mat = hit?.[0] ?? (ctx.mat && ctx.mat in MATERIALS ? (ctx.mat as MaterialId) : null);
   if (!mat || ctx.o2 == null || ctx.p == null || ctx.g == null) return null;
+  return scenarioVerdict(mat, { ...ctx, g: ctx.g, o2: ctx.o2, p: ctx.p }, lang);
+}
+
+/**
+ * Conclusión del motor físico para un material en un escenario: si supera su
+ * frontera de propagación, con qué margen y con qué evidencia. La usan el chat
+ * y la prueba de materiales, para que digan lo mismo.
+ */
+export function scenarioVerdict(mat: MaterialId, ctx: ChatContext & { g: number; o2: number; p: number }, lang: Lang): Omit<ChatAnswer, "lang"> {
   const m = MATERIALS[mat];
   const env = getModule(ctx.module);
   const a = assess({ mat, g: ctx.g, o2: ctx.o2, P: ctx.p, vent: ctx.vent ?? 10 });
@@ -188,7 +210,7 @@ function scenarioBlock(ctx: ChatContext): string {
   return lines.join("\n");
 }
 
-async function askGemini(question: string, card: KnowledgeCard | null, lang: Lang, ctx: ChatContext = {}): Promise<{ text: string; docs: string[]; abstained: boolean } | null> {
+async function askGemini(question: string, card: KnowledgeCard | null, lang: Lang, ctx: ChatContext = {}, finding = ""): Promise<{ text: string; docs: string[]; abstained: boolean } | null> {
   const key = process.env.GEMINI_API_KEY;
   if (!key) return null;
   const model = process.env.GEMINI_MODEL ?? "gemini-3.5-flash-lite";
@@ -203,6 +225,7 @@ async function askGemini(question: string, card: KnowledgeCard | null, lang: Lan
     `If the information is missing, start your answer with the marker ${NO_EVIDENCE} and then say, in the language of the question, that you could not find it in our NASA sources.`,
     "At most 130 words, short clear sentences, no tables, no headings.",
     scenario,
+    finding,
     card ? `Context:\n${card.text[lang]}` : "",
   ].join("\n");
   // TODO(diagnóstico): registro temporal en la terminal del servidor. Retirar
@@ -231,8 +254,8 @@ async function askGemini(question: string, card: KnowledgeCard | null, lang: Lan
     const text = cand?.content?.parts?.map((p) => p.text ?? "").join("").trim();
     // Documentos del almacén en los que se apoyó la respuesta (sin repetir).
     const docs = [...new Set((cand?.groundingMetadata?.groundingChunks ?? []).flatMap((c) => c.retrievedContext?.title ?? []))];
-    // Hay apoyo si respondió con documentos, con una ficha o con el escenario calculado.
-    const grounded = docs.length > 0 || !!card || !!scenario;
+    // Hay apoyo si respondió con documentos, con una ficha, con el escenario calculado o con un hallazgo de PSI.
+    const grounded = docs.length > 0 || !!card || !!scenario || !!finding;
     const abstained = !!text && (text.includes(NO_EVIDENCE) || text.includes(NO_ANSWER.es) || text.includes(NO_ANSWER.en));
     log(`respuesta en ${Date.now() - started} ms · fin=${cand?.finishReason ?? "?"} · fuentes=${docs.length}${docs.length ? ` [${docs.map((d) => d.slice(0, 40)).join(" | ")}]` : " (SIN FUENTES del almacén)"} · texto=${text ? `${text.length} caracteres` : "vacío"}${abstained ? " · el modelo se abstuvo" : ""}`);
     return text && grounded ? { text: text.replaceAll(NO_EVIDENCE, "").trim(), docs, abstained } : null;
@@ -261,6 +284,34 @@ export async function answerQuestion(question: string, hint: Lang, ctx: ChatCont
       sources: cite(card?.sources ?? prepared.sources ?? []),
       evidence: card?.evidence,
     };
+  }
+  // Hallazgo de PSI fijado: la respuesta trata de ese hallazgo. Si ya no existe
+  // para ese ambiente, la pregunta sigue por el camino general.
+  const pack = ctx.finding ? await findingPack(ctx.finding.key, ctx.finding.env) : null;
+  if (pack) {
+    // El escenario del Laboratorio no se mezcla: el hallazgo trae su propio ambiente.
+    const explained = await askGemini(question, null, lang, {}, findingBlock(pack));
+    const docs = explained && !explained.abstained ? explained.docs.map(citeDocument) : [];
+    const sources = [...cite(["PSI"]), ...docs];
+    return {
+      lang,
+      text: explained && !explained.abstained ? explained.text : findingSummary(pack, lang),
+      origin: "psi",
+      sources: sources.filter((x, i) => sources.findIndex((y) => y.id === x.id) === i).slice(0, 5),
+      rows: pack.evidence.slice(0, 6),
+    };
+  }
+  // Explicación de un escenario probado en la pestaña de materiales: el modelo
+  // de lenguaje interpreta las cifras del motor físico; sin él, queda la
+  // conclusión calculada.
+  if (ctx.explain && ctx.mat && ctx.mat in MATERIALS && ctx.g != null && ctx.o2 != null && ctx.p != null) {
+    const verdict = scenarioVerdict(ctx.mat as MaterialId, { ...ctx, g: ctx.g, o2: ctx.o2, p: ctx.p }, lang);
+    const explained = await askGemini(question, null, lang, ctx);
+    if (explained && !explained.abstained) {
+      const sources = [...verdict.sources, ...explained.docs.map(citeDocument)];
+      return { ...verdict, lang, text: explained.text, sources: sources.filter((x, i) => sources.findIndex((y) => y.id === x.id) === i).slice(0, 5) };
+    }
+    return { ...verdict, lang };
   }
   const analysis = analyse(question, ctx, lang);
   if (analysis) return { ...analysis, lang };

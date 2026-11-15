@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Database, TriangleAlert } from "lucide-react";
+import { Database, MessageCircle, TriangleAlert } from "lucide-react";
 import { l, type L } from "@/content/i18n";
 import { MODULES } from "@/content/modules";
 import { Segmented } from "@/shared/components/Controls";
 import { Pager } from "@/shared/components/Workspace";
 import { useLang } from "@/shared/hooks/useLang";
+import { appStore, askAboutFinding } from "@/shared/lib/appStore";
 import { gravity, num } from "@/shared/lib/format";
 import type { ApiEnvelope } from "@/shared/types/api";
 import type { PsiData } from "../server/psi.service";
@@ -38,6 +39,8 @@ interface PsiPanelProps {
  * Datos de NASA PSI procesados por el backend del equipo: ranking de
  * hallazgos para el ambiente elegido, con su índice RPI, y a la derecha las
  * observaciones por clase de material y las brechas que el corpus declara.
+ * Cada hallazgo se puede llevar al asistente, que lo explica con sus factores
+ * y sus filas de evidencia.
  */
 export function PsiPanel({ envId, onEnv, page, onPage }: PsiPanelProps) {
   const { t, lang } = useLang();
@@ -52,6 +55,13 @@ export function PsiPanel({ envId, onEnv, page, onPage }: PsiPanelProps) {
         if (!(e instanceof DOMException && e.name === "AbortError")) setState({ env: envId, data: null, failed: true });
       });
     return () => ctrl.abort();
+  }, [envId]);
+
+  // Con el chat abierto y un hallazgo fijado, cambiar de ambiente vuelve a
+  // pedir la explicación para el ambiente nuevo.
+  useEffect(() => {
+    const { chatOpen, chatFinding } = appStore.get();
+    if (chatOpen && chatFinding && chatFinding.env !== envId) askAboutFinding({ ...chatFinding, env: envId });
   }, [envId]);
 
   const loading = state.env !== envId;
@@ -94,6 +104,9 @@ export function PsiPanel({ envId, onEnv, page, onPage }: PsiPanelProps) {
                 <th>{t(l("Observ.", "Obs."))}</th>
                 <th>{t(l("Relevancia", "Relevance"))}</th>
                 <th title={t(l("Índice de 0 a 100 que calcula el backend para este ambiente", "Index from 0 to 100 computed by the backend for this environment"))}>RPI</th>
+                <th>
+                  <span className={styles.srOnly}>{t(l("Asistente", "Assistant"))}</span>
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -120,11 +133,22 @@ export function PsiPanel({ envId, onEnv, page, onPage }: PsiPanelProps) {
                       <em>{t(BAND[f.band] ?? l(f.band, f.band))}</em>
                     </span>
                   </td>
+                  <td>
+                    <button
+                      type="button"
+                      className={styles.ask}
+                      onClick={() => askAboutFinding({ key: f.key, env: envId, label: f.material ? `${f.experiment} · ${f.material}` : f.experiment })}
+                      aria-label={`${t(l("Preguntar a Flamey sobre", "Ask Flamey about"))} ${f.experiment}${f.material ? ` · ${f.material}` : ""}`}
+                      title={t(l("Preguntar a Flamey sobre este hallazgo", "Ask Flamey about this finding"))}
+                    >
+                      <MessageCircle size={14} aria-hidden="true" />
+                    </button>
+                  </td>
                 </tr>
               ))}
               {loading && rows.length === 0 && (
                 <tr>
-                  <td colSpan={6}>{t(l("Cargando datos de PSI…", "Loading PSI data…"))}</td>
+                  <td colSpan={7}>{t(l("Cargando datos de PSI…", "Loading PSI data…"))}</td>
                 </tr>
               )}
             </tbody>

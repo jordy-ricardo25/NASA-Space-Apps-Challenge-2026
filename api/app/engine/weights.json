@@ -1,0 +1,16 @@
+{
+  "version": "1.7.0",
+  "factors": {
+    "o2_margin": 0.16,
+    "gravity_extrapolation": 0.13,
+    "material_fit": 0.11,
+    "soot_load": 0.1,
+    "cool_flame": 0.08,
+    "pressure_extrapolation": 0.09,
+    "measured_sustain": 0.09,
+    "evidence_weakness": 0.08,
+    "egress_window": 0.07,
+    "o2_extrapolation": 0.04,
+    "evidence_density": 0.05
+  }
+}

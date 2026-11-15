@@ -17,7 +17,15 @@ import { TopBar } from "./TopBar";
 import styles from "./CommandShell.module.scss";
 
 // El mundo 3D solo existe en el navegador: nunca se renderiza en el servidor.
-const WorldStage = dynamic(() => import("@/features/world/components/WorldStage"), { ssr: false });
+const loadStage = () => import("@/features/world/components/WorldStage");
+const WorldStage = dynamic(loadStage, { ssr: false });
+// En el navegador, el lienzo y el motor empiezan a descargarse en cuanto llega
+// este módulo, sin esperar a que React monte el componente diferido: en un
+// teléfono esa espera eran varios segundos de pantalla de carga.
+if (typeof window !== "undefined") {
+  void loadStage();
+  void import("@/features/world/engine/World");
+}
 
 /**
  * Contenedor del centro de mando. Mantiene vivos el mundo 3D, las barras y el

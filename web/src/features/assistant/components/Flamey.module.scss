@@ -1,3 +1,5 @@
+@use "mixins";
+
 .flamey {
   display: inline-block;
   width: var(--size);
@@ -143,5 +145,29 @@
   }
   50% {
     transform: translateY(-8%);
+  }
+}
+
+// Teléfono y tableta: sin sombra por filtro (obliga a repintar en cada
+// fotograma) y sin el pulso y el parpadeo continuos; quedan el balanceo y los ojos.
+@include mixins.tablet {
+  .flamey {
+    filter: none;
+  }
+
+  .halo,
+  .body {
+    animation: none;
+  }
+}
+
+@include mixins.touch {
+  .flamey {
+    filter: none;
+  }
+
+  .halo,
+  .body {
+    animation: none;
   }
 }

@@ -107,6 +107,8 @@ export class World {
   private panRadius = 40;
   private heightAt: ((x: number, z: number) => number) | null = null;
   private zone: Zone = "moon";
+  /** Construye el terreno de Marte si aún no existe (perfil ligero). */
+  private buildMars: (() => void) | null = null;
   private stars: THREE.Points | null = null;
   private lights: Lights | null = null;
   private readonly fog = new THREE.Fog(0x000000, 1e5, 2e5);
@@ -187,13 +189,21 @@ export class World {
     if (this.disposed) return;
     onProgress(0.16, { es: "Trazando la superficie lunar", en: "Plotting the lunar surface" });
     await new Promise((r) => setTimeout(r, 30));
-    const terrain = buildTerrain();
+    // Calcular el relieve es lo más caro del arranque. El perfil ligero usa una
+    // malla de 120 divisiones en lugar de 220 (la tercera parte de vértices).
+    const seg = this.hooks.lite ? 120 : 220;
+    const terrain = buildTerrain("moon", seg);
     this.heightAt = terrain.heightAt;
     this.scene.add(terrain.mesh);
     // Segundo terreno, con polvo marciano, lejos del sitio lunar: ahí vive la base de Marte.
-    const mars = buildTerrain("mars");
-    mars.mesh.position.x = MARS_X;
-    this.scene.add(mars.mesh);
+    // En el perfil ligero se construye después de arrancar, o al entrar a Marte.
+    this.buildMars = (): void => {
+      this.buildMars = null;
+      const mars = buildTerrain("mars", seg);
+      mars.mesh.position.x = MARS_X;
+      this.scene.add(mars.mesh);
+    };
+    if (!this.hooks.lite) this.buildMars();
     this.stars = buildStars();
     this.scene.add(this.stars);
     this.earth = buildEarth(earthMap);
@@ -227,6 +237,7 @@ export class World {
     await new Promise((r) => setTimeout(r, 120));
     onProgress(1, { es: "Sistemas en línea", en: "Systems online" });
     this.hooks.onReady();
+    if (this.buildMars) setTimeout(() => !this.disposed && this.buildMars?.(), 4000);
   }
 
   // ── Vista ────────────────────────────────────────────────────────────────
@@ -247,6 +258,7 @@ export class World {
 
   /** Cambia cielo, niebla y luz entre el sitio lunar y el marciano. */
   private setZone(zone: Zone): void {
+    if (zone === "mars") this.buildMars?.();
     if (zone === this.zone) return;
     this.zone = zone;
     const mars = zone === "mars";
@@ -515,7 +527,9 @@ export class World {
       if (n >= 80) this.acc = 0;
     }
     this.pubT += dt;
-    if (this.pubT > 0.14) {
+    // Cada publicación redibuja la telemetría y sus gráficas en React: en el
+    // perfil ligero se hace dos veces por segundo en lugar de siete.
+    if (this.pubT > (this.hooks.lite ? 0.5 : 0.14)) {
       this.pubT = 0;
       this.publish();
     }

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { APP_NAME, APP_TAGLINE, l } from "@/content/i18n";
 import { TEAM } from "@/content/team";
+import { useHandheld } from "@/shared/hooks/useHandheld";
 import { useLang } from "@/shared/hooks/useLang";
 import { appStore } from "@/shared/lib/appStore";
 import { useStore } from "@/shared/lib/store";
@@ -28,7 +29,6 @@ export function LoadingScreen() {
   const progress = useStore(appStore, (s) => s.progress);
   const stage = useStore(appStore, (s) => s.stage);
   const booted = useStore(appStore, (s) => s.booted);
-  const [shown, setShown] = useState(0);
   const [gone, setGone] = useState(false);
   const [phase, setPhase] = useState<"seal" | "flight">("seal");
   // La pantalla se retira cuando terminó la carga, el sello y la barra llegó al final.
@@ -37,7 +37,15 @@ export function LoadingScreen() {
   const pathRef = useRef<SVGPathElement>(null);
   const rocketRef = useRef<SVGGElement>(null);
   const trailRef = useRef<SVGPathElement>(null);
+  const fillRef = useRef<HTMLDivElement>(null);
+  const pctRef = useRef<HTMLSpanElement>(null);
   const target = useRef(0);
+  const handheld = useHandheld();
+  const quick = useRef(false);
+
+  useEffect(() => {
+    quick.current = handheld;
+  }, [handheld]);
 
   useEffect(() => {
     target.current = booted ? 1 : Math.min(progress, 0.985);
@@ -68,10 +76,16 @@ export function LoadingScreen() {
       // tiempo (hasta el 70 %) cubre los tramos en que el progreso real no cambia.
       const goal = ready.current.booted ? 1 : Math.max(target.current, Math.min(0.7, elapsed / 7));
       const gap = goal - cur;
-      const speed = ready.current.booted ? Math.min(0.4, Math.max(0.14, gap * 1.1)) : Math.min(0.22, Math.max(0.01, gap * 1.2));
+      // En teléfono y tableta la carga real ya es larga: al terminar, la barra cierra más rápido.
+      const cap = quick.current ? 1.1 : 0.4;
+      const speed = ready.current.booted ? Math.min(cap, Math.max(quick.current ? 0.5 : 0.14, gap * 1.1)) : Math.min(0.22, Math.max(0.01, gap * 1.2));
       cur = Math.min(goal, cur + speed * dt);
       if (cur >= 0.999 && ready.current.booted && ready.current.flight) setDone(true);
-      setShown(cur);
+      // La barra y la cifra se escriben directamente en el DOM: un estado de
+      // React por fotograma acapara al planificador y retrasa la descarga del
+      // motor 3D, que se monta con prioridad baja.
+      fillRef.current?.style.setProperty("--p", `${(cur * 100).toFixed(2)}%`);
+      if (pctRef.current) pctRef.current.textContent = `${String(Math.round(cur * 100)).padStart(2, "0")}%`;
       const path = pathRef.current, rocket = rocketRef.current, trail = trailRef.current;
       if (path && rocket && trail) {
         const len = path.getTotalLength();
@@ -95,10 +109,9 @@ export function LoadingScreen() {
   }, [done]);
 
   if (gone) return null;
-  const pct = Math.round(shown * 100);
 
   return (
-    <div className={`${styles.screen} ${done ? styles.leaving : ""}`} data-phase={phase} role="status" aria-live="polite" aria-label={`${TEAM.name} · ${APP_NAME} · ${t(stage)} ${pct}%`}>
+    <div className={`${styles.screen} ${done ? styles.leaving : ""}`} data-phase={phase} role="status" aria-live="polite" aria-label={`${TEAM.name} · ${APP_NAME} · ${t(stage)}`}>
       <div className={styles.stars} />
 
       {/* Sello del equipo: abre la plataforma y deja paso al viaje. */}
@@ -177,11 +190,13 @@ export function LoadingScreen() {
 
         <div className={styles.loader}>
           <div className={styles.track}>
-            <div className={styles.fill} style={{ "--p": `${(shown * 100).toFixed(2)}%` } as React.CSSProperties} />
+            <div ref={fillRef} className={styles.fill} />
           </div>
           <div className={styles.meta}>
             <span className={styles.stage}>{t(stage)}</span>
-            <span className={styles.pct}>{String(pct).padStart(2, "0")}%</span>
+            <span ref={pctRef} className={styles.pct}>
+              00%
+            </span>
           </div>
         </div>
       </div>

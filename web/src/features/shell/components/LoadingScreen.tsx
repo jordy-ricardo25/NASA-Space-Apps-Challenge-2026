@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { APP_NAME, APP_TAGLINE } from "@/content/i18n";
+import { APP_NAME, APP_TAGLINE, l } from "@/content/i18n";
+import { TEAM } from "@/content/team";
 import { useLang } from "@/shared/hooks/useLang";
 import { appStore } from "@/shared/lib/appStore";
 import { useStore } from "@/shared/lib/store";
@@ -9,10 +10,18 @@ import styles from "./LoadingScreen.module.scss";
 
 const TRAJECTORY = "M 70 250 C 220 300, 420 60, 668 132";
 
+/** Tiempo que se muestra el sello de Andora Labs antes del viaje a la Luna. */
+const SEAL_MS = 2600;
+
+/** Máscaras del logo: se pintan con el color del tema y un brillo que las recorre. */
+const MARK = { "--mask": "url(/img/andora-mark.png)" } as React.CSSProperties;
+const WORDMARK = { "--mask": "url(/img/andora-wordmark.png)" } as React.CSSProperties;
+
 /**
- * Pantalla de carga inicial: un cohete viaja hacia la Luna mientras se
- * preparan el motor 3D y los modelos. La línea de carga y la posición del
- * cohete siguen el progreso real del arranque.
+ * Pantalla de carga inicial. Abre con el sello de Andora Labs y después un
+ * cohete viaja hacia la Luna mientras se preparan el motor 3D y los modelos.
+ * La línea de carga y el cohete siguen el progreso real del arranque, pero
+ * avanzan con una velocidad limitada: suben de forma continua, sin saltos.
  */
 export function LoadingScreen() {
   const { t } = useLang();
@@ -21,6 +30,10 @@ export function LoadingScreen() {
   const booted = useStore(appStore, (s) => s.booted);
   const [shown, setShown] = useState(0);
   const [gone, setGone] = useState(false);
+  const [phase, setPhase] = useState<"seal" | "flight">("seal");
+  // La pantalla se retira cuando terminó la carga, el sello y la barra llegó al final.
+  const [done, setDone] = useState(false);
+  const ready = useRef({ booted: false, flight: false });
   const pathRef = useRef<SVGPathElement>(null);
   const rocketRef = useRef<SVGGElement>(null);
   const trailRef = useRef<SVGPathElement>(null);
@@ -28,15 +41,36 @@ export function LoadingScreen() {
 
   useEffect(() => {
     target.current = booted ? 1 : Math.min(progress, 0.985);
+    ready.current.booted = booted;
   }, [progress, booted]);
 
-  // El avance visible persigue suavemente al real para que el cohete nunca salte.
+  useEffect(() => {
+    const id = setTimeout(() => {
+      ready.current.flight = true;
+      setPhase("flight");
+    }, SEAL_MS);
+    return () => clearTimeout(id);
+  }, []);
+
+  // El avance visible persigue al real con velocidad limitada (fracción por
+  // segundo): aunque la carga real dé saltos, la barra y el cohete suben de
+  // forma progresiva.
   useEffect(() => {
     let raf = 0;
     let cur = 0;
-    const tick = (): void => {
-      cur += (target.current - cur) * 0.06 + 0.0006;
-      cur = Math.min(cur, target.current);
+    let last = 0;
+    let elapsed = 0;
+    const tick = (now: number): void => {
+      const dt = Math.min(0.05, (now - (last || now)) / 1000);
+      last = now;
+      elapsed += dt;
+      // Mientras carga, la barra nunca se queda quieta: un avance mínimo por
+      // tiempo (hasta el 70 %) cubre los tramos en que el progreso real no cambia.
+      const goal = ready.current.booted ? 1 : Math.max(target.current, Math.min(0.7, elapsed / 7));
+      const gap = goal - cur;
+      const speed = ready.current.booted ? Math.min(0.4, Math.max(0.14, gap * 1.1)) : Math.min(0.22, Math.max(0.01, gap * 1.2));
+      cur = Math.min(goal, cur + speed * dt);
+      if (cur >= 0.999 && ready.current.booted && ready.current.flight) setDone(true);
       setShown(cur);
       const path = pathRef.current, rocket = rocketRef.current, trail = trailRef.current;
       if (path && rocket && trail) {
@@ -55,17 +89,26 @@ export function LoadingScreen() {
   }, []);
 
   useEffect(() => {
-    if (!booted) return;
+    if (!done) return;
     const id = setTimeout(() => setGone(true), 1150);
     return () => clearTimeout(id);
-  }, [booted]);
+  }, [done]);
 
   if (gone) return null;
   const pct = Math.round(shown * 100);
 
   return (
-    <div className={`${styles.screen} ${booted ? styles.leaving : ""}`} role="status" aria-live="polite" aria-label={`${t(stage)} ${pct}%`}>
+    <div className={`${styles.screen} ${done ? styles.leaving : ""}`} data-phase={phase} role="status" aria-live="polite" aria-label={`${TEAM.name} · ${APP_NAME} · ${t(stage)} ${pct}%`}>
       <div className={styles.stars} />
+
+      {/* Sello del equipo: abre la plataforma y deja paso al viaje. */}
+      <div className={styles.seal} aria-hidden="true">
+        <span className={styles.ring} />
+        <span className={styles.mark} style={MARK} />
+        <span className={styles.wordmark} style={WORDMARK} />
+        <span className={styles.presents}>{t(l("PRESENTA", "PRESENTS"))}</span>
+      </div>
+
       <div className={styles.inner}>
         <svg viewBox="0 0 760 330" className={styles.scene} aria-hidden="true">
           <defs>
@@ -126,11 +169,15 @@ export function LoadingScreen() {
         <div className={styles.brand}>
           <span className={styles.name}>{APP_NAME}</span>
           <span className={styles.tag}>{t(APP_TAGLINE)}</span>
+          <span className={styles.by}>
+            <i style={MARK} aria-hidden="true" />
+            {t(l("por", "by"))} {TEAM.name}
+          </span>
         </div>
 
         <div className={styles.loader}>
           <div className={styles.track}>
-            <div className={styles.fill} style={{ "--p": `${pct}%` } as React.CSSProperties} />
+            <div className={styles.fill} style={{ "--p": `${(shown * 100).toFixed(2)}%` } as React.CSSProperties} />
           </div>
           <div className={styles.meta}>
             <span className={styles.stage}>{t(stage)}</span>

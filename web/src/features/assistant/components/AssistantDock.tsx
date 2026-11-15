@@ -20,7 +20,8 @@ const TIPS: Record<Exclude<ActiveEnv["section"], "module" | "cabin">, L> = {
   earth: l("En la Tierra vuelvo a ser una gota amarilla: la flotabilidad me estira hacia arriba.", "On Earth I'm a yellow teardrop again: buoyancy stretches me upward."),
   refs: l("Todo número de la plataforma sale de una de estas fuentes.", "Every number on the platform comes from one of these sources."),
   settings: l("Puedes cambiar idioma, unidades y calidad del 3D. Todo se guarda solo en tu navegador.", "You can change language, units and 3D quality. Everything is stored only in your browser."),
-  map: l("Con H, M, L, G, R y T saltas entre secciones; con / me abres a mí.", "Use H, M, L, G, R and T to jump between sections; / opens me."),
+  map: l("Con H, N, M, L, G, R y T saltas entre secciones; con / me abres a mí.", "Use H, N, M, L, G, R and T to jump between sections; / opens me."),
+  challenge: l("Este es el encargo de NASA. Cada objetivo te lleva a la pantalla donde lo resolvemos.", "This is NASA's brief. Each goal takes you to the screen where we solve it."),
   other: l("¿Te ayudo a volver al centro de mando?", "Shall I help you back to the command centre?"),
 };
 

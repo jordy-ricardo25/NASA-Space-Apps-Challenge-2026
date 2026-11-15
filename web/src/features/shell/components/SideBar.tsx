@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpen, Box, FlaskConical, Globe, LayoutDashboard, Map as MapIcon, Radar, Settings, FileText } from "lucide-react";
+import { BookOpen, Box, FlaskConical, Globe, LayoutDashboard, Map as MapIcon, Radar, Settings, FileText, Target } from "lucide-react";
 import { l } from "@/content/i18n";
 import { ROUTES, type RouteIcon } from "@/content/routes";
 import { useLang } from "@/shared/hooks/useLang";
@@ -18,6 +18,7 @@ const ICONS: Record<RouteIcon, React.ComponentType<{ size?: number; strokeWidth?
   refs: FileText,
   settings: Settings,
   map: MapIcon,
+  challenge: Target,
 };
 
 /** Ícono de una ruta (lo reutiliza el mapa del sitio). */

@@ -13,7 +13,7 @@ export interface ActiveEnv {
   g: number;
   label: L;
   /** Sección de la plataforma: decide el mensaje del guía. */
-  section: "home" | "module" | "cabin" | "modules" | "lab" | "guide" | "radar" | "earth" | "refs" | "settings" | "map" | "other";
+  section: "home" | "module" | "cabin" | "modules" | "lab" | "guide" | "radar" | "earth" | "refs" | "settings" | "map" | "challenge" | "other";
 }
 
 /**
@@ -43,6 +43,7 @@ export function useActiveEnv(): ActiveEnv {
       : first === "referencias" ? "refs"
       : first === "ajustes" ? "settings"
       : first === "mapa" ? "map"
+      : first === "reto" ? "challenge"
       : "other";
     if (section === "earth") return { module: null, scenario: null, g: 1, label: l("TIERRA", "EARTH"), section };
     return { module: null, scenario: null, g: 0.165, label: l("SITIO LUNAR", "LUNAR SITE"), section };

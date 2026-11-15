@@ -15,6 +15,7 @@ import { tigNow } from "@/features/fire/engine/physics";
 import { emptyHistory, fireStore, type FireHistory, type FireSnapshot } from "@/features/fire/store";
 import { FireRig, flameMaterial } from "./flame";
 import { buildInterior, type Interior } from "./interiors";
+import { FlameGlow, buildEnvironment } from "./postfx";
 import { SUN_DIR, buildEarth, buildLights, buildStars, type Lights } from "./sky";
 import { MARS_X, buildSite, type Site } from "./site";
 import { buildTerrain } from "./terrain";
@@ -101,6 +102,10 @@ export class World {
   private stars: THREE.Points | null = null;
   private lights: Lights | null = null;
   private readonly fog = new THREE.Fog(0x000000, 1e5, 2e5);
+  /** Resplandor de la llama; se apaga solo si el equipo va justo. */
+  private readonly glow = new FlameGlow();
+  private glowOn = true;
+  private readonly env: THREE.Texture;
 
   constructor(private readonly canvas: HTMLCanvasElement, private readonly hooks: WorldHooks) {
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: "high-performance" });
@@ -114,6 +119,12 @@ export class World {
     this.scene.background = new THREE.Color(0x01040a);
     // La niebla existe siempre (lejísima en la Luna) para no recompilar materiales al ir a Marte.
     this.scene.fog = this.fog;
+    // Reflejos suaves en metales y visores (entorno generado por código).
+    this.env = buildEnvironment(this.renderer);
+    this.scene.environment = this.env;
+    this.scene.environmentIntensity = 0.16;
+    // "?fx=0" en la URL de entrada apaga el resplandor (útil para medir o en equipos muy justos).
+    this.glowOn = hooks.quality !== "low" && new URLSearchParams(window.location.search).get("fx") !== "0";
 
     this.cam.position.copy(OVERVIEW.pos);
     this.cam.lookAt(this.target);
@@ -284,6 +295,8 @@ export class World {
       let it = this.interiors.get(id);
       if (!it) {
         it = buildInterior(id);
+        it.scene.environment = this.env;
+        it.scene.environmentIntensity = 0.28;
         this.interiors.set(id, it);
       }
       this.cabinModule = id;
@@ -559,6 +572,7 @@ export class World {
     this.h = Math.max(1, r.height);
     this.renderer.setPixelRatio(this.dpr);
     this.renderer.setSize(this.w, this.h, false);
+    this.glow.setSize(this.w * this.dpr, this.h * this.dpr);
     for (const c of [this.cam, this.camI]) {
       c.aspect = this.w / this.h;
       c.updateProjectionMatrix();
@@ -593,6 +607,7 @@ export class World {
       this.renderer.setScissorTest(false);
       this.renderer.setViewport(0, 0, this.w, this.h);
       this.renderer.render(it.scene, this.camI);
+      if (this.glowOn && this.rig.flame.visible) this.glow.render(this.renderer, this.rig.flame, this.camI, 0.62);
       this.renderInset(t);
     } else {
       this.site?.update(t);
@@ -697,6 +712,9 @@ export class World {
         this.dpr = Math.max(1, this.dpr - 0.25);
         this.resize();
       }
+    } else if (this.fAvg > 27 && this.glowOn) {
+      // Último recurso: se apaga el resplandor de la llama.
+      this.glowOn = false;
     } else if (this.fAvg < 12 && this.steps < 30) this.steps += 4;
   }
 
@@ -724,6 +742,8 @@ export class World {
     this.scene.traverse(free);
     this.ins.traverse(free);
     this.interiors.forEach((it) => it.scene.traverse(free));
+    this.glow.dispose();
+    this.env.dispose();
     this.renderer.dispose();
   }
 }

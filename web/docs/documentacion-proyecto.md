@@ -303,7 +303,20 @@ motor físico la dirección del flujo, el hollín, la intensidad y el parpadeo:
 
 En la cabina, un recuadro muestra la misma llama en la Tierra para comparar.
 
-### 8.3 Rendimiento
+### 8.3 Realismo ligero
+
+Tres efectos pensados para el navegador, sin posprocesado de pantalla completa:
+
+- **Resplandor de la llama:** solo la llama se dibuja en una textura a un cuarto de resolución,
+  se difumina y se suma sobre la imagen. Medido a 1440 × 900: sin diferencia apreciable de
+  fluidez frente a tenerlo apagado.
+- **Reflejos en metales:** entorno de reflexión generado por código (no se descarga nada).
+- **Relieve fino del suelo:** mapa de rugosidad generado por código para el regolito lunar y marciano.
+
+El resplandor se apaga en calidad baja, se desactiva solo si el equipo va justo y se puede
+forzar apagado entrando con `?fx=0` en la URL.
+
+### 8.4 Rendimiento
 
 Un solo `WebGLRenderer` para toda la plataforma. El bucle se pausa si la pestaña está oculta
 y la calidad se ajusta sola (pasos de la llama y resolución) para mantener la fluidez. Los

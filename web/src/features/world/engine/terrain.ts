@@ -67,6 +67,41 @@ const TINT: Record<Palette, [number, number, number, number]> = {
   mars: [1.72, 0.92, 0.56, 1.55],
 };
 
+/** Relieve fino del regolito (granos, guijarros y microcráteres) como mapa de altura repetido. */
+function detailTexture(): THREE.CanvasTexture {
+  const c = document.createElement("canvas");
+  c.width = c.height = 256;
+  const x = c.getContext("2d")!;
+  const rnd = mulberry32(911);
+  x.fillStyle = "#808080";
+  x.fillRect(0, 0, 256, 256);
+  for (let i = 0; i < 2600; i++) {
+    const v = Math.floor(90 + rnd() * 90);
+    x.fillStyle = `rgba(${v},${v},${v},${0.25 + rnd() * 0.4})`;
+    const r = 0.6 + Math.pow(rnd(), 3) * 5;
+    x.beginPath();
+    x.arc(rnd() * 256, rnd() * 256, r, 0, 6.3);
+    x.fill();
+  }
+  for (let i = 0; i < 26; i++) {
+    const cx = rnd() * 256, cy = rnd() * 256, r = 3 + rnd() * 9;
+    const g = x.createRadialGradient(cx, cy, 0, cx, cy, r);
+    g.addColorStop(0, "rgba(40,40,40,0.75)");
+    g.addColorStop(0.7, "rgba(70,70,70,0.3)");
+    g.addColorStop(0.86, "rgba(190,190,190,0.5)");
+    g.addColorStop(1, "rgba(128,128,128,0)");
+    x.fillStyle = g;
+    x.beginPath();
+    x.arc(cx, cy, r, 0, 6.3);
+    x.fill();
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.repeat.set(70, 70);
+  t.anisotropy = 4;
+  return t;
+}
+
 export function buildTerrain(palette: Palette = "moon"): Terrain {
   const rnd = mulberry32(20260714);
   const craters: Crater[] = [];
@@ -126,7 +161,7 @@ export function buildTerrain(palette: Palette = "moon"): Terrain {
   }
   geo.setAttribute("color", new THREE.BufferAttribute(col, 3));
   geo.computeVertexNormals();
-  const mat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1, metalness: 0 });
+  const mat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1, metalness: 0, bumpMap: detailTexture(), bumpScale: 2.2, envMapIntensity: 0 });
   const mesh = new THREE.Mesh(geo, mat);
   mesh.receiveShadow = true;
   return { mesh, heightAt };

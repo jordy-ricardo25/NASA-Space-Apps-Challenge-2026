@@ -40,8 +40,9 @@ export function TeamPanel() {
             <i>{m.name.charAt(0)}</i>
             <div>
               <b>{m.name}</b>
-              {m.title && <em>{t(m.title)}</em>}
-              <span>{t(m.role)}</span>
+              {/* Cargos y roles siempre en inglés (decisión del equipo). */}
+              <em lang="en">{m.title}</em>
+              <span lang="en">{m.role}</span>
             </div>
             {m.link && (
               <a href={m.link} target="_blank" rel="noreferrer" aria-label={`LinkedIn · ${m.name}`} title="LinkedIn" tabIndex={open ? 0 : -1}>

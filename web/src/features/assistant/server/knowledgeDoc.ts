@@ -60,7 +60,7 @@ export function buildKnowledgeDoc(projectDoc: string): string {
   h(2, "1. Qué es la plataforma y quién la hizo");
   p(`Flame in Freefall es un ${both(APP_TAGLINE)}.`, "", both(TEAM.pitch), "", `- Equipo: ${TEAM.name}.`, `- ${both(TEAM.challenge)}.`, `- ${both(TEAM.event)}.`, `- ${both(TEAM.disclaimer)}`);
   h(3, "Integrantes del equipo Andora Labs");
-  for (const m of TEAM.members) p(`- ${m.name}${"title" in m && m.title ? `, ${both(m.title)}` : ""}. Rol en el proyecto: ${both(m.role)}.`);
+  for (const m of TEAM.members) p(`- ${m.name}, ${m.title}. Rol en el proyecto: ${m.role}.`);
   h(3, "El asistente Flamey");
   p("Flamey es la mascota y el asistente de la plataforma: una llama con carita que cae y se vuelve esfera. Su forma sigue la gravedad del ambiente activo: gota amarilla en 1 g y esfera azul en microgravedad.", "", "Flamey responde por capas: primero las preguntas preparadas por el equipo, después las cifras calculadas por el modelo físico, después las fichas del catálogo y por último los documentos de la bibliografía. Los números del margen de inflamabilidad los calcula el modelo físico; el asistente no los redacta ni los estima.", "", `Cuando no hay evidencia, Flamey responde: "${NO_ANSWER.es}" (EN: "${NO_ANSWER.en}").`);
 

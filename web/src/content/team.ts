@@ -2,15 +2,18 @@
  * Panel del Equipo (pautas §5.4). Solo datos que cada integrante aprobó:
  * nombre, cargo o título, rol en el proyecto y perfil profesional. Sin
  * teléfonos, correos ni direcciones.
+ *
+ * Los cargos y roles van siempre en inglés, también con la interfaz en
+ * español: es una decisión del equipo para este panel.
  */
-import { l, type L } from "./i18n";
+import { l } from "./i18n";
 
 export interface TeamMember {
   name: string;
-  /** Cargo o título profesional (opcional). */
-  title?: L;
-  /** Rol dentro del proyecto. */
-  role: L;
+  /** Cargo o título principal, resaltado en el panel. Siempre en inglés. */
+  title: string;
+  /** Rol dentro del proyecto. Siempre en inglés. */
+  role: string;
   /** Perfil profesional (LinkedIn) aprobado por la persona. */
   link?: string;
 }
@@ -29,36 +32,38 @@ export const TEAM = {
   members: [
     {
       name: "Juan Stalin Quezada Ruiz",
-      title: l("CEO de Andorasoft", "CEO, Andorasoft"),
-      role: l("Capitán del equipo · Project Manager · Ingeniero de IA", "Team Captain · Project Manager · AI Engineer"),
+      title: "CEO, Andorasoft",
+      role: "Captain · Project Manager · AI Engineer",
       link: "https://www.linkedin.com/in/juansquezada/",
     },
     {
       name: "Jordy Ricardo Carrión Chávez",
-      title: l("CTO de Andorasoft", "CTO, Andorasoft"),
-      role: l("Desarrollador full stack · Arquitecto de software", "Full-Stack Developer · Software Architect"),
+      title: "CTO, Andorasoft",
+      role: "Full-Stack Developer · Software Architect",
       link: "https://www.linkedin.com/in/jordy-ricardo25/",
     },
     {
       name: "Zuleyka Naomi Ortiz Salazar",
-      role: l("Diseñadora · Directora creativa", "Designer · Creative Director"),
+      title: "Creative Director",
+      role: "Designer",
       link: "https://www.linkedin.com/in/zuleyka-ortiz-25147237a/",
     },
     {
       name: "Lisbeth Aracelly Escudero Coba",
-      title: l("Ingeniera en Estadística", "Statistics Engineer"),
-      role: l("Analista de datos", "Data Analyst"),
+      title: "Statistics Engineer",
+      role: "Data Analyst",
       link: "https://www.linkedin.com/in/aracelly-escudero-0761023aa/",
     },
     {
       name: "Johnatan Moises Ley Guacho",
-      title: l("Ingeniero en Tecnologías de la Información", "Information Technology Engineer"),
-      role: l("DevOps Manager", "DevOps Manager"),
+      title: "Information Technology Engineer",
+      role: "DevOps Manager",
       link: "https://www.linkedin.com/in/johnatan-guacho-7376563b0/",
     },
     {
       name: "Wagner Nolasco Ramírez Klínger",
-      role: l("Físico", "Physicist"),
+      title: "Physics Expert",
+      role: "Combustion Science Lead",
       link: "https://www.linkedin.com/in/nolasco-ram%C3%ADrez-560891280/",
     },
   ] satisfies TeamMember[],

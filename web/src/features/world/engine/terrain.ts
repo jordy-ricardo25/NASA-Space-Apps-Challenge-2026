@@ -102,7 +102,7 @@ function detailTexture(): THREE.CanvasTexture {
   return t;
 }
 
-export function buildTerrain(palette: Palette = "moon"): Terrain {
+export function buildTerrain(palette: Palette = "moon", segments = 220): Terrain {
   const rnd = mulberry32(20260714);
   const craters: Crater[] = [];
   while (craters.length < 70) {
@@ -139,7 +139,7 @@ export function buildTerrain(palette: Palette = "moon"): Terrain {
     return h;
   };
 
-  const SIZE = 640, SEG = 220;
+  const SIZE = 640, SEG = segments;
   const geo = new THREE.PlaneGeometry(SIZE, SIZE, SEG, SEG);
   geo.rotateX(-Math.PI / 2);
   const pos = geo.attributes.position as THREE.BufferAttribute;

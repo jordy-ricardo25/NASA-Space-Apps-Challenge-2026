@@ -102,6 +102,23 @@
   }
 }
 
+// Recorrido de Flamey: la sección de la que habla late en la navegación.
+.item[data-tour="true"] {
+  color: var(--color-warm);
+  border-color: var(--color-warm);
+  box-shadow: 0 0 0 0 var(--color-warm);
+  animation: spot 1.3s ease-out infinite;
+}
+
+@keyframes spot {
+  from {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-warm) 70%, transparent);
+  }
+  to {
+    box-shadow: 0 0 0 10px transparent;
+  }
+}
+
 // Tableta y teléfono: la navegación va abajo, al alcance del pulgar.
 @include mixins.tablet {
   .side {
@@ -147,5 +164,41 @@
   // Las etiquetas flotantes dependen del ratón: no se muestran al tocar.
   .tip {
     display: none;
+  }
+}
+
+// Teléfono en horizontal: navegación vertical estrecha a la izquierda.
+@include mixins.short {
+  .side {
+    inset: var(--topbar-h) auto 0 0;
+    width: var(--sidebar-w);
+    height: auto;
+    flex-direction: column;
+    padding: 4px 0;
+    border-top: 0;
+    border-right: 1px solid var(--color-line);
+
+    ul {
+      flex-direction: column;
+      justify-content: flex-start;
+      gap: 0;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+  }
+
+  .item {
+    width: 40px;
+    height: 34px;
+
+    &[aria-current="page"]::before {
+      left: -6px;
+      right: auto;
+      top: 6px;
+      bottom: 6px;
+      width: 3px;
+      height: auto;
+      border-radius: 0 3px 3px 0;
+    }
   }
 }

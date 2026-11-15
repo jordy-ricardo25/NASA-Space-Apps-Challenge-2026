@@ -234,3 +234,15 @@
     height: 34px;
   }
 }
+
+// Teléfono en horizontal: barra más baja.
+@include mixins.short {
+  .clock {
+    display: none;
+  }
+
+  .team {
+    width: 32px;
+    height: 32px;
+  }
+}

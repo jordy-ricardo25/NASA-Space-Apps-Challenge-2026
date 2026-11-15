@@ -115,6 +115,14 @@
   }
 }
 
+/// Teléfono en horizontal: pantalla ancha pero muy baja. La navegación vuelve
+/// al lado y los paneles van a la derecha del 3D.
+@mixin short {
+  @media (max-height: 520px) and (max-width: 1100px) and (orientation: landscape) {
+    @content;
+  }
+}
+
 /// Dispositivo táctil (teléfono o tableta), tenga el ancho que tenga.
 @mixin touch {
   @media (pointer: coarse) and (hover: none) {

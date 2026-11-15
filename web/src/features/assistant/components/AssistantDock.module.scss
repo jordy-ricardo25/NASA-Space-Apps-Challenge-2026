@@ -140,6 +140,39 @@
   color: var(--color-warm);
 }
 
+// Recorrido inicial: mismo globo, con "Siguiente" como acción principal.
+.tour {
+  padding-right: 14px;
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+  }
+
+  .next {
+    min-height: 30px;
+    padding: 3px 14px;
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+    color: var(--color-bg-deep);
+
+    &:hover {
+      background: var(--color-text);
+    }
+  }
+
+  .skip {
+    min-height: 30px;
+    padding: 3px 4px;
+    border: 0;
+    color: var(--color-text-2);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+}
+
 .actions {
   margin-top: 8px;
 
@@ -208,5 +241,14 @@
     position: static;
     max-width: min(300px, calc(100vw - 84px));
     margin: 0 0 4px;
+  }
+}
+
+// Teléfono en horizontal: no hay barra inferior.
+@include mixins.short {
+  .dock,
+  .floating,
+  .docked {
+    bottom: 6px;
   }
 }

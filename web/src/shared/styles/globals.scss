@@ -210,3 +210,13 @@ html[data-reduce-motion="true"] {
     --topbar-h: 48px;
   }
 }
+
+// Teléfono en horizontal: la barra inferior se comería un séptimo de la
+// pantalla, así que la navegación vuelve al lado izquierdo, más estrecha.
+@include mixins.short {
+  :root {
+    --topbar-h: 44px;
+    --sidebar-w: 50px;
+    --bottombar-h: 0px;
+  }
+}

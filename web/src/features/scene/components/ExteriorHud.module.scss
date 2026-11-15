@@ -617,3 +617,31 @@
     font-size: 20px;
   }
 }
+
+// Teléfono en horizontal: el 3D a la izquierda y la ficha a la derecha.
+@include mixins.short {
+  @include sheet-layout(6px);
+
+  .sheet {
+    left: 50%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .info,
+  .telemetry {
+    flex: none;
+  }
+
+  .crumb h1 {
+    font-size: 16px;
+  }
+
+  // Los controles de cámara quedan en el borde derecho de la mitad con 3D.
+  .controls {
+    right: calc(50% + 8px);
+    top: auto;
+    bottom: 8px;
+    flex-direction: row;
+  }
+}

@@ -33,8 +33,14 @@ export function StageBridge() {
     // Tableta y teléfono: los paneles son una hoja inferior, así que el centro
     // óptico sube para que el módulo o la llama queden en la franja libre.
     if (window.innerWidth <= 1100) {
-      const lift = Math.round(window.innerHeight * (view.mode === "overview" ? 0.12 : view.mode === "ambient" ? 0 : 0.21));
-      view = { ...view, shiftX: 0, shiftY: lift };
+      const idle = view.mode === "ambient";
+      if (window.innerHeight <= 520 && window.innerWidth > window.innerHeight) {
+        // Teléfono en horizontal: los paneles van a la derecha y la escena se centra en la mitad izquierda.
+        view = { ...view, shiftX: idle ? 0 : Math.round(window.innerWidth * 0.24), shiftY: 0 };
+      } else {
+        const lift = Math.round(window.innerHeight * (view.mode === "overview" ? 0.12 : idle ? 0 : 0.21));
+        view = { ...view, shiftX: 0, shiftY: lift };
+      }
     }
     worldCtl.setView(view);
   }, [pathname, query]);

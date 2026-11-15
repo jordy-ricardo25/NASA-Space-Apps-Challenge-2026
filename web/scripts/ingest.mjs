@@ -9,6 +9,10 @@
  *   nunca crea otro.
  * - Omite los documentos que ya están en el almacén, así que se puede volver a
  *   ejecutar para añadir archivos nuevos (por ejemplo, el documento final).
+ * - Para reemplazar un documento que ya está (por ejemplo, el documento del
+ *   proyecto tras regenerarlo), se indica su nombre en REPLACE:
+ *     REPLACE="Documento del proyecto Flame in Freefall.md" npm run ingest
+ *   Primero se borra del almacén y después se sube la versión nueva.
  * - Al terminar dice cuántos archivos quedaron bien y cuántos mal, y guarda el
  *   detalle en conocimiento/ingesta.json.
  */
@@ -33,6 +37,7 @@ if (!key) {
   process.exit(1);
 }
 const ai = new GoogleGenAI({ apiKey: key });
+const REPLACE = (process.env.REPLACE ?? "").split("|").map((x) => x.trim()).filter(Boolean);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 /** Escribe FILE_SEARCH_STORE=<nombre> en .env.local (sin tocar el resto). */
@@ -47,7 +52,16 @@ async function existingDocs(store) {
   const names = new Set();
   try {
     const pager = await ai.fileSearchStores.documents.list({ parent: store, config: { pageSize: 20 } });
-    for await (const doc of pager) if (doc.displayName) names.add(doc.displayName);
+    for await (const doc of pager) {
+      if (!doc.displayName) continue;
+      // Los documentos pedidos en REPLACE se borran para subir su versión nueva.
+      if (REPLACE.includes(doc.displayName)) {
+        await ai.fileSearchStores.documents.delete({ name: doc.name, config: { force: true } });
+        console.log(`↻  reemplazo   ${doc.displayName} (borrado del almacén)`);
+        continue;
+      }
+      names.add(doc.displayName);
+    }
   } catch (e) {
     console.warn("No se pudo listar el almacén (se intentará subir todo):", e.message);
   }

@@ -5,7 +5,10 @@ import { usePathname } from "next/navigation";
 import { BookOpen, Box, FlaskConical, Globe, LayoutDashboard, Map as MapIcon, Radar, Settings, FileText, Target } from "lucide-react";
 import { l } from "@/content/i18n";
 import { ROUTES, type RouteIcon } from "@/content/routes";
+import { TOUR } from "@/content/tour";
 import { useLang } from "@/shared/hooks/useLang";
+import { appStore } from "@/shared/lib/appStore";
+import { useStore } from "@/shared/lib/store";
 import styles from "./SideBar.module.scss";
 
 const ICONS: Record<RouteIcon, React.ComponentType<{ size?: number; strokeWidth?: number }>> = {
@@ -31,13 +34,16 @@ export function RouteGlyph({ icon, size = 19 }: { icon: RouteIcon; size?: number
 export function SideBar({ children }: { children?: React.ReactNode }) {
   const pathname = usePathname();
   const { t } = useLang();
+  // Durante el recorrido de Flamey se resalta la sección de la que habla.
+  const tour = useStore(appStore, (s) => s.tour);
+  const spot = tour !== null ? (TOUR[tour]?.routes ?? []) : [];
   const isActive = (href: string): boolean => (href === "/" ? pathname === "/" : pathname.startsWith(href));
   return (
     <nav className={styles.side} aria-label={t(l("Navegación principal", "Main navigation"))}>
       <ul>
         {ROUTES.filter((r) => r.sidebar).map((r) => (
           <li key={r.id} className={r.id === "settings" ? styles.push : undefined}>
-            <Link href={r.href} className={styles.item} aria-current={isActive(r.href) ? "page" : undefined} aria-label={t(r.label)}>
+            <Link href={r.href} className={styles.item} data-tour={spot.includes(r.id) || undefined} aria-current={isActive(r.href) ? "page" : undefined} aria-label={t(r.label)}>
               <RouteGlyph icon={r.icon} />
               <span className={styles.tip}>
                 {t(r.label)}

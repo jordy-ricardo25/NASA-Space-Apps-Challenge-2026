@@ -5,11 +5,13 @@ import sharp from "sharp";
 
 const base = process.env.BASE ?? "http://localhost:3000";
 const SCENES = { home: "/", nave: "/modulos/nave", estacion: "/modulos/estacion", rover: "/modulos/rover", traje: "/modulos/traje", base: "/modulos/base", marte: "/modulos/marte" };
-const SCREENS = { guide: "/guia", lab: "/laboratorio", radar: "/radar", earth: "/tierra" };
+const SCREENS = { challenge: "/reto", guide: "/guia", analyst: "/flamey", lab: "/laboratorio", radar: "/radar", earth: "/tierra" };
 const HIDE = "header, nav, main, aside, [role=status], [class*=dock], [class*=vignette], [class*=toast] { visibility: hidden !important; }";
 
 const browser = await chromium.launch({ channel: "chrome", args: ["--enable-gpu", "--ignore-gpu-blocklist"] });
 const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+// El recorrido inicial de Flamey cambia de pantalla: se marca como visto para capturar la que se pide.
+await page.addInitScript(() => localStorage.setItem("fif:prefs:v1", JSON.stringify({ welcomed: true, toured: true })));
 const shoot = async (name, route, hideUi) => {
   await page.goto(base + route, { waitUntil: "load" });
   // La pantalla de carga (sello y viaje) debe haberse retirado antes de capturar.

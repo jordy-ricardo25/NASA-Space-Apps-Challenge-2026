@@ -4,7 +4,7 @@
  */
 import { l, type L } from "./i18n";
 
-export type RouteIcon = "home" | "modules" | "lab" | "guide" | "radar" | "earth" | "refs" | "settings" | "map" | "challenge";
+export type RouteIcon = "home" | "modules" | "lab" | "guide" | "radar" | "earth" | "refs" | "settings" | "map" | "challenge" | "local";
 
 export interface RouteDef {
   id: string;
@@ -26,6 +26,7 @@ export const ROUTES: RouteDef[] = [
   { id: "modules", href: "/modulos", label: l("Módulos", "Modules"), description: l("Acceso directo a cada ambiente y a las herramientas de análisis.", "Direct access to each environment and to the analysis tools."), icon: "modules", goal: "core", sidebar: true, key: "M" },
   { id: "lab", href: "/laboratorio", label: l("Laboratorio", "Laboratory"), description: l("Mapa de inflamabilidad, gotas, humo y contaminantes de cabina.", "Flammability map, droplets, smoke and cabin contaminants."), icon: "lab", goal: "O2", sidebar: true, key: "L" },
   { id: "guide", href: "/guia", label: l("Guía", "Guide"), description: l("Biblioteca de investigaciones PSI, ranking, comparador y lecciones.", "PSI investigation library, ranking, comparator and lessons."), icon: "guide", goal: "O1", sidebar: true, key: "G" },
+  { id: "local", href: "/flamey", label: l("Analista PSI", "PSI Analyst"), description: l("Conversación por voz o texto con Flamey sobre los hallazgos de NASA PSI, con las cifras del backend del equipo.", "Voice or text conversation with Flamey about the NASA PSI findings, using the team's backend figures."), icon: "local", goal: "O1", sidebar: true, key: "F" },
   { id: "radar", href: "/radar", label: l("Radar tecnológico", "Technology radar"), description: l("De la evidencia a la tecnología: brechas y misiones que las cerrarán.", "From evidence to technology: gaps and the missions that will close them."), icon: "radar", goal: "O3", sidebar: true, key: "R" },
   { id: "earth", href: "/tierra", label: l("Tierra", "Earth"), description: l("Tecnologías espaciales que hoy protegen a bomberos e industria.", "Space technologies that protect firefighters and industry today."), icon: "earth", goal: "O4", sidebar: true, key: "T" },
   { id: "refs", href: "/referencias", label: l("Datos y referencias", "Data and references"), description: l("Fuentes de NASA, DOIs, licencias de modelos y uso de IA.", "NASA sources, DOIs, model licences and AI use."), icon: "refs", goal: "info", sidebar: false },

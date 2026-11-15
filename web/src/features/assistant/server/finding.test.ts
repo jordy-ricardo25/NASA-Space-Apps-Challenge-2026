@@ -81,7 +81,21 @@ describe("asistente con un hallazgo de PSI fijado", () => {
     expect(vi.mocked(fetchMock).mock.calls.some(([u]) => String(u) === `${BACKEND}/api/findings/${encodeURIComponent(KEY)}/context?environment=lunar`)).toBe(true);
     // El texto del backend que se contradice con sus propios campos no se repite.
     expect(a.text).not.toContain("texto del backend");
-    expect(a.sources.map((s) => s.id)).toEqual(["PSI"]);
+    // Tres partes, como el Flamey de Johnatan; la prevención sale de una ficha con fuente.
+    expect(a.text).toContain("- **Dato PSI:**");
+    expect(a.text).toContain("- **Riesgo en Base lunar:**");
+    expect(a.text).toContain("- **Prevención:** CO₂, N₂ y He apagan");
+    expect(a.sources.map((s) => s.id)).toEqual(["PSI", "B17"]);
+    // Cierra ofreciendo el siguiente paso, como el Flamey de Johnatan.
+    expect(a.text.endsWith("¿Quieres saber cómo se apaga una llama así?")).toBe(true);
+  });
+
+  it("un sí a lo que Flamey ofreció responde con la ficha de supresión", async () => {
+    vi.stubGlobal("fetch", backend(CONTEXT));
+    const a = await answerQuestion("Sí", "es", { finding: { key: KEY, env: "base" } }, [{ role: "bot", text: "Resumen.\n\n¿Quieres saber cómo se apaga una llama así?" }]);
+    expect(a.origin).toBe("psi");
+    expect(a.text).toContain("CO₂, N₂ y He apagan");
+    expect(a.sources.map((s) => s.id)).toEqual(["PSI", "B17"]);
   });
 
   it("ordena los factores por lo que aportan al índice", async () => {

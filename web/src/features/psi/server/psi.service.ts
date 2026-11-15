@@ -27,6 +27,12 @@ const finding = z.object({
   band: z.string(),
   relevance: z.string(),
   sources: z.array(z.string()).optional(),
+  // Presión mediana del ensayo (atm) y texto del backend sobre la fila más representativa:
+  // de él se lee si la velocidad de la llama se midió o se proyectó.
+  pressure_atm: z.number().nullable().optional(),
+  narrative: z.string().optional(),
+  // El ranking del backend trae los factores del índice; la copia de respaldo, no.
+  factors: z.array(z.object({ name: z.string(), value: z.number(), weight: z.number(), contribution: z.number() })).optional(),
 });
 const findingsOut = z.array(finding).min(1);
 
@@ -73,7 +79,7 @@ const OPTIONS = { timeout: 5000, revalidate: 300 } as const;
 const factor = z.object({ name: z.string(), value: z.number(), weight: z.number(), contribution: z.number() });
 const contextOut = z.object({
   finding: finding.extend({ factors: z.array(factor) }),
-  environment: z.object({ key: z.string(), label: z.string(), gravity_g: z.number(), o2_fraction: z.number(), pressure_atm: z.number() }),
+  environment: z.object({ key: z.string(), label: z.string(), gravity_g: z.number(), o2_fraction: z.number(), pressure_atm: z.number(), egress_s: z.number().optional(), diluent: z.string().optional() }),
   evidence: z.array(z.object({ file: z.string(), row: z.number(), quality: z.number() })),
   messages: z.array(z.object({ role: z.string(), content: z.string() })),
 });
@@ -84,7 +90,17 @@ export type PsiFactor = z.infer<typeof factor>;
 export interface FindingPack {
   /** `true` si respondió el backend; `false` si salió de la copia de respaldo (sin factores ni filas). */
   live: boolean;
-  environment: { key: PsiEnvKey; label: string; gravity_g: number; o2_fraction: number; pressure_atm: number };
+  environment: {
+    key: PsiEnvKey;
+    label: string;
+    gravity_g: number;
+    o2_fraction: number;
+    pressure_atm: number;
+    /** Segundos que el backend da a la tripulación para evacuar ese ambiente (solo en vivo). */
+    egress_s?: number;
+    /** Gas diluyente del ambiente según el backend (solo en vivo). */
+    diluent?: string;
+  };
   finding: PsiFinding;
   /** Factores del índice RPI, de mayor a menor aporte. */
   factors: PsiFactor[];
@@ -112,7 +128,7 @@ export async function findingPack(key: string, moduleId: string | null | undefin
     const e = live.environment;
     return {
       live: true,
-      environment: { key: envKey, label: e.label, gravity_g: e.gravity_g, o2_fraction: e.o2_fraction, pressure_atm: e.pressure_atm },
+      environment: { key: envKey, label: e.label, gravity_g: e.gravity_g, o2_fraction: e.o2_fraction, pressure_atm: e.pressure_atm, egress_s: e.egress_s, diluent: e.diluent },
       finding: found,
       factors: [...factors].sort((a, b) => b.contribution - a.contribution),
       evidence: live.evidence,
@@ -162,4 +178,43 @@ export async function psiFor(moduleId: string | null | undefined): Promise<ApiEn
     },
     { data_mode: real ? "real" : "precomputed", kind: "derived", sources: [{ id: "PSI" }], model_version: `emberwatch ${meta.kernel_version}` },
   );
+}
+
+/** Contrato de `GET /api/oxygen-ladder` (api/app/dto.py · OxygenLadderOut). */
+const ladderOut = z.object({
+  steps: z.array(z.number()),
+  materials: z.array(
+    z.object({
+      material: z.string(),
+      steps: z.array(z.object({ o2: z.number(), sustains_cabin: z.boolean(), sustains_suit: z.boolean() })),
+    }),
+  ),
+});
+
+/** Qué materiales sostienen la llama en un escalón de oxígeno, según el modelo del backend. */
+export interface LadderStep {
+  /** Fracción de O₂ del escalón evaluado (el primero que iguala o supera la del ambiente). */
+  o2: number;
+  sustains: string[];
+  quenches: string[];
+}
+
+/**
+ * Escalón de la "escalera de oxígeno" del backend que corresponde a un ambiente.
+ * En el traje se usa el límite del traje; en el resto, el de cabina.
+ * @returns `null` si el backend no responde: no hay copia de respaldo de este dato.
+ */
+export async function ladderFor(env: { key: PsiEnvKey; o2_fraction: number }): Promise<LadderStep | null> {
+  const ladder = await backendFetch("/api/oxygen-ladder", ladderOut, OPTIONS);
+  if (!ladder) return null;
+  const o2 = ladder.steps.find((step) => step >= env.o2_fraction - 1e-9) ?? ladder.steps[ladder.steps.length - 1];
+  if (o2 == null) return null;
+  const sustains: string[] = [];
+  const quenches: string[] = [];
+  for (const m of ladder.materials) {
+    const step = m.steps.find((x) => Math.abs(x.o2 - o2) < 1e-9);
+    if (!step) continue;
+    ((env.key === "eva" ? step.sustains_suit : step.sustains_cabin) ? sustains : quenches).push(m.material);
+  }
+  return { o2, sustains, quenches };
 }

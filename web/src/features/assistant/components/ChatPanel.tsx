@@ -101,6 +101,8 @@ export function ChatPanel({ env }: { env: ActiveEnv }) {
       // Enviar cierra el micrófono (para que no vuelva a llenar el campo) y corta la voz.
       stopDictation(true);
       stopSpeaking();
+      // Los últimos turnos viajan con la pregunta: el modelo recuerda la conversación.
+      const history = chatStore.get().messages.slice(-6).map((m) => ({ role: m.role, text: m.text.slice(0, 1500) }));
       pushMessage({ role: "user", text: q });
       setInput("");
       setBusy(true);
@@ -115,6 +117,7 @@ export function ChatPanel({ env }: { env: ActiveEnv }) {
             // El idioma de la conversación es el de la primera respuesta: solo decide
             // cuando una pregunta posterior es demasiado corta para reconocer el suyo.
             lang: chatStore.get().lang ?? lang,
+            history,
             // Una pregunta desde la pestaña de materiales lleva el escenario probado, no el de la pantalla ni el hallazgo fijado.
             context: tested ?? (scene || pinned ? { ...(scene ?? {}), ...(pinned ? { finding: { key: pinned.key, env: pinned.env } } : {}) } : undefined),
           }),
@@ -245,7 +248,7 @@ export function ChatPanel({ env }: { env: ActiveEnv }) {
           <div key={i} className={`${styles.msg} ${m.role === "user" ? styles.user : styles.bot}`}>
             {m.role === "user" ? <p>{m.text}</p> : <AnswerText text={m.text} />}
             {m.rows && m.rows.length > 0 && (
-              <details className={styles.rows}>
+              <details className={styles.rows} open>
                 <summary>
                   <FileCheck2 size={13} aria-hidden="true" />
                   {t(l("Respaldo en los CSV de NASA PSI", "Backing in the NASA PSI CSVs"))} ({m.rows.length})

@@ -18,7 +18,7 @@ export interface KnowledgeCard {
 export const KNOWLEDGE: KnowledgeCard[] = [
   {
     id: "sphere",
-    keys: ["esfera", "esferica", "forma", "azul", "sphere", "spherical", "shape", "blue", "vela", "candle", "gota"],
+    keys: ["esfera", "esferica", "redonda", "redondo", "forma", "azul", "sphere", "spherical", "round", "shape", "blue", "vela", "candle", "gota"],
     text: l(
       "En la Tierra el gas caliente de la llama es unas 7–8 veces menos denso que el aire: sube, arrastra aire fresco y estira la llama en forma de gota amarilla. En caída libre esa flotabilidad desaparece: el oxígeno solo llega por difusión y la llama de un combustible pequeño en aire quieto se vuelve una esfera azul y tenue. Si hay ventilación o una superficie grande, la llama se inclina o se alarga.",
       "On Earth the hot flame gas is about 7–8 times less dense than air: it rises, drags in fresh air and stretches the flame into a yellow teardrop. In freefall that buoyancy vanishes: oxygen arrives only by diffusion and the flame of a small fuel in still air becomes a dim blue sphere. With ventilation or a large surface the flame tilts or elongates.",

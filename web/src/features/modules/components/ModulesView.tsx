@@ -47,6 +47,9 @@ export function ModulesView() {
         chips: [gravity(v.g, lang), `${num(v.o2, v.o2 % 1 ? 1 : 0, lang)} % O₂`],
       };
     }),
+    { href: route("challenge").href, code: "RETO", title: route("challenge").label, text: route("challenge").description, image: "/img/card-challenge.webp" },
+    { href: route("guide").href, code: "O1", title: route("guide").label, text: route("guide").description, image: "/img/card-guide.webp" },
+    { href: route("local").href, code: "PSI", title: route("local").label, text: route("local").description, image: "/img/card-analyst.webp" },
     { href: "/laboratorio", code: "O2", title: route("lab").label, text: route("lab").description, image: "/img/card-lab.webp" },
     { href: "/radar", code: "O3", title: route("radar").label, text: route("radar").description, image: "/img/card-radar.webp" },
     { href: "/tierra", code: "O4", title: route("earth").label, text: route("earth").description, image: "/img/card-earth.webp" },

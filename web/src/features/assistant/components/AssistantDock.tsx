@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MessageCircle, X } from "lucide-react";
+import { ArrowRight, MessageCircle, X } from "lucide-react";
 import { l, type L } from "@/content/i18n";
+import { TOUR } from "@/content/tour";
 import { useActiveEnv, type ActiveEnv } from "@/features/shell/hooks/useActiveEnv";
 import { useHandheld } from "@/shared/hooks/useHandheld";
 import { useLang } from "@/shared/hooks/useLang";
@@ -39,6 +40,7 @@ export function AssistantDock() {
   const booted = useStore(appStore, (s) => s.booted);
   const chatOpen = useStore(appStore, (s) => s.chatOpen);
   const welcomed = useStore(appStore, (s) => s.welcomed);
+  const tour = useStore(appStore, (s) => s.tour);
   const floating = env.section === "home" || env.section === "module";
   const key = `${env.section}:${env.module?.id ?? ""}`;
   // Sección cuyo mensaje ya se recogió y sección cuyo mensaje se pidió con un clic.
@@ -60,15 +62,21 @@ export function AssistantDock() {
     return () => clearTimeout(id);
   }, [booted]);
 
+  // Primera visita: al terminar la entrada, Flamey ofrece un recorrido corto
+  // por las partes del sitio. Se puede saltar y no vuelve a salir.
+  useEffect(() => {
+    if (introDone && !welcomed && appStore.get().tour === null) appStore.set({ tour: 0 });
+  }, [introDone, welcomed]);
+
   // Cada sección trae un mensaje nuevo, que se recoge solo tras unos segundos.
   useEffect(() => {
-    if (!booted || (env.section === "home" && !welcomed)) return;
+    if (!booted || tour !== null || (env.section === "home" && !welcomed)) return;
     const id = setTimeout(() => {
       setHiddenKey(key);
       setAskedKey(null);
     }, env.section === "home" ? 12000 : 9000);
     return () => clearTimeout(id);
-  }, [key, env.section, welcomed, booted, askedKey]);
+  }, [key, env.section, welcomed, booted, askedKey, tour]);
 
   if (!booted) return null;
   const message = env.section === "module" ? env.module!.guide : env.section === "cabin" ? env.module!.cabinGuide : TIPS[env.section];
@@ -78,14 +86,40 @@ export function AssistantDock() {
     if (env.section === "home") setPrefs({ welcomed: true });
   };
   const open = (): void => appStore.set({ chatOpen: true });
+  const step = tour !== null ? TOUR[tour] : undefined;
+  const endTour = (): void => {
+    appStore.set({ tour: null });
+    setPrefs({ welcomed: true });
+    setHiddenKey(key);
+  };
+  const nextTour = (): void => (tour !== null && tour < TOUR.length - 1 ? appStore.set({ tour: tour + 1 }) : endTour());
 
   return (
     <>
       <div className={`${styles.dock} ${floating ? styles.floating : styles.docked} ${env.section === "cabin" ? styles.cabin : ""}`}>
-        <button type="button" className={`${styles.mascot} ${!chatOpen && !bubble && !intro ? styles.nudge : ""}`} onClick={() => (bubble ? open() : setAskedKey(key))} aria-label={t(l("Asistente Flamey", "Flamey assistant"))}>
+        <button type="button" className={`${styles.mascot} ${!chatOpen && !bubble && !intro && !step ? styles.nudge : ""}`} onClick={() => (step ? nextTour() : bubble ? open() : setAskedKey(key))} aria-label={t(l("Asistente Flamey", "Flamey assistant"))}>
           <Flamey gravity={env.g} size={floating ? (env.section === "home" ? 92 : 68) : 44} intro={intro} mood={chatOpen ? "happy" : "idle"} />
         </button>
-        {bubble && !chatOpen && (
+        {step && !chatOpen && (
+          <div className={`${styles.bubble} ${styles.tour}`} role="dialog" aria-label={t(l("Recorrido por el sitio", "Tour of the site"))}>
+            <span className={styles.who}>
+              Flamey · {(tour ?? 0) + 1}/{TOUR.length}
+            </span>
+            <p aria-live="polite">{t(step.text)}</p>
+            <div className={styles.actions}>
+              <button type="button" className={styles.next} onClick={nextTour}>
+                {t(tour === TOUR.length - 1 ? l("Empezar", "Start") : l("Siguiente", "Next"))}
+                <ArrowRight size={13} aria-hidden="true" />
+              </button>
+              {tour !== TOUR.length - 1 && (
+                <button type="button" className={styles.skip} onClick={endTour}>
+                  {t(l("Saltar recorrido", "Skip tour"))}
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+        {!step && bubble && !chatOpen && (
           <div className={styles.bubble} role="status">
             <span className={styles.who}>Flamey</span>
             <p>{t(message)}</p>

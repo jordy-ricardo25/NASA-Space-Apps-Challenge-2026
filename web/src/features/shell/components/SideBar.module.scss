@@ -102,6 +102,23 @@
   }
 }
 
+// Recorrido de Flamey: la sección de la que habla late en la navegación.
+.item[data-tour="true"] {
+  color: var(--color-warm);
+  border-color: var(--color-warm);
+  box-shadow: 0 0 0 0 var(--color-warm);
+  animation: spot 1.3s ease-out infinite;
+}
+
+@keyframes spot {
+  from {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-warm) 70%, transparent);
+  }
+  to {
+    box-shadow: 0 0 0 10px transparent;
+  }
+}
+
 // Tableta y teléfono: la navegación va abajo, al alcance del pulgar.
 @include mixins.tablet {
   .side {

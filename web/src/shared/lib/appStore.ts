@@ -28,8 +28,10 @@ export interface AppState {
   teamOpen: boolean;
   online: boolean | null;
   toast: L | null;
-  /** El guía ya dio la bienvenida. */
+  /** El guía ya dio la bienvenida (el recorrido inicial se vio o se saltó). */
   welcomed: boolean;
+  /** Paso del recorrido inicial de Flamey; `null` si no está en marcha. */
+  tour: number | null;
   /** El asistente lee sus respuestas en voz alta al terminar. */
   autoSpeak: boolean;
   /** Al dictar, la pregunta se envía sola cuando la persona deja de hablar. */
@@ -51,6 +53,7 @@ export const appStore = createStore<AppState>({
   online: null,
   toast: null,
   welcomed: false,
+  tour: null,
   autoSpeak: true,
   autoSend: true,
 });

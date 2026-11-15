@@ -73,7 +73,7 @@ export function SettingsView() {
         <Row title={t(l("Rol de uso", "Usage role"))} text={t(l("Orienta los mensajes del guía y el orden de lectura sugerido.", "Tunes the guide's messages and the suggested reading order."))}>
           <Segmented<Role> value={role} options={ROLES.map((r) => ({ value: r.value, label: t(r.label) }))} onChange={(v) => setPrefs({ role: v })} />
         </Row>
-        <Row title={t(l("Bienvenida del guía", "Guide welcome"))} text={t(l("Vuelve a mostrar el mensaje de bienvenida de Flamey en el inicio.", "Show Flamey's welcome message on the home screen again."))}>
+        <Row title={t(l("Bienvenida del guía", "Guide welcome"))} text={t(l("Vuelve a mostrar el recorrido inicial de Flamey por el sitio.", "Show Flamey's opening tour of the site again."))}>
           <button
             type="button"
             className={styles.reset}

@@ -30,6 +30,8 @@ export interface AppState {
   toast: L | null;
   /** El guía ya dio la bienvenida. */
   welcomed: boolean;
+  /** El asistente lee sus respuestas en voz alta al terminar. */
+  autoSpeak: boolean;
 }
 
 export const appStore = createStore<AppState>({
@@ -47,10 +49,11 @@ export const appStore = createStore<AppState>({
   online: null,
   toast: null,
   welcomed: false,
+  autoSpeak: true,
 });
 
 const KEY = "fif:prefs:v1";
-type Prefs = Pick<AppState, "lang" | "units" | "quality" | "reduceMotion" | "role" | "welcomed">;
+type Prefs = Pick<AppState, "lang" | "units" | "quality" | "reduceMotion" | "role" | "welcomed" | "autoSpeak">;
 
 /** Restaura las preferencias guardadas (se llama una vez al montar la plataforma). */
 export function loadPrefs(): void {
@@ -66,8 +69,8 @@ export function loadPrefs(): void {
 export function setPrefs(patch: Partial<Prefs>): void {
   appStore.set(patch);
   try {
-    const { lang, units, quality, reduceMotion, role, welcomed } = appStore.get();
-    localStorage.setItem(KEY, JSON.stringify({ lang, units, quality, reduceMotion, role, welcomed }));
+    const { lang, units, quality, reduceMotion, role, welcomed, autoSpeak } = appStore.get();
+    localStorage.setItem(KEY, JSON.stringify({ lang, units, quality, reduceMotion, role, welcomed, autoSpeak }));
   } catch {
     /* sin almacenamiento */
   }

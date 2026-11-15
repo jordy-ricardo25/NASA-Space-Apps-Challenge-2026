@@ -1,35 +1,56 @@
 @use "mixins";
 
+// Las tarjetas crecen con su contenido; si no caben, se desplaza el cuerpo
+// del panel (nunca se corta una lista de enlaces).
 .layout {
-  flex: 1;
-  min-height: 0;
+  flex: 1 0 auto;
   display: grid;
   grid-template-columns: minmax(0, 1fr) 300px;
   gap: 18px;
+
+  @include mixins.tablet {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .groups {
-  min-height: 0;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  grid-template-rows: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(min-content, 1fr));
   gap: 14px;
+
+  @include mixins.tablet {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: none;
+  }
+
+  @include mixins.phone {
+    grid-template-columns: minmax(0, 1fr);
+  }
 
   section {
     display: flex;
     flex-direction: column;
     gap: 6px;
-    min-height: 0;
+    min-width: 0;
     padding: 16px 18px;
     border: 1px solid var(--color-line-soft);
     border-radius: var(--radius-m);
     background: var(--color-panel-raise);
-    overflow: hidden;
 
     // El centro de mando ocupa dos filas: incluye los cuatro ambientes.
     &:first-child {
       grid-row: span 2;
+
+      @include mixins.phone {
+        grid-row: auto;
+      }
     }
+  }
+
+  span {
+    min-width: 0;
+    overflow-wrap: anywhere;
   }
 
   h2 {
@@ -107,12 +128,11 @@
 }
 
 .keys {
-  min-height: 0;
+  min-width: 0;
   padding: 16px 18px;
   border: 1px solid var(--color-line);
   border-radius: var(--radius-m);
   background: rgba(3, 10, 20, 0.5);
-  overflow: hidden;
 
   h2 {
     margin-bottom: 8px;

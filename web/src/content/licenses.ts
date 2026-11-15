@@ -63,7 +63,7 @@ export const AI_USE: { title: L; text: L }[] = [
     ),
   },
   {
-    title: l("Asistente FUEGO", "FUEGO assistant"),
+    title: l("Asistente Flamey", "Flamey assistant"),
     text: l(
       "Responde con respuestas aprobadas por el equipo, con cifras calculadas por el modelo físico y con una base de conocimiento curada a partir de fuentes de NASA. Si el equipo configura su clave, un modelo de lenguaje (Gemini) redacta respuestas apoyadas en esos documentos. Cada respuesta muestra su origen y sus fuentes; si no hay evidencia, lo dice.",
       "It answers with team-approved answers, figures computed by the physics model and a knowledge base curated from NASA sources. When the team configures its key, a language model (Gemini) drafts answers grounded in those documents. Every answer shows its origin and sources; when there is no evidence, it says so.",
@@ -72,8 +72,8 @@ export const AI_USE: { title: L; text: L }[] = [
   {
     title: l("Ilustraciones", "Illustrations"),
     text: l(
-      "La mascota FUEGO y la pantalla de inicio son gráficos vectoriales dibujados con código. Los modelos 3D y las texturas son de NASA. No se usan imágenes generadas con IA ni logotipos de NASA.",
-      "The FUEGO mascot and the start screen are vector graphics drawn in code. 3D models and textures come from NASA. No AI-generated images or NASA logos are used.",
+      "La mascota Flamey y la pantalla de inicio son gráficos vectoriales dibujados con código. Los modelos 3D y las texturas son de NASA. No se usan imágenes generadas con IA ni logotipos de NASA.",
+      "The Flamey mascot and the start screen are vector graphics drawn in code. 3D models and textures come from NASA. No AI-generated images or NASA logos are used.",
     ),
   },
   {

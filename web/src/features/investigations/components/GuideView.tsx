@@ -8,8 +8,10 @@ import { l, type L } from "@/content/i18n";
 import { HISTORY } from "@/content/earth";
 import { FAMILY_LABEL, PILLAR_LABEL, VAR_KEYS, VAR_LABEL, type Family, type Investigation, type Pillar } from "@/content/investigations";
 import { MODULES, getModule } from "@/content/modules";
+import type { Myth } from "@/content/myths";
 import { getSource } from "@/content/sources";
 import { patchQuery } from "@/features/scene/lib/scenario";
+import { ClampText } from "@/shared/components/ClampText";
 import { Segmented, Slider } from "@/shared/components/Controls";
 import { SourceChips } from "@/shared/components/EvidenceBadge";
 import { Pager, Workspace } from "@/shared/components/Workspace";
@@ -18,12 +20,13 @@ import { num, pct } from "@/shared/lib/format";
 import { CRITERIA, CRITERION_LABEL, DEFAULT_WEIGHTS, rankInvestigations, type Criterion, type RankWeights } from "../lib/ranking";
 import styles from "./Guide.module.scss";
 
-type Tab = "library" | "ranking" | "compare" | "coverage" | "history";
+type Tab = "library" | "ranking" | "compare" | "coverage" | "myths" | "history";
 const TABS: { id: Tab; label: L }[] = [
   { id: "library", label: l("Biblioteca PSI", "PSI library") },
   { id: "ranking", label: l("Ranking por ambiente", "Ranking by environment") },
   { id: "compare", label: l("Comparador", "Comparator") },
   { id: "coverage", label: l("Cobertura", "Coverage") },
+  { id: "myths", label: l("Mitos y hechos", "Myths and facts") },
   { id: "history", label: l("Lecciones", "Lessons") },
 ];
 const CRIT_COLOR: Record<Criterion, string> = { atmosphere: "#35d8f2", gravity: "#ff8738", scale: "#b68cff", data: "#00d49a", pillar: "#ffc53d" };
@@ -37,7 +40,7 @@ const PER_PAGE = 8;
  * pesos visibles, comparador lado a lado, matriz de cobertura y lecciones
  * históricas. El estado vive en la URL.
  */
-export function GuideView({ investigations }: { investigations: Investigation[] }) {
+export function GuideView({ investigations, myths }: { investigations: Investigation[]; myths: Myth[] }) {
   const { t, lang } = useLang();
   const sp = useSearchParams();
   const tab = (TABS.find((x) => x.id === sp.get("tab"))?.id ?? "library") as Tab;
@@ -112,13 +115,15 @@ export function GuideView({ investigations }: { investigations: Investigation[] 
           </div>
           <div className={styles.cards}>
             {shown.map((i) => (
-              <button key={i.id} type="button" className={styles.card} onClick={() => set({ id: i.id })}>
+              <article key={i.id} className={styles.card}>
                 <span className={styles.fam} data-family={i.family}>
                   {t(FAMILY_LABEL[i.family])}
                 </span>
-                <b>{i.name}</b>
+                <button type="button" className={styles.open} onClick={() => set({ id: i.id })}>
+                  <b>{i.name}</b>
+                </button>
                 <em>{i.full}</em>
-                <p>{t(i.objective)}</p>
+                <ClampText className={styles.objective}>{t(i.objective)}</ClampText>
                 <dl className={styles.facts}>
                   <div>
                     <dt>O₂</dt>
@@ -141,7 +146,7 @@ export function GuideView({ investigations }: { investigations: Investigation[] 
                     ))}
                   </span>
                 </span>
-              </button>
+              </article>
             ))}
           </div>
         </div>
@@ -272,6 +277,30 @@ export function GuideView({ investigations }: { investigations: Investigation[] 
             </tbody>
           </table>
           <p className={styles.note}>● {t(l("medida", "measured"))} · ○ {t(l("no medida", "not measured"))} · – {t(l("no aplica", "not applicable"))}. {t(l("La columna de gravedad parcial muestra la brecha: solo LUCI y FM2.", "The partial-gravity column shows the gap: only LUCI and FM2."))}</p>
+        </div>
+      )}
+
+      {tab === "myths" && (
+        <div className={styles.myths}>
+          <ul>
+            {myths.map((m, i) => (
+              <li key={m.id}>
+                <i>{String(i + 1).padStart(2, "0")}</i>
+                <div className={styles.myth}>
+                  <h3>{t(l("MITO", "MYTH"))}</h3>
+                  <p>{t(m.myth)}</p>
+                </div>
+                <div className={styles.fact}>
+                  <h3>{t(l("HECHO", "FACT"))}</h3>
+                  <p>{t(m.fact)}</p>
+                  <SourceChips ids={m.sources} />
+                </div>
+              </li>
+            ))}
+          </ul>
+          <p className={styles.note}>
+            {t(l("La intuición terrestre falla sin gravedad: estas son las ideas equivocadas que NASA señala en su guía de combustión para investigadores.", "Earth intuition fails without gravity: these are the misconceptions NASA points out in its combustion guide for researchers."))}
+          </p>
         </div>
       )}
 

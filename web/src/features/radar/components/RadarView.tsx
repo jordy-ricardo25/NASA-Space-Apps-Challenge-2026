@@ -6,6 +6,7 @@ import { ChevronRight, Rocket } from "lucide-react";
 import { l, type L } from "@/content/i18n";
 import { STAGE_LABEL, type Stage } from "@/content/radar";
 import { patchQuery } from "@/features/scene/lib/scenario";
+import { ClampText } from "@/shared/components/ClampText";
 import { EvidenceBadge, SourceChips } from "@/shared/components/EvidenceBadge";
 import { Workspace } from "@/shared/components/Workspace";
 import { useLang } from "@/shared/hooks/useLang";
@@ -58,11 +59,12 @@ export function RadarView({ data }: { data: TechMap }) {
                 return (
                   <article key={s} className={styles.node} data-stage={s}>
                     {i > 0 && <ChevronRight size={18} className={styles.arrow} aria-hidden="true" />}
+                    <span className={styles.nodeStage}>{t(STAGE_LABEL[s])}</span>
                     <header>
                       <h3>{t(node.title)}</h3>
                       {node.evidence && <EvidenceBadge level={node.evidence} compact />}
                     </header>
-                    <p>{t(node.text)}</p>
+                    <ClampText className={styles.text}>{t(node.text)}</ClampText>
                     <div className={styles.src}>
                       <SourceChips ids={node.sources} max={2} />
                     </div>

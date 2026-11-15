@@ -4,7 +4,7 @@
  */
 import { l, type L } from "./i18n";
 
-export type RouteIcon = "home" | "modules" | "lab" | "guide" | "radar" | "earth" | "refs" | "settings" | "map";
+export type RouteIcon = "home" | "modules" | "lab" | "guide" | "radar" | "earth" | "refs" | "settings" | "map" | "challenge";
 
 export interface RouteDef {
   id: string;
@@ -22,6 +22,7 @@ export interface RouteDef {
 
 export const ROUTES: RouteDef[] = [
   { id: "home", href: "/", label: l("Inicio", "Home"), description: l("Vista general del sitio lunar con los cuatro ambientes habitables.", "Overview of the lunar site with the four habitable environments."), icon: "home", goal: "core", sidebar: true, key: "H" },
+  { id: "challenge", href: "/reto", label: l("Nuestro Reto", "Our challenge"), description: l("De dónde surge el reto de NASA, qué pide y dónde lo resuelve la plataforma.", "Where NASA's challenge comes from, what it asks for and where the platform solves it."), icon: "challenge", goal: "core", sidebar: true, key: "N" },
   { id: "modules", href: "/modulos", label: l("Módulos", "Modules"), description: l("Acceso directo a cada ambiente y a las herramientas de análisis.", "Direct access to each environment and to the analysis tools."), icon: "modules", goal: "core", sidebar: true, key: "M" },
   { id: "lab", href: "/laboratorio", label: l("Laboratorio", "Laboratory"), description: l("Mapa de inflamabilidad, gotas, humo y contaminantes de cabina.", "Flammability map, droplets, smoke and cabin contaminants."), icon: "lab", goal: "O2", sidebar: true, key: "L" },
   { id: "guide", href: "/guia", label: l("Guía", "Guide"), description: l("Biblioteca de investigaciones PSI, ranking, comparador y lecciones.", "PSI investigation library, ranking, comparator and lessons."), icon: "guide", goal: "O1", sidebar: true, key: "G" },

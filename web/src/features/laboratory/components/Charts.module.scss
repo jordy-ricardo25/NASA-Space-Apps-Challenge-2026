@@ -56,6 +56,10 @@
   grid-row: 1 / -1;
   grid-column: 1;
 
+  @include mixins.phone {
+    grid-row: auto;
+  }
+
   figcaption b {
     font-size: 14px;
   }

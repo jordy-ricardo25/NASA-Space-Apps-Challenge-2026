@@ -19,8 +19,72 @@
 }
 
 .docked {
-  left: 10px;
+  left: 8px;
   bottom: 8px;
+
+  // En la barra lateral va sobre un disco oscuro con borde cian: la llama,
+  // de color saturado, contrasta con el fondo y el borde la delimita.
+  .mascot {
+    padding: 2px;
+    border: 1px solid var(--color-line-strong);
+    background: var(--color-bg-deep);
+    box-shadow: 0 0 14px var(--color-accent-soft);
+  }
+}
+
+// Llamada de atención con el chat cerrado: cada 9 s la llama se estira como
+// al encenderse, salta, gira y vuelve a hacerse esfera, con un destello.
+.nudge {
+  position: relative;
+  animation: nudge 9s var(--ease-out) 3s infinite;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    border: 2px solid var(--color-warm);
+    border-radius: 50%;
+    opacity: 0;
+    pointer-events: none;
+    animation: spark 9s ease-out 3s infinite;
+  }
+}
+
+@keyframes nudge {
+  0%,
+  82% {
+    transform: none;
+  }
+  86% {
+    transform: translateY(-7px) scale(0.88, 1.16);
+  }
+  90% {
+    transform: translateY(-13px) rotate(200deg) scale(1);
+  }
+  94% {
+    transform: translateY(-3px) rotate(360deg) scale(1.02);
+  }
+  97% {
+    transform: translateY(0) rotate(360deg) scale(1.12, 0.88);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spark {
+  0%,
+  92% {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  95% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.55);
+  }
 }
 
 .mascot {

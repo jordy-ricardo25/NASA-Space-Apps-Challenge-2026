@@ -1,15 +1,15 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import styles from "./Fuego.module.scss";
+import styles from "./Flamey.module.scss";
 
-export type FuegoMood = "idle" | "talk" | "think" | "listen" | "happy";
+export type FlameyMood = "idle" | "talk" | "think" | "listen" | "happy";
 
-interface FuegoProps {
+interface FlameyProps {
   /** Gravedad del ambiente activo (en g₀): decide la forma de la llama. */
   gravity: number;
   size?: number;
-  mood?: FuegoMood;
+  mood?: FlameyMood;
   /** Reproduce la entrada: una llama que cae y se vuelve esfera. */
   intro?: boolean;
   className?: string;
@@ -31,11 +31,11 @@ function bodyPath(s: number, r: number, cx: number, cy: number): string {
 export const shapeFor = (g: number): number => Math.min(1, Math.cbrt(Math.max(g, 0)));
 
 /**
- * FUEGO, la mascota y asistente de la plataforma: una llama con carita que
+ * Flamey, la mascota y asistente de la plataforma: una llama con carita que
  * cambia de forma con la gravedad del ambiente. En la Tierra es una gota
  * amarilla; en caída libre se vuelve una esfera azul, igual que una llama real.
  */
-export function Fuego({ gravity, size = 96, mood = "idle", intro = false, className }: FuegoProps) {
+export function Flamey({ gravity, size = 96, mood = "idle", intro = false, className }: FlameyProps) {
   const target = shapeFor(gravity);
   const [s, setS] = useState(intro ? 1 : target);
   const sRef = useRef(s);
@@ -59,34 +59,47 @@ export function Fuego({ gravity, size = 96, mood = "idle", intro = false, classN
   }, [target, intro]);
 
   const cx = 60, cy = 92, r = 34;
-  const outer = mix([47, 123, 255], [255, 106, 42], s);
-  const mid = mix([127, 208, 255], [255, 179, 71], s);
-  const core = mix([233, 251, 255], [255, 246, 200], s);
-  const glow = mix([91, 157, 255], [255, 135, 56], s);
+  // Colores de una llama real, sin mezclarlos (azul + naranja daría un malva
+  // apagado en gravedad parcial). La base siempre es azul: zona sin hollín,
+  // con emisión de CH y C₂. Con gravedad, la flotabilidad forma hollín
+  // incandescente y la punta se vuelve amarilla y naranja; cuanto más cerca
+  // de 1 g, más abajo llega esa zona cálida. En microgravedad queda la
+  // esfera azul completa.
+  const core = mix([150, 226, 255], [255, 236, 140], s);
+  const glow = s > 0.7 ? "rgb(255,122,40)" : "rgb(56,136,255)";
+  const warmEnd = Math.min(0.92, 0.92 * s);
   const eyeDy = mood === "think" ? -2.5 : 0;
 
   return (
     <span
-      className={[styles.fuego, intro ? styles.intro : "", styles[mood], className ?? ""].join(" ")}
+      className={[styles.flamey, intro ? styles.intro : "", styles[mood], className ?? ""].join(" ")}
       style={{ "--size": `${size}px`, "--glow": glow } as React.CSSProperties}
       aria-hidden="true"
     >
       <svg viewBox="0 0 120 140" className={styles.svg}>
         <defs>
           <radialGradient id={`b${uid}`} cx="50%" cy="68%" r="62%">
-            <stop offset="0%" stopColor={core} />
-            <stop offset="52%" stopColor={mid} />
-            <stop offset="100%" stopColor={outer} />
+            <stop offset="0%" stopColor="#96e2ff" />
+            <stop offset="52%" stopColor="#349cff" />
+            <stop offset="100%" stopColor="#1654ff" />
           </radialGradient>
+          <linearGradient id={`w${uid}`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#ff5414" />
+            <stop offset={warmEnd * 0.5} stopColor="#ff9e22" />
+            <stop offset={warmEnd * 0.8} stopColor="#ffd84a" stopOpacity="0.85" />
+            <stop offset={warmEnd} stopColor="#ffd84a" stopOpacity="0" />
+          </linearGradient>
           <radialGradient id={`h${uid}`} cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor={glow} stopOpacity="0.55" />
+            <stop offset="0%" stopColor={glow} stopOpacity="0.75" />
             <stop offset="100%" stopColor={glow} stopOpacity="0" />
           </radialGradient>
         </defs>
         <circle cx={cx} cy={cy - 6 * s} r={r + 22} fill={`url(#h${uid})`} className={styles.halo} />
         <g className={styles.body}>
           <path d={bodyPath(s, r, cx, cy)} fill={`url(#b${uid})`} />
-          <path d={bodyPath(s * 0.9, r * 0.6, cx, cy + 7)} fill={core} opacity="0.5" />
+          {warmEnd > 0.02 && <path d={bodyPath(s, r, cx, cy)} fill={`url(#w${uid})`} />}
+          <path d={bodyPath(s, r, cx, cy)} fill="none" stroke="#061a3a" strokeOpacity="0.55" strokeWidth="2.5" strokeLinejoin="round" />
+          <path d={bodyPath(s * 0.9, r * 0.6, cx, cy + 7)} fill={core} opacity="0.62" />
           <ellipse cx={cx - 13} cy={cy - 17} rx="6.5" ry="3.6" fill="#fff" opacity="0.55" transform={`rotate(-28 ${cx - 13} ${cy - 17})`} />
         </g>
         <g className={styles.face}>

@@ -1,7 +1,9 @@
 @use "mixins";
 
 // Guía (O1): biblioteca, ranking, comparador, cobertura y lecciones.
-// Todo cabe en el cuerpo del panel; nada desplaza la página.
+// Nada desplaza la página: si algo no cabe, se desplaza el cuerpo del panel.
+// Las filas nunca bajan de la altura de su contenido (min-content), así que
+// ninguna tarjeta corta su texto.
 
 .note {
   flex: none;
@@ -33,7 +35,7 @@
 
 // ── Biblioteca ───────────────────────────────────────────────────────────────
 .library {
-  flex: 1;
+  flex: 1 0 auto;
   min-height: 0;
   display: flex;
   flex-direction: column;
@@ -42,6 +44,7 @@
 
 .toolbar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 14px;
   flex: none;
@@ -55,32 +58,36 @@
 }
 
 .cards {
-  flex: 1;
-  min-height: 0;
+  flex: 1 0 auto;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  grid-template-rows: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(min-content, 1fr));
   gap: 12px;
 
   @include mixins.narrow {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-template-rows: repeat(4, minmax(0, 1fr));
+    grid-template-rows: repeat(4, minmax(min-content, 1fr));
+  }
+
+  @include mixins.phone {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+    grid-auto-rows: min-content;
   }
 }
 
 .card {
+  position: relative; // el botón del título cubre toda la tarjeta
   display: flex;
   flex-direction: column;
   gap: 4px;
-  min-height: 0;
+  min-width: 0;
   padding: 14px 16px 12px;
   border: 1px solid var(--color-line-soft);
   border-radius: var(--radius-m);
   background: var(--color-panel-raise);
   text-align: left;
-  overflow: hidden;
   transition: border-color 0.15s, transform 0.15s, background 0.15s;
-  @include mixins.focus-ring;
 
   &:hover {
     border-color: var(--color-line-strong);
@@ -96,23 +103,43 @@
   em {
     font-size: 11.5px;
     font-style: normal;
+    line-height: 1.35;
     color: var(--color-text-3);
-    @include mixins.truncate;
+    overflow-wrap: anywhere;
   }
 
   p {
-    flex: 1;
-    min-height: 0;
-    margin-top: 4px;
     font-size: clamp(13px, 1.02vw, 15px);
     line-height: 1.45;
     color: var(--color-text-2);
-    @include mixins.clamp(4);
+  }
+}
 
-    @include mixins.compact-h {
-      @include mixins.clamp(2);
+// Abre la ficha. Su ::after cubre la tarjeta para que toda ella sea clicable
+// sin anidar el botón "Ver más" dentro de otro botón.
+.open {
+  text-align: left;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-m);
+  }
+
+  &:focus-visible {
+    outline: none;
+
+    &::after {
+      outline: 2px solid var(--color-accent);
+      outline-offset: 2px;
     }
   }
+}
+
+.objective {
+  flex: 1 0 auto;
+  margin-top: 4px;
 }
 
 .facts {
@@ -139,7 +166,7 @@
     font-size: 12px;
     text-align: right;
     color: var(--color-text);
-    @include mixins.truncate;
+    overflow-wrap: anywhere;
   }
 
   @include mixins.compact-h {
@@ -159,7 +186,8 @@
   color: var(--color-text-3);
 
   > span:first-child {
-    @include mixins.truncate;
+    min-width: 0;
+    overflow-wrap: anywhere;
   }
 }
 
@@ -203,6 +231,18 @@
       @include mixins.eyebrow;
     }
   }
+
+  @include mixins.phone {
+    flex: 1 0 auto;
+    grid-template-columns: minmax(0, 1fr);
+
+    aside {
+      padding: 0 0 12px;
+      border-right: 0;
+      border-bottom: 1px solid var(--color-line-soft);
+      overflow: visible;
+    }
+  }
 }
 
 .weight input[type="range"] {
@@ -212,17 +252,31 @@
 .rankList {
   min-height: 0;
   display: grid;
-  grid-auto-rows: minmax(0, 1fr);
+  grid-auto-rows: minmax(min-content, 1fr);
   gap: 6px;
   list-style: none;
+  @include mixins.inner-scroll;
+
+  @include mixins.phone {
+    overflow: visible;
+  }
 
   li {
     display: grid;
     grid-template-columns: 30px minmax(150px, 240px) minmax(0, 1fr) 46px 40px;
     align-items: center;
-    gap: 12px;
-    min-height: 0;
-    padding: 0 12px;
+    gap: 4px 12px;
+    padding: 4px 12px;
+
+    @include mixins.phone {
+      grid-template-columns: 24px minmax(0, 1fr) 40px 34px;
+
+      > div {
+        grid-column: 2 / -1;
+        grid-row: 2;
+      }
+    }
+
     border: 1px solid var(--color-line-soft);
     border-radius: var(--radius-s);
     background: var(--color-panel-raise);
@@ -252,8 +306,9 @@
       span {
         display: block;
         font-size: 11.5px;
+        line-height: 1.3;
         color: var(--color-text-3);
-        @include mixins.truncate;
+        overflow-wrap: anywhere;
       }
 
       &:hover b {
@@ -294,11 +349,16 @@
 
 // ── Comparador ───────────────────────────────────────────────────────────────
 .compare {
-  flex: 1;
-  min-height: 0;
+  flex: 1 0 auto;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 10px;
+
+  // En móvil la tabla conserva un ancho legible y se desplaza en horizontal.
+  @include mixins.phone {
+    overflow-x: auto;
+  }
 }
 
 .pick {
@@ -349,6 +409,10 @@
   table-layout: fixed;
   font-size: 13px;
 
+  @include mixins.phone {
+    min-width: 620px;
+  }
+
   th,
   td {
     padding: 5px 12px;
@@ -381,8 +445,7 @@
 
   td {
     color: var(--color-text-2);
-    @include mixins.clamp(3);
-    display: table-cell;
+    overflow-wrap: anywhere;
   }
 
   tr[data-diff="true"] td {
@@ -403,11 +466,15 @@
 
 // ── Cobertura ────────────────────────────────────────────────────────────────
 .coverage {
-  flex: 1;
-  min-height: 0;
+  flex: 1 0 auto;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 8px;
+
+  @include mixins.tablet {
+    overflow-x: auto;
+  }
 
   table {
     flex: 1;
@@ -416,6 +483,10 @@
     height: 100%;
     border-collapse: collapse;
     table-layout: fixed;
+
+    @include mixins.tablet {
+      min-width: 860px;
+    }
   }
 
   thead th {
@@ -469,6 +540,119 @@
   }
 }
 
+// ── Mitos y hechos ───────────────────────────────────────────────────────────
+.myths {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  ul {
+    flex: 1 0 auto;
+    display: grid;
+    grid-auto-rows: minmax(min-content, 1fr);
+    gap: 10px;
+    list-style: none;
+  }
+
+  li {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 0.8fr) minmax(0, 1.6fr);
+    align-items: stretch;
+    gap: 14px;
+    padding: 10px 16px;
+    border: 1px solid var(--color-line-soft);
+    border-radius: var(--radius-m);
+    background: var(--color-panel-raise);
+
+    @include mixins.phone {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 8px;
+      padding: 10px 12px;
+    }
+
+    > i {
+      align-self: center;
+      @include mixins.mono;
+      font-size: 22px;
+      font-style: normal;
+      color: var(--color-text-3);
+    }
+  }
+
+  h3 {
+    @include mixins.eyebrow;
+  }
+
+  p {
+    font-size: clamp(13px, 1.05vw, 15.5px);
+    line-height: 1.4;
+  }
+}
+
+.myth,
+.fact {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  min-width: 0;
+  padding-left: 14px;
+}
+
+.myth {
+  border-left: 3px solid var(--color-risk-high);
+
+  h3 {
+    color: var(--color-risk-high);
+  }
+
+  p {
+    font-weight: 600;
+    color: var(--color-text);
+  }
+}
+
+.fact {
+  border-left: 3px solid var(--color-success);
+
+  h3 {
+    color: var(--color-success);
+  }
+
+  p {
+    color: var(--color-text-2);
+  }
+}
+
+// Pantallas bajas: los cinco mitos deben caber completos, sin texto cortado.
+@include mixins.compact-h {
+  .myths {
+    gap: 6px;
+
+    ul {
+      gap: 6px;
+    }
+
+    li {
+      padding: 5px 14px;
+    }
+
+    p {
+      font-size: 12.5px;
+      line-height: 1.3;
+    }
+
+    > .note {
+      display: none;
+    }
+  }
+
+  .fact > span {
+    display: none;
+  }
+}
+
 // ── Lecciones históricas ─────────────────────────────────────────────────────
 .history {
   flex: 1;
@@ -476,6 +660,16 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
+
+  // En tableta y móvil las lecciones se leen en vertical, completas.
+  @include mixins.tablet {
+    flex: 1 0 auto;
+    grid-template-columns: minmax(0, 1fr);
+
+    article {
+      overflow: visible;
+    }
+  }
 
   article {
     display: flex;
@@ -548,6 +742,10 @@
   background: rgba(3, 10, 20, 0.72);
   backdrop-filter: blur(6px);
   animation: fade 0.2s ease-out;
+
+  @include mixins.phone {
+    padding: 8px;
+  }
 }
 
 .detail {
@@ -602,6 +800,11 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 24px;
   @include mixins.inner-scroll;
+
+  @include mixins.phone {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
 
   dt {
     margin-top: 10px;

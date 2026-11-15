@@ -8,7 +8,7 @@ import { useLang } from "@/shared/hooks/useLang";
 import { appStore, setPrefs } from "@/shared/lib/appStore";
 import { useStore } from "@/shared/lib/store";
 import { ChatPanel } from "./ChatPanel";
-import { Fuego } from "./Fuego";
+import { Flamey } from "./Flamey";
 import styles from "./AssistantDock.module.scss";
 
 const TIPS: Record<Exclude<ActiveEnv["section"], "module" | "cabin">, L> = {
@@ -20,14 +20,17 @@ const TIPS: Record<Exclude<ActiveEnv["section"], "module" | "cabin">, L> = {
   earth: l("En la Tierra vuelvo a ser una gota amarilla: la flotabilidad me estira hacia arriba.", "On Earth I'm a yellow teardrop again: buoyancy stretches me upward."),
   refs: l("Todo número de la plataforma sale de una de estas fuentes.", "Every number on the platform comes from one of these sources."),
   settings: l("Puedes cambiar idioma, unidades y calidad del 3D. Todo se guarda solo en tu navegador.", "You can change language, units and 3D quality. Everything is stored only in your browser."),
-  map: l("Con H, M, L, G, R y T saltas entre secciones; con / me abres a mí.", "Use H, M, L, G, R and T to jump between sections; / opens me."),
+  map: l("Con H, N, M, L, G, R y T saltas entre secciones; con / me abres a mí.", "Use H, N, M, L, G, R and T to jump between sections; / opens me."),
+  challenge: l("Este es el encargo de NASA. Cada objetivo te lleva a la pantalla donde lo resolvemos.", "This is NASA's brief. Each goal takes you to the screen where we solve it."),
   other: l("¿Te ayudo a volver al centro de mando?", "Shall I help you back to the command centre?"),
 };
 
 /**
- * Puesto del asistente: la mascota FUEGO con su mensaje contextual y el chat.
- * FUEGO cambia de forma con la gravedad del ambiente activo. En las vistas 3D
+ * Puesto del asistente: la mascota Flamey con su mensaje contextual y el chat.
+ * Flamey cambia de forma con la gravedad del ambiente activo. En las vistas 3D
  * flota abajo a la izquierda; en las pantallas de trabajo se acopla a la barra lateral.
+ * Mientras el chat está cerrado, cada pocos segundos da un salto y un giro para
+ * recordar que se le puede preguntar.
  */
 export function AssistantDock() {
   const env = useActiveEnv();
@@ -76,12 +79,12 @@ export function AssistantDock() {
   return (
     <>
       <div className={`${styles.dock} ${floating ? styles.floating : styles.docked} ${env.section === "cabin" ? styles.cabin : ""}`}>
-        <button type="button" className={styles.mascot} onClick={() => (bubble ? open() : setAskedKey(key))} aria-label={t(l("Asistente FUEGO", "FUEGO assistant"))}>
-          <Fuego gravity={env.g} size={floating ? (env.section === "home" ? 92 : 68) : 44} intro={intro} mood={chatOpen ? "happy" : "idle"} />
+        <button type="button" className={`${styles.mascot} ${!chatOpen && !bubble && !intro ? styles.nudge : ""}`} onClick={() => (bubble ? open() : setAskedKey(key))} aria-label={t(l("Asistente Flamey", "Flamey assistant"))}>
+          <Flamey gravity={env.g} size={floating ? (env.section === "home" ? 92 : 68) : 44} intro={intro} mood={chatOpen ? "happy" : "idle"} />
         </button>
         {bubble && !chatOpen && (
           <div className={styles.bubble} role="status">
-            <span className={styles.who}>FUEGO</span>
+            <span className={styles.who}>Flamey</span>
             <p>{t(message)}</p>
             <div className={styles.actions}>
               <button type="button" onClick={open}>

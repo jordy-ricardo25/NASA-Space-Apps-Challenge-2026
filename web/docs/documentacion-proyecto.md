@@ -17,7 +17,7 @@ Versión del documento: 14 de noviembre de 2026.
 6. [La física: qué calcula y de dónde sale](#6-la-física-qué-calcula-y-de-dónde-sale)
 7. [Evidencia y alertas](#7-evidencia-y-alertas)
 8. [El mundo 3D](#8-el-mundo-3d)
-9. [El asistente FUEGO](#9-el-asistente-fuego)
+9. [El asistente Flamey](#9-el-asistente-flamey)
 10. [Arquitectura del código](#10-arquitectura-del-código)
 11. [API](#11-api)
 12. [Estado en la URL](#12-estado-en-la-url)
@@ -303,7 +303,20 @@ motor físico la dirección del flujo, el hollín, la intensidad y el parpadeo:
 
 En la cabina, un recuadro muestra la misma llama en la Tierra para comparar.
 
-### 8.3 Rendimiento
+### 8.3 Realismo ligero
+
+Tres efectos pensados para el navegador, sin posprocesado de pantalla completa:
+
+- **Resplandor de la llama:** solo la llama se dibuja en una textura a un cuarto de resolución,
+  se difumina y se suma sobre la imagen. Medido a 1440 × 900: sin diferencia apreciable de
+  fluidez frente a tenerlo apagado.
+- **Reflejos en metales:** entorno de reflexión generado por código (no se descarga nada).
+- **Relieve fino del suelo:** mapa de rugosidad generado por código para el regolito lunar y marciano.
+
+El resplandor se apaga en calidad baja, se desactiva solo si el equipo va justo y se puede
+forzar apagado entrando con `?fx=0` en la URL.
+
+### 8.4 Rendimiento
 
 Un solo `WebGLRenderer` para toda la plataforma. El bucle se pausa si la pestaña está oculta
 y la calidad se ajusta sola (pasos de la llama y resolución) para mantener la fluidez. Los
@@ -311,9 +324,9 @@ modelos pesan menos de 1 MB en total.
 
 ---
 
-## 9. El asistente FUEGO
+## 9. El asistente Flamey
 
-FUEGO es la mascota y el asistente: una llama con carita que **cae y se vuelve esfera**, y
+Flamey es la mascota y el asistente: una llama con carita que **cae y se vuelve esfera**, y
 cuya forma sigue la gravedad del ambiente activo (gota amarilla en 1 g, esfera azul en
 microgravedad).
 
@@ -322,12 +335,43 @@ Responde por capas, de la más segura a la más abierta:
 1. **Pregunta preparada:** respuesta aprobada por el equipo, al instante.
 2. **Análisis del escenario:** cifras calculadas por el motor físico, nunca redactadas.
 3. **Base de conocimiento:** fichas curadas a partir del documento maestro, con sus fuentes.
-4. **Gemini File Search (opcional):** solo si se configuran las claves en el servidor.
+4. **Gemini File Search:** si hay clave y almacén configurados, el modelo responde apoyado en los
+   documentos de la bibliografía y la respuesta cita el documento consultado.
 5. **Sin evidencia:** se abstiene y lo dice.
 
+### Corpus de documentos (RAG)
+
+Los documentos viven en `web/conocimiento/` (carpeta ignorada por git) y se indexan en un
+almacén de Gemini File Search con:
+
+```bash
+npm run ingest
+```
+
+- La primera ejecución crea el almacén y escribe su nombre en `FILE_SEARCH_STORE` dentro de
+  `.env.local`. Las siguientes reutilizan ese almacén: **nunca crean otro**.
+- Solo sube lo que falta. Para añadir un documento nuevo (por ejemplo, el documento final
+  del proyecto), se copia a `web/conocimiento/` y se vuelve a ejecutar el comando.
+- Al terminar indica cuántos archivos quedaron bien y cuántos mal, y guarda el detalle en
+  `conocimiento/ingesta.json`.
+- Estado actual: 24 documentos indexados (22 de la bibliografía, el informe del reto y el
+  documento del proyecto).
+- El documento del proyecto se genera con `npm run knowledge-doc` a partir del contenido
+  verificado de la plataforma (ambientes, fichas, materiales, preguntas preparadas, equipo y
+  esta documentación) y se escribe en `conocimiento/`. La ingesta omite los nombres que ya
+  existen: para reemplazarlo hay que borrarlo antes del almacén.
+- Si la pregunta nombra una investigación (por ejemplo, CFI-G), su ficha de la Guía se pasa
+  al modelo como contexto, porque no todos los datos de las fichas están en los PDF.
+- Modelo: `gemini-3.5-flash-lite` (variable `GEMINI_MODEL`).
+- En Vercel hay que definir `GEMINI_API_KEY`, `GEMINI_MODEL` y `FILE_SEARCH_STORE`.
+
 Cada respuesta muestra su origen, sus fuentes y su nivel de evidencia. El micrófono nunca
-envía solo: llena el campo de texto y la persona pulsa Enviar. La lectura en voz alta usa la
-voz del navegador.
+envía solo: llena el campo de texto y la persona pulsa Enviar. El dictado usa la Web Speech
+API, que funciona en Chrome y Edge; Brave la bloquea y el chat lo avisa.
+
+La respuesta se lee en voz alta al terminar (interruptor "Lectura automática"). Por defecto
+usa la voz del navegador; con `FISH_API_KEY`, `FISH_VOICE_ID` y `FISH_MODEL` en el servidor
+usa Fish Audio (`/api/asistente/tts`) y la interfaz la declara como voz generada con IA.
 
 ---
 
@@ -359,7 +403,7 @@ src/
 │   ├── investigations/   Guía: biblioteca, ranking, comparador, cobertura
 │   ├── radar/ · earth/ · references/ · modules/ · sitemap/ · preferences/
 │   ├── alerts/           Presentación de las alertas
-│   ├── assistant/        FUEGO y el chat
+│   ├── assistant/        Flamey y el chat
 │   ├── shell/            Barras, pantalla de carga y contenedor
 │   └── audio/            Estructura del módulo de música (apagado)
 ├── shared/               Componentes, hooks, estilos y utilidades comunes
@@ -440,7 +484,7 @@ Ejemplo para la demo: `/laboratorio?env=rover&mat=pmma&o2=30&p=70.3&flow=10`.
 | Acento | `#35D8F2` |
 | Éxito | `#00D49A` |
 | Texto | `#EAF3F8` |
-| Cálido (FUEGO y telemetría) | `#FF8738` |
+| Cálido (Flamey y telemetría) | `#FF8738` |
 | Riesgo bajo / precaución / alto | `#00D49A` / `#FFC53D` / `#FF5C6C` |
 | Sin evidencia | `#8497A8`, con patrón rayado |
 | Títulos | Space Grotesk |
@@ -475,7 +519,7 @@ Antes de dar un cambio por terminado: `npm run check` y revisar la pantalla en C
 5. **Traje EVA.** 100 % de O₂: la plataforma avisa que está fuera del rango ensayado.
 6. **Base en Marte.** El mundo cambia a Marte y la evidencia pasa a "sin evidencia": es una brecha real.
 7. **Radar.** Qué misión cerrará cada brecha (LUCI, FM2).
-8. **FUEGO.** Una pregunta del jurado, con su fuente.
+8. **Flamey.** Una pregunta del jurado, con su fuente.
 
 ---
 
@@ -489,10 +533,9 @@ Antes de dar un cambio por terminado: `npm run check` y revisar la pantalla en C
 | Traje EVA | 100 % de O₂ queda fuera del rango ensayado (10–40 %) |
 | Catálogo de investigaciones | 17 fichas verificadas de las 24 de PSI; faltan las restantes |
 | Backend | La plataforma calcula con su propio motor; la conexión con FastAPI y los modelos entrenados del equipo está preparada pero no hecha |
-| Asistente con Gemini | Código listo, sin probar por falta de clave |
+| Asistente con Gemini | Funciona en local con la bibliografía indexada; falta configurar las variables en Vercel |
 | Voz clonada | No implementada; se usa la voz del navegador |
 | Música | Solo la estructura del módulo, apagada |
-| Equipo | Roles y enlaces por confirmar con cada integrante |
 | Fidelidad visual | Modelos con color por vértice, sin texturas ni posprocesado |
 | Repositorio y despliegue | Sin repositorio git ni despliegue en Vercel todavía |
 

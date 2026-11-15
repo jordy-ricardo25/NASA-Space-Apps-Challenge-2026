@@ -101,6 +101,20 @@
   }
 }
 
+/// Tableta: el carrusel pasa a dos tarjetas y las rejillas pierden columnas.
+@mixin tablet {
+  @media (max-width: 1100px) {
+    @content;
+  }
+}
+
+/// Móvil: todo se lee en una sola columna.
+@mixin phone {
+  @media (max-width: 640px) {
+    @content;
+  }
+}
+
 /// Panel dentro del flujo normal (añade position: relative para las marcas de esquina).
 @mixin panel-box($strong: false) {
   position: relative;

@@ -1,5 +1,5 @@
 /**
- * Base de conocimiento del asistente FUEGO: fichas cortas redactadas a partir
+ * Base de conocimiento del asistente Flamey: fichas cortas redactadas a partir
  * del documento maestro, cada una con sus fuentes. El asistente responde con
  * estas fichas (y las cita); si ninguna encaja, dice que no lo encontró.
  */

@@ -64,8 +64,14 @@
   flex-direction: column;
   gap: 12px;
   padding: 14px 16px;
-  overflow: hidden;
+  // Si la ficha no cabe, se desplaza dentro del panel: nada se corta.
+  overflow-x: hidden;
+  @include mixins.inner-scroll;
   border-top: 2px solid var(--accent);
+
+  > * {
+    flex: none;
+  }
 }
 
 .head {
@@ -358,8 +364,9 @@
   span {
     display: block;
     font-size: 10.5px;
+    line-height: 1.3;
     color: var(--color-text-3);
-    @include mixins.truncate;
+    overflow-wrap: anywhere;
   }
 
   em {
@@ -414,13 +421,8 @@
     height: 188px;
   }
 
-  .desc {
-    @include mixins.clamp(3);
-  }
-
   .compInfo {
     min-height: 2.8em;
-    @include mixins.clamp(2);
   }
 
   .specs {

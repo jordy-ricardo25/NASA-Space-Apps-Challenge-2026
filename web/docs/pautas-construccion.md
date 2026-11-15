@@ -56,7 +56,7 @@
 
 ### 1.1 Se conserva el diseño de Zuleica
 
-Se respetan la distribución, la navegación, la paleta, la tipografía, el personaje FUEGO y la plantilla común de escena. [Z]
+Se respetan la distribución, la navegación, la paleta, la tipografía, el personaje Flamey y la plantilla común de escena. [Z]
 
 ### 1.2 Los cuatro módulos son los cuatro ambientes habitables del reto [P]
 
@@ -86,9 +86,9 @@ Velocidad, altitud y batería no se relacionan con el reto. La caja de telemetr�
 | Personaje | Función | Cómo se comporta |
 |---|---|---|
 | **Astronauta** (como en el wireframe: "Bienvenido, comandante") | **Asistente con IA**: chat RAG con citas y voz | Avatar con traje espacial en la celda del chat. Responde preguntas del usuario y de los jurados (§11) |
-| **FUEGO** [Z] | **Guía contextual** | Mensajes fijos y breves en cada escena. No usa IA. Al pulsarlo, ofrece "Pregúntale al astronauta" y abre el chat |
+| **Flamey** [Z] | **Guía contextual** | Mensajes fijos y breves en cada escena. No usa IA. Al pulsarlo, ofrece "Pregúntale al astronauta" y abre el chat |
 
-Así queda claro qué responde una IA (el astronauta) y qué es un texto escrito por el equipo (FUEGO).
+Así queda claro qué responde una IA (el astronauta) y qué es un texto escrito por el equipo (Flamey).
 
 ### 1.6 Nada se presenta como dato real si no lo es
 
@@ -208,7 +208,7 @@ flame-in-freefall/
 │   │   ├── investigations/   # Fichas, ranking, comparador, cobertura
 │   │   ├── laboratory/       # Mapa de inflamabilidad, D²(t), margen
 │   │   ├── alerts/           # Reglas ALR-01…09 y su presentación
-│   │   ├── assistant/        # Astronauta, chat, micrófono, voz, FAQ, prompt; FUEGO (guía)
+│   │   ├── assistant/        # Astronauta, chat, micrófono, voz, FAQ, prompt; Flamey (guía)
 │   │   ├── radar/            # Evidencia → brecha → tecnología
 │   │   ├── earth/            # Casos de transferencia
 │   │   ├── references/       # DOIs, licencias, uso de IA
@@ -231,7 +231,7 @@ flame-in-freefall/
 ├── public/
 │   ├── models/               # .glb optimizados (Meshopt)
 │   ├── media/                # Imágenes y videos de PSI (con licencia)
-│   ├── fuego/                # Personaje FUEGO
+│   ├── fuego/                # Personaje Flamey
 │   ├── astronaut/            # Avatar del asistente
 │   └── audio/                # Vacía hasta implementar la música (§12.3)
 ├── scripts/                  # ingest.ts, probar.ts (asistente), bake de modelos
@@ -325,7 +325,7 @@ Reglas:
 | **Siempre se sabe dónde se está** | Ícono activo en la barra lateral, título de la pantalla y ruta corta debajo de la barra superior (por ejemplo "Modules › Lunar Base") |
 | **Siempre se puede volver** | Flecha de regreso en cada escena; el botón Atrás del navegador funciona porque el estado vive en la URL |
 | **Atajos de teclado** | `H` Home · `M` Módulos · `G` Guía · `/` abre el chat · `Esc` cierra paneles. Se listan en el mapa del sitio |
-| **Primera visita guiada** | FUEGO muestra 3 pasos cortos (elegir ambiente, ver detalles, preguntar al astronauta). Se puede saltar y no vuelve a aparecer |
+| **Primera visita guiada** | Flamey muestra 3 pasos cortos (elegir ambiente, ver detalles, preguntar al astronauta). Se puede saltar y no vuelve a aparecer |
 | **Estados vacíos útiles** | Si no hay datos, se explica por qué y se sugiere qué hacer, en vez de dejar un hueco |
 | **Sin sorpresas** | Ningún botón parece funcionar si no funciona: lo que no está implementado se oculta |
 
@@ -361,7 +361,7 @@ La lista de rutas vive en un solo archivo (`src/content/routes.ts`). La usan la 
 | Zona | Contenido | Comportamiento |
 |---|---|---|
 | Escenario central | Paisaje lunar panorámico con Cohete, Estación (en órbita), Carro y Base | Cada módulo tiene una **etiqueta clicable** (botón accesible) que lleva a `/modulos/<id>` |
-| Mensaje de bienvenida | FUEGO + "¡Bienvenido al centro de exploración! Selecciona uno de los módulos para iniciar tu recorrido." | Caja inferior izquierda; se cierra o continúa; recuerda si se cerró |
+| Mensaje de bienvenida | Flamey + "¡Bienvenido al centro de exploración! Selecciona uno de los módulos para iniciar tu recorrido." | Caja inferior izquierda; se cierra o continúa; recuerda si se cerró |
 | Indicador inferior | Señal de desplazamiento | Discreta |
 
 **Primera versión [P]:** imagen panorámica fija con etiquetas posicionadas. La versión con escena 3D es opcional (prioridad C). Así el Home carga rápido y el 3D pesado queda en las escenas.
@@ -394,7 +394,7 @@ La barra inferior del diseño (Progreso · Misiones · Logros · Ranking) se ada
 | Panel derecho | Ícono + nombre · ID · descripción · especialidades · componentes · **Ver detalles** | Misma jerarquía en las 4 escenas. Cada componente abre una explicación breve |
 | Telemetría | Título + 3 indicadores con valor, unidad y barra | Caja inferior izquierda |
 | Controles 3D | Rotar · Alejar · Acercar · Centrar · Pantalla completa | Barra compacta; tooltip en cada uno. Si una función no existe, no se muestra |
-| FUEGO | Mensaje contextual | Cerca de la telemetría sin tapar el modelo. Al pulsarlo ofrece abrir el chat del astronauta |
+| Flamey | Mensaje contextual | Cerca de la telemetría sin tapar el modelo. Al pulsarlo ofrece abrir el chat del astronauta |
 | Ver detalles | Panel ampliado | Muestra el ambiente con alertas, investigaciones relevantes (ranking) y un botón "Abrir en el Laboratorio" con el escenario ya cargado en la URL |
 
 **Textos propuestos por módulo [P]**
@@ -409,7 +409,7 @@ Reemplazan a los de la ficha, para alinearlos con el reto. Mantienen la longitud
 | Especialidades | Prevención • Detección • Supresión |
 | Componentes | Ventilación de cabina · Detector de humo · Extintor · Materiales de cabina |
 | Telemetría | O₂: 21 % · Presión: 101,3 kPa · Ventilación: 10–20 cm/s |
-| FUEGO | "En la nave el humo no sube: lo mueve la ventilación. Por eso los detectores están en el flujo de aire." |
+| Flamey | "En la nave el humo no sube: lo mueve la ventilación. Por eso los detectores están en el flujo de aire." |
 | Investigaciones clave | Saffire, SAME, FLEX |
 
 **Estación · SPX-002 · Estación espacial**
@@ -420,7 +420,7 @@ Reemplazan a los de la ficha, para alinearlos con el reto. Mantienen la longitud
 | Especialidades | Investigación de combustión • Soporte vital • Experimentos en el CIR |
 | Componentes | Combustion Integrated Rack · Glovebox (MSG) · Muestras sólidas · Gotas de combustible |
 | Telemetría | O₂: 21 % · Presión: 101,3 kPa · Gravedad: ~0 g |
-| FUEGO | "Aquí, sin flotación, la llama se vuelve una esfera azul que vive de la difusión." |
+| Flamey | "Aquí, sin flotación, la llama se vuelve una esfera azul que vive de la difusión." |
 | Investigaciones clave | BASS-II, FLEX, ACME, SAME-R |
 
 **Carro · SPX-003 · Rover presurizado**
@@ -431,7 +431,7 @@ Reemplazan a los de la ficha, para alinearlos con el reto. Mantienen la longitud
 | Especialidades | Atmósfera enriquecida • Volumen reducido • Gravedad lunar |
 | Componentes | Cabina presurizada · Esclusa · Sistemas eléctricos · Materiales interiores |
 | Telemetría | O₂: 30 % · Presión: 70,3 kPa · ppO₂: 21,1 kPa |
-| FUEGO | "Respiras casi el mismo oxígeno que en la Tierra, pero aquí los materiales arden con más facilidad." |
+| Flamey | "Respiras casi el mismo oxígeno que en la Tierra, pero aquí los materiales arden con más facilidad." |
 | Investigaciones clave | CFI-G, LUCI, E-FIELD (proxy) |
 
 **Base · SPX-004 · Base lunar**
@@ -442,7 +442,7 @@ Reemplazan a los de la ficha, para alinearlos con el reto. Mantienen la longitud
 | Especialidades | Habitabilidad • Atmósfera de exploración • Gravedad parcial |
 | Componentes | Módulos habitacionales · Esclusas · Centro de operaciones · Soporte vital |
 | Telemetría | O₂: 34 % · Presión: 56,5 kPa · Gravedad: 0,165 g |
-| FUEGO | "En la Luna la gravedad parcial podría ser el peor caso para un incendio. Te muestro por qué." |
+| Flamey | "En la Luna la gravedad parcial podría ser el peor caso para un incendio. Te muestro por qué." |
 | Investigaciones clave | FM2, LUCI, BRE |
 | Variante Marte | Interruptor Luna / Marte. En Marte: 0,38 g y atmósfera **sin definir**, con evidencia ∅ |
 
@@ -515,9 +515,9 @@ Página con tokens, tipografía, botones y estados. Sirve para revisar el diseñ
 | `--color-accent` | `#35D8F2` | Etiquetas activas, botones y contornos |
 | `--color-success` | `#00D49A` | Estado online y confirmaciones |
 | `--color-text` | `#EAF3F8` | Textos y líneas |
-| `--color-warm` | `#FF8738` | Telemetría y FUEGO |
+| `--color-warm` | `#FF8738` | Telemetría y Flamey |
 
-**Colores de estado agregados [A].** Las alertas necesitan su propia escala, distinta del naranja de FUEGO:
+**Colores de estado agregados [A].** Las alertas necesitan su propia escala, distinta del naranja de Flamey:
 
 | Token | Uso |
 |---|---|
@@ -799,7 +799,7 @@ Detalles técnicos [A]:
 | Tipo | Regla |
 |---|---|
 | Modelos y fotos de NASA | Se pueden usar citando la fuente. **Sin logos ni marcas de NASA** |
-| Imágenes generadas con IA (por ejemplo, los renders de referencia del diseño o el personaje FUEGO, si se hizo con IA) | Solo con **marca de agua visible** indicando que son generadas con IA, y declaradas en el campo de uso de IA |
+| Imágenes generadas con IA (por ejemplo, los renders de referencia del diseño o el personaje Flamey, si se hizo con IA) | Solo con **marca de agua visible** indicando que son generadas con IA, y declaradas en el campo de uso de IA |
 | Fuentes tipográficas | Licencia abierta (OFL); se registran en `/referencias` |
 | Videos e imágenes de PSI | Citar el DOI de la investigación; verificar la licencia |
 
@@ -970,12 +970,12 @@ En el plan Max, Fable puede usar hasta el 50 % del límite semanal y lo consume 
 | F0 · Base | Proyecto, dependencias, tokens, fuentes, `CLAUDE.md`, `.env.example` | M | `build` pasa y se despliega en Vercel |
 | F1 · Shell | Barra superior con chip de ambiente, barra lateral, panel del Equipo, rutas desde `routes.ts`, transiciones, idioma, `useScenarioParams` | M | Se navega por todas las rutas sin recargar el shell |
 | F2 · Datos | Sobre común, `apiClient`, rutas `/api` simuladas, insignias de modo y evidencia | M | Las rutas responden con `data_mode: "simulation"` |
-| F3 · Home | Panorama lunar, etiquetas, FUEGO de bienvenida | M | Cada etiqueta abre su módulo |
+| F3 · Home | Panorama lunar, etiquetas, Flamey de bienvenida | M | Cada etiqueta abre su módulo |
 | F4 · Escenas | Plantilla común + 4 módulos con textos, telemetría, Ver detalles y visor 3D | M | Las 4 escenas tienen la misma estructura |
 | F5 · Laboratorio | Mapa de inflamabilidad, margen, alertas, ficha del modelo | M | El enlace de la demo carga el escenario lunar con ALR-03 y ALR-04 |
 | F6 · Guía | Biblioteca, ranking, comparador, cobertura | M | 24 fichas (o las verificadas) con fuente |
 | F7 · Radar y Referencias | Grafo de brechas y página de DOIs | M | Cada nodo tiene fuente |
-| F8 · Asistente | Astronauta con chat RAG, micrófono controlado (§11.3) y FUEGO como guía | M | Pasa la prueba automática de la guía y el protocolo de §11.4 |
+| F8 · Asistente | Astronauta con chat RAG, micrófono controlado (§11.3) y Flamey como guía | M | Pasa la prueba automática de la guía y el protocolo de §11.4 |
 | F9 · Extras | D²(t), llama 3D en el Laboratorio, Tierra, lecciones, progreso, mapa del sitio | S/C | — |
 | F1 (incluido) · Audio | Solo la estructura del módulo `audio/`, apagada y con comentarios (§12.3). La implementación queda para después del hackathon o si sobra tiempo | W | El flag apagado no muestra nada |
 | F10 · Pulido | Responsive, accesibilidad, rendimiento, textos en inglés, recorrido de la demo | M | Tres recorridos seguidos sin error |
@@ -988,7 +988,7 @@ En el plan Max, Fable puede usar hasta el 50 % del límite semanal y lo consume 
 |---|---|---|
 | 1 | Aprobar el nuevo contenido del Cohete y la telemetría atmosférica (§1.3, §1.4, §6.3) | Juan y Zuleica |
 | 2 | Nombre visible de la plataforma: "Space Exploration Simulator" no menciona el fuego, que es el centro del reto | Equipo |
-| 3 | Si FUEGO, el astronauta o los renders se hicieron con IA, agregar marca de agua o reemplazarlos | Zuleica |
+| 3 | Si Flamey, el astronauta o los renders se hicieron con IA, agregar marca de agua o reemplazarlos | Zuleica |
 | 4 | Valores exactos de los colores de alerta (§7.1) | Zuleica |
 | 5 | Nombre final del repositorio | Juan |
 | 6 | Modelos 3D disponibles para Cohete, Carro y Base | Ricardo |

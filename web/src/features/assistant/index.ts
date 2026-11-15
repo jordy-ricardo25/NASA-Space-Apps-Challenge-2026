@@ -1,3 +1,3 @@
-/** API pública de la feature "assistant" (mascota FUEGO y chat con fuentes). */
+/** API pública de la feature "assistant" (mascota Flamey y chat con fuentes). */
 export { AssistantDock } from "./components/AssistantDock";
-export { Fuego } from "./components/Fuego";
+export { Flamey } from "./components/Flamey";

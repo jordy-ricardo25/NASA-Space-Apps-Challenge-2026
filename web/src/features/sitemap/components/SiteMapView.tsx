@@ -19,7 +19,7 @@ const GROUPS: { goal: RouteDef["goal"][]; title: L; text: L }[] = [
 
 const KEYS: { keys: string; label: L }[] = [
   ...ROUTES.filter((r) => r.key).map((r) => ({ keys: r.key!, label: r.label })),
-  { keys: "/", label: l("Abrir el asistente FUEGO", "Open the FUEGO assistant") },
+  { keys: "/", label: l("Abrir el asistente Flamey", "Open the Flamey assistant") },
   { keys: "Esc", label: l("Cerrar paneles", "Close panels") },
 ];
 

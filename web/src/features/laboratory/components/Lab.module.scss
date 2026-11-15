@@ -38,7 +38,13 @@
   padding: 12px 14px 12px;
   // Deja libre la esquina donde vive el guía.
   padding-bottom: 12px;
-  overflow: hidden;
+  // Si los controles no caben, se desplazan dentro del panel (nunca se cortan).
+  overflow-x: hidden;
+  @include mixins.inner-scroll;
+
+  > * {
+    flex: none;
+  }
 
   header {
     span {
@@ -92,9 +98,11 @@
     border-bottom: 2px solid transparent;
     font: 600 13px var(--font-display);
     text-align: left;
+    line-height: 1.25;
     color: var(--color-text-3);
     transition: all 0.15s;
-    @include mixins.truncate;
+    overflow-wrap: anywhere;
+    @include mixins.focus-ring;
 
     &:first-child {
       border-left: 0;
@@ -123,6 +131,8 @@
   }
 }
 
+// Las gráficas conservan una altura mínima legible; si el análisis no cabe,
+// se desplaza este cuerpo en vez de cortar las cifras o las notas.
 .body {
   flex: 1;
   min-height: 0;
@@ -130,6 +140,12 @@
   flex-direction: column;
   gap: 8px;
   padding: 10px 14px 10px;
+  overflow-x: hidden;
+  @include mixins.inner-scroll;
+
+  > * {
+    flex-shrink: 0;
+  }
 }
 
 .lede {
@@ -143,8 +159,8 @@
 }
 
 .maps {
-  flex: 1;
-  min-height: 0;
+  flex: 1 0 0;
+  min-height: 260px;
   display: grid;
   // Mapa del ambiente activo en grande; los otros dos regímenes a la derecha.
   grid-template-columns: minmax(0, 1.9fr) minmax(0, 1fr);
@@ -216,10 +232,10 @@
 }
 
 .split {
-  flex: 1;
-  min-height: 0;
+  flex: 1 0 auto;
   display: grid;
-  grid-template-rows: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(200px, 1fr) auto;
   gap: 10px;
 }
 
@@ -262,6 +278,7 @@
     @include mixins.mono;
     font-size: 15px;
     color: var(--color-text);
+    overflow-wrap: anywhere;
   }
 
   p {
@@ -369,7 +386,9 @@
   dt {
     @include mixins.eyebrow;
     font-size: 9px;
-    @include mixins.truncate;
+    letter-spacing: 0.08em;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
   }
 
   dd {
@@ -551,5 +570,66 @@
 
   .cardGrid {
     grid-template-columns: 1fr;
+  }
+
+  .facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .bars {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+// Móvil: controles, análisis y margen se apilan y se lee todo en vertical.
+@include mixins.phone {
+  .lab {
+    display: flex;
+    flex-direction: column;
+    pointer-events: auto;
+    @include mixins.inner-scroll;
+  }
+
+  .left,
+  .main,
+  .right {
+    flex: none;
+    overflow: visible;
+  }
+
+  .right {
+    display: flex;
+  }
+
+  .scroll {
+    flex: none;
+    overflow: visible;
+  }
+
+  .tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .body {
+    flex: none;
+    overflow: visible;
+  }
+
+  .maps {
+    flex: none;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: repeat(3, 270px);
+  }
+
+  .split {
+    grid-template-rows: 260px auto;
+  }
+
+  .bars {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .overlay {
+    padding: 8px;
   }
 }

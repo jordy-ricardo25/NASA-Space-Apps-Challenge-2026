@@ -28,6 +28,8 @@ const TIPS: Record<Exclude<ActiveEnv["section"], "module" | "cabin">, L> = {
  * Puesto del asistente: la mascota Flamey con su mensaje contextual y el chat.
  * Flamey cambia de forma con la gravedad del ambiente activo. En las vistas 3D
  * flota abajo a la izquierda; en las pantallas de trabajo se acopla a la barra lateral.
+ * Mientras el chat está cerrado, cada pocos segundos da un salto y un giro para
+ * recordar que se le puede preguntar.
  */
 export function AssistantDock() {
   const env = useActiveEnv();
@@ -76,7 +78,7 @@ export function AssistantDock() {
   return (
     <>
       <div className={`${styles.dock} ${floating ? styles.floating : styles.docked} ${env.section === "cabin" ? styles.cabin : ""}`}>
-        <button type="button" className={styles.mascot} onClick={() => (bubble ? open() : setAskedKey(key))} aria-label={t(l("Asistente Flamey", "Flamey assistant"))}>
+        <button type="button" className={`${styles.mascot} ${!chatOpen && !bubble && !intro ? styles.nudge : ""}`} onClick={() => (bubble ? open() : setAskedKey(key))} aria-label={t(l("Asistente Flamey", "Flamey assistant"))}>
           <Flamey gravity={env.g} size={floating ? (env.section === "home" ? 92 : 68) : 44} intro={intro} mood={chatOpen ? "happy" : "idle"} />
         </button>
         {bubble && !chatOpen && (

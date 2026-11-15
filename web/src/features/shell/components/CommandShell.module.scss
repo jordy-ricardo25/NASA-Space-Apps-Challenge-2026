@@ -32,12 +32,12 @@
   position: fixed;
   inset: var(--topbar-h) 0 0 var(--sidebar-w);
   z-index: 10;
+  // El área deja pasar el ratón al 3D y sus hijos lo heredan; cada panel se
+  // activa con su propio `pointer-events: auto`. No se repite aquí una regla
+  // para los hijos: tendría la misma especificidad que la del panel y, según
+  // el orden en que se empaquete el CSS, lo dejaría sin interacción.
   pointer-events: none;
   overflow: hidden;
-
-  > * {
-    pointer-events: none;
-  }
 }
 
 .toast {

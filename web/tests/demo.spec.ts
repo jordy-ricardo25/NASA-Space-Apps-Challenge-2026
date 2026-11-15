@@ -12,7 +12,7 @@ async function expectNoScroll(page: Page): Promise<void> {
   expect(sw).toBeLessThanOrEqual(iw);
 }
 
-const ROUTES = ["/", "/modulos", "/modulos/nave", "/modulos/estacion", "/modulos/rover", "/modulos/base", "/modulos/base?view=cabina", "/modulos/traje", "/modulos/traje?view=cabina", "/laboratorio?env=traje&mat=nomex", "/referencias?q=saffire&mission=saffire", "/laboratorio", "/laboratorio?tab=droplet", "/laboratorio?tab=smoke", "/laboratorio?tab=cabin", "/guia", "/guia?tab=ranking", "/guia?tab=compare", "/guia?tab=coverage", "/guia?tab=history", "/radar", "/radar?tab=gaps", "/tierra", "/referencias", "/ajustes", "/mapa"];
+const ROUTES = ["/", "/modulos", "/modulos/nave", "/modulos/estacion", "/modulos/rover", "/modulos/base", "/modulos/base?view=cabina", "/modulos/traje", "/modulos/traje?view=cabina", "/laboratorio?env=traje&mat=nomex", "/referencias?q=saffire&mission=saffire", "/laboratorio", "/laboratorio?tab=droplet", "/laboratorio?tab=smoke", "/laboratorio?tab=cabin", "/guia", "/guia?tab=ranking", "/guia?tab=compare", "/guia?tab=coverage", "/guia?tab=myths", "/guia?tab=history", "/radar", "/radar?tab=gaps", "/tierra", "/referencias", "/ajustes", "/mapa"];
 
 test("todas las rutas cargan sin errores de consola ni desplazamiento", async ({ page }) => {
   test.setTimeout(300_000);

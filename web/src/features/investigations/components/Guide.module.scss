@@ -469,6 +469,117 @@
   }
 }
 
+// ── Mitos y hechos ───────────────────────────────────────────────────────────
+.myths {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  ul {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-auto-rows: minmax(0, 1fr);
+    gap: 10px;
+    list-style: none;
+  }
+
+  li {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 0.8fr) minmax(0, 1.6fr);
+    align-items: stretch;
+    gap: 14px;
+    min-height: 0;
+    padding: 10px 16px;
+    border: 1px solid var(--color-line-soft);
+    border-radius: var(--radius-m);
+    background: var(--color-panel-raise);
+    overflow: hidden;
+
+    > i {
+      align-self: center;
+      @include mixins.mono;
+      font-size: 22px;
+      font-style: normal;
+      color: var(--color-text-3);
+    }
+  }
+
+  h3 {
+    @include mixins.eyebrow;
+  }
+
+  p {
+    font-size: clamp(13px, 1.05vw, 15.5px);
+    line-height: 1.4;
+  }
+}
+
+.myth,
+.fact {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  min-width: 0;
+  padding-left: 14px;
+}
+
+.myth {
+  border-left: 3px solid var(--color-risk-high);
+
+  h3 {
+    color: var(--color-risk-high);
+  }
+
+  p {
+    font-weight: 600;
+    color: var(--color-text);
+  }
+}
+
+.fact {
+  border-left: 3px solid var(--color-success);
+
+  h3 {
+    color: var(--color-success);
+  }
+
+  p {
+    color: var(--color-text-2);
+  }
+}
+
+// Pantallas bajas: los cinco mitos deben caber completos, sin texto cortado.
+@include mixins.compact-h {
+  .myths {
+    gap: 6px;
+
+    ul {
+      gap: 6px;
+    }
+
+    li {
+      padding: 5px 14px;
+    }
+
+    p {
+      font-size: 12.5px;
+      line-height: 1.3;
+    }
+
+    > .note {
+      display: none;
+    }
+  }
+
+  .fact > span {
+    display: none;
+  }
+}
+
 // ── Lecciones históricas ─────────────────────────────────────────────────────
 .history {
   flex: 1;

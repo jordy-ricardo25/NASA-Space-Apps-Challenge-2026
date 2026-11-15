@@ -3,7 +3,7 @@ import { ModulesView } from "@/features/modules/components/ModulesView";
 
 export const metadata: Metadata = { title: "Modules · Flame in Freefall" };
 
-/** Selector de módulos: los cuatro ambientes y las herramientas de análisis. */
+/** Selector de módulos: los ambientes habitables y las herramientas de análisis. */
 export default function ModulesPage() {
   return <ModulesView />;
 }

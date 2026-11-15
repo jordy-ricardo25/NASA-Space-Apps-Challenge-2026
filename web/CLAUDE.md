@@ -33,7 +33,11 @@ PROHIBIDO: Tailwind, Bootstrap, TanStack.
 9. "Sin evidencia" nunca en verde. Toda alerta: color + ícono + texto.
 10. Rutas definidas una sola vez en src/content/routes.ts.
 11. Textos bilingües con l("es", "en") en src/content.
-12. El micrófono del asistente nunca envía solo: llena el campo de texto.
+12. El micrófono del asistente llena el campo de texto. Con "Envío automático"
+    (activo por defecto, se puede apagar en el chat) la pregunta se envía tras
+    una pausa sin voz; apagado, la persona pulsa Enviar.
+12b. El chat responde en el idioma de la pregunta con una sola petición al
+     modelo: nunca se traduce la respuesta con una segunda llamada.
 13. Música: NO implementarla (src/features/audio está apagado a propósito).
 14. Secretos solo en el servidor; nunca en NEXT_PUBLIC_.
 

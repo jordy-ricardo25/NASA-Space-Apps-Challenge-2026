@@ -55,6 +55,14 @@ interface DictationOptions {
   onText: (text: string) => void;
   /** Tiempo máximo de escucha antes de apagarse solo. */
   maxMs?: number;
+  /**
+   * Se llama cuando la persona deja de hablar: pasan `silenceMs` sin que el
+   * reconocimiento entregue texto nuevo. Recibe el texto completo del campo.
+   * Si no se pasa, el dictado solo llena el campo.
+   */
+  onSilence?: (text: string) => void;
+  /** Pausa (ms) que se espera antes de dar por terminada la intervención. */
+  silenceMs?: number;
 }
 
 export interface Dictation {
@@ -82,7 +90,7 @@ const join = (a: string, b: string): string => [a.trim(), b.trim()].filter(Boole
  * mientras la persona no lo detenga y quede tiempo, la escucha se reabre sin
  * perder lo ya dictado. Expone el estado y los errores para mostrarlos.
  */
-export function useDictation({ onText, maxMs = 30000 }: DictationOptions): Dictation {
+export function useDictation({ onText, maxMs = 30000, onSilence, silenceMs = 1800 }: DictationOptions): Dictation {
   // El chat solo se monta en el navegador, así que se puede consultar aquí.
   const [supported] = useState(() => !!getRecognition());
   const [phase, setPhase] = useState<DictationPhase>("idle");
@@ -106,16 +114,23 @@ export function useDictation({ onText, maxMs = 30000 }: DictationOptions): Dicta
   const ticker = useRef<ReturnType<typeof setInterval>>(undefined);
   const beginRef = useRef<() => void>(() => undefined);
   const onTextRef = useRef(onText);
+  const onSilenceRef = useRef(onSilence);
+  const silence = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const latest = useRef(""); // último texto entregado al campo
 
   useEffect(() => {
     onTextRef.current = onText;
-  }, [onText]);
+    onSilenceRef.current = onSilence;
+    // Si se apaga el envío automático mientras se escucha, se anula la espera.
+    if (!onSilence) clearTimeout(silence.current);
+  }, [onText, onSilence]);
 
   /** Cierra la escucha y deja en pantalla por qué terminó. */
   const finish = useCallback(() => {
     want.current = false;
     rec.current = null;
     clearTimeout(timeout.current);
+    clearTimeout(silence.current);
     clearInterval(ticker.current);
     const heard = join(done.current, session.current).length > 0;
     setNotice(quiet.current ? null : reason.current ?? (lastError.current === "no-speech" && !heard ? { kind: "error", code: "no-speech" } : { kind: "info", code: heard ? "stopped" : "stopped-empty" }));
@@ -134,7 +149,10 @@ export function useDictation({ onText, maxMs = 30000 }: DictationOptions): Dicta
     r.maxAlternatives = 1;
     session.current = "";
     r.onstart = () => setPhase((p) => (p === "starting" ? "waiting" : p));
-    r.onspeechstart = () => setPhase("hearing");
+    r.onspeechstart = () => {
+      clearTimeout(silence.current); // volvió a hablar: se cancela el envío pendiente
+      setPhase("hearing");
+    };
     r.onspeechend = () => setPhase((p) => (p === "hearing" ? "waiting" : p));
     r.onresult = (e) => {
       if (!want.current) return; // ya se detuvo o se envió: no se vuelve a llenar el campo
@@ -149,7 +167,16 @@ export function useDictation({ onText, maxMs = 30000 }: DictationOptions): Dicta
       session.current = fin;
       lastError.current = null;
       setPhase("hearing");
-      onTextRef.current(join(base.current, join(join(done.current, fin), interim)));
+      latest.current = join(base.current, join(join(done.current, fin), interim));
+      onTextRef.current(latest.current);
+      // Debounce: cada texto nuevo reinicia la espera; si pasa la pausa sin
+      // más voz, la intervención terminó.
+      clearTimeout(silence.current);
+      if (onSilenceRef.current && latest.current.trim()) {
+        silence.current = setTimeout(() => {
+          if (want.current && latest.current.trim()) onSilenceRef.current?.(latest.current);
+        }, silenceMs);
+      }
     };
     r.onerror = (e) => {
       const code = e.error ?? "unknown";
@@ -185,7 +212,7 @@ export function useDictation({ onText, maxMs = 30000 }: DictationOptions): Dicta
       reason.current = { kind: "error", code: "start-failed" };
       finish();
     }
-  }, [finish]);
+  }, [finish, silenceMs]);
 
   useEffect(() => {
     beginRef.current = begin;
@@ -196,6 +223,7 @@ export function useDictation({ onText, maxMs = 30000 }: DictationOptions): Dicta
     if (!want.current && !rec.current) return;
     quiet.current = silent;
     want.current = false;
+    clearTimeout(silence.current);
     if (rec.current) rec.current.stop();
     else finish();
   }, [finish]);
@@ -211,6 +239,7 @@ export function useDictation({ onText, maxMs = 30000 }: DictationOptions): Dicta
       reason.current = null;
       quiet.current = false;
       lastError.current = null;
+      latest.current = text;
       shortSessions.current = 0;
       deadline.current = performance.now() + maxMs;
       setNotice(null);
@@ -236,6 +265,7 @@ export function useDictation({ onText, maxMs = 30000 }: DictationOptions): Dicta
     () => () => {
       want.current = false;
       clearTimeout(timeout.current);
+      clearTimeout(silence.current);
       clearInterval(ticker.current);
       if (rec.current) {
         rec.current.onend = null;

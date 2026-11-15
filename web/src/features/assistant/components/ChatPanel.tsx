@@ -28,12 +28,12 @@ interface Message {
 /** Longitud máxima de una pregunta (la misma que valida la ruta). */
 const MAX_QUESTION = 400;
 
-type ChatValue = { text: string; origin: Message["origin"]; citations: Message["citations"] };
+type ChatValue = { text: string; lang?: Lang; origin: Message["origin"]; citations: Message["citations"] };
 
 /**
  * Chat del asistente Flamey: respuestas con origen, fuentes y nivel de
- * evidencia; dictado controlado (el micrófono llena el campo de texto y la
- * persona pulsa Enviar) y lectura automática de la respuesta en voz alta.
+ * evidencia, en el idioma de cada pregunta; dictado (el micrófono llena el
+ * campo y, con el envío automático, la pregunta sale al terminar de hablar) y lectura automática de la respuesta en voz alta.
  * Mientras el asistente habla, el micrófono queda deshabilitado.
  */
 export function ChatPanel({ env }: { env: ActiveEnv }) {
@@ -44,8 +44,15 @@ export function ChatPanel({ env }: { env: ActiveEnv }) {
   // Idioma de escucha: separado del idioma de la interfaz.
   const [listenLang, setListenLang] = useState<Lang>(lang);
   const autoSpeak = useStore(appStore, (st) => st.autoSpeak);
+  const autoSend = useStore(appStore, (st) => st.autoSend);
+  // Idioma de la conversación: el de la primera pregunta. Solo decide cuando
+  // una pregunta posterior es demasiado corta para reconocer su idioma.
+  const convLang = useRef<Lang | null>(null);
+  const askRef = useRef<(question: string) => void>(() => undefined);
   const onDictated = useCallback((text: string) => setInput(text.slice(0, MAX_QUESTION)), []);
-  const dictation = useDictation({ onText: onDictated });
+  // Debounce del dictado: tras una pausa sin voz, la pregunta se envía sola.
+  const onSilence = useCallback((text: string) => askRef.current(text.slice(0, MAX_QUESTION)), []);
+  const dictation = useDictation({ onText: onDictated, onSilence: autoSend ? onSilence : undefined });
   const speech = useSpeech();
   const { listening, stop: stopDictation } = dictation;
   const { speaking, speak, stop: stopSpeaking } = speech;
@@ -77,15 +84,18 @@ export function ChatPanel({ env }: { env: ActiveEnv }) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             question: q,
-            lang,
+            // Pista de idioma: el de la conversación o, al empezar, el de la interfaz.
+            lang: convLang.current ?? lang,
             context: s ? { module: env.module?.id, mat: s.mat, g: s.g, o2: s.o2, p: s.p, vent: s.vent } : undefined,
           }),
         });
         if (!res.ok) throw new Error("chat");
         const data = (await res.json()) as ApiEnvelope<ChatValue>;
         setMessages((m) => [...m, { role: "bot", text: data.value.text, origin: data.value.origin, citations: data.value.citations, evidence: data.evidence_level }]);
+        const answered = data.value.lang ?? lang;
+        convLang.current ??= answered;
         // Lectura automática: solo el texto de la respuesta, nunca los chips de las fuentes.
-        if (appStore.get().autoSpeak) speak(data.value.text, lang);
+        if (appStore.get().autoSpeak) speak(data.value.text, answered);
       } catch {
         setMessages((m) => [...m, { role: "bot", text: t(l("No pude conectar con el servicio. Inténtalo de nuevo.", "I couldn't reach the service. Please try again.")), origin: "none" }]);
       } finally {
@@ -95,7 +105,12 @@ export function ChatPanel({ env }: { env: ActiveEnv }) {
     [busy, env, lang, speak, stopDictation, stopSpeaking, t],
   );
 
-  // Dictado controlado: llena el campo y nunca envía solo. Se apaga a los 30 s.
+  useEffect(() => {
+    askRef.current = (question: string) => void ask(question);
+  }, [ask]);
+
+  // Dictado: llena el campo en vivo y se apaga a los 30 s. Con el envío
+  // automático activo, la pregunta se envía cuando la persona deja de hablar.
   const toggleMic = (): void => {
     if (listening) {
       stopDictation(false);
@@ -105,6 +120,8 @@ export function ChatPanel({ env }: { env: ActiveEnv }) {
     dictation.start(listenLang, input);
     inputRef.current?.focus();
   };
+
+  const toggleAutoSend = (on: boolean): void => setPrefs({ autoSend: on });
 
   const toggleAutoSpeak = (on: boolean): void => {
     setPrefs({ autoSpeak: on });
@@ -182,7 +199,7 @@ export function ChatPanel({ env }: { env: ActiveEnv }) {
         )}
       </div>
 
-      <VoiceBar dictation={dictation} speech={speech} listenLang={listenLang} onListenLang={setListenLang} autoSpeak={autoSpeak} onAutoSpeak={toggleAutoSpeak} />
+      <VoiceBar dictation={dictation} speech={speech} listenLang={listenLang} onListenLang={setListenLang} autoSpeak={autoSpeak} onAutoSpeak={toggleAutoSpeak} autoSend={autoSend} onAutoSend={toggleAutoSend} />
       <form
         className={styles.form}
         onSubmit={(e) => {
@@ -198,7 +215,7 @@ export function ChatPanel({ env }: { env: ActiveEnv }) {
             disabled={speaking}
             aria-pressed={listening}
             aria-label={listening ? t(l("Detener el micrófono", "Stop the microphone")) : t(l("Dictar con el micrófono", "Dictate with the microphone"))}
-            title={speaking ? t(l("El micrófono se activa cuando termina la voz", "The microphone is available when the voice ends")) : t(l("Dictar (no envía solo)", "Dictate (never auto-sends)"))}
+            title={speaking ? t(l("El micrófono se activa cuando termina la voz", "The microphone is available when the voice ends")) : t(l("Dictar con el micrófono", "Dictate with the microphone"))}
           >
             <Mic size={16} aria-hidden="true" />
           </button>

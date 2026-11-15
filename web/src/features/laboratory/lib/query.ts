@@ -11,7 +11,7 @@ export const LAB_TABS = ["map", "droplet", "smoke", "cabin"] as const;
 export type LabTab = (typeof LAB_TABS)[number];
 
 export const labSchema = z.object({
-  env: z.enum(["nave", "estacion", "rover", "traje", "base"]).catch("rover"),
+  env: z.enum(["nave", "estacion", "rover", "traje", "base", "marte"]).catch("rover"),
   atm: z.string().max(24).optional().catch(undefined),
   mat: z.enum(materialIds).optional().catch(undefined),
   o2: z.coerce.number().min(8).max(100).optional().catch(undefined),

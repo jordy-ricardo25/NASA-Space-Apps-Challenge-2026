@@ -54,13 +54,13 @@ studying rockets or propellants.
 ## 🚀 Our solution
 
 **Flame in Freefall is a mission command center on a single screen.** One persistent 3D world
-(a lunar site with a crewed spacecraft, the Space Station, a pressurised rover, an EVA suit and a
-Mars base) and panels that change with the route. Pick an environment and everything follows it:
+(a lunar site with a crewed spacecraft, the Space Station, a pressurised rover, an EVA suit, a
+lunar base and a Mars base) and panels that change with the route. Pick an environment and everything follows it:
 the ranking of investigations, the flammability margin, the alerts, the shape of the flame and
 the context of the assistant.
 
 <div align="center">
-<img src="docs/media/home.jpg" alt="Lunar site with the five habitable environments" width="100%" />
+<img src="docs/media/home.jpg" alt="Lunar site with the six habitable environments" width="100%" />
 </div>
 
 What makes it different:
@@ -90,7 +90,7 @@ What makes it different:
 </tr>
 <tr>
 <td><img src="docs/media/challenge.jpg" alt="Our challenge page" /><br /><b>Our challenge</b> · NASA's brief and where each goal is solved</td>
-<td><img src="docs/media/modules.jpg" alt="Modules carousel" /><br /><b>Modules</b> · the five environments and the analysis tools</td>
+<td><img src="docs/media/modules.jpg" alt="Modules carousel" /><br /><b>Modules</b> · the six environments and the analysis tools</td>
 </tr>
 </table>
 
@@ -100,6 +100,7 @@ What makes it different:
 | Space station (ISS) | µg | 21% O₂ · 101.3 kPa | Direct: PSI data were measured here |
 | Pressurised lunar rover | 0.165 g | 30% O₂ · 70.3 kPa | No direct data: partial gravity |
 | EVA suit | 0.165 g or µg | 100% O₂ · 29.6 kPa | Outside the tested range |
+| Lunar base | 0.165 g | 34% O₂ · 56.5 kPa | No direct data: partial gravity |
 | Mars base | 0.38 g | 34% O₂ · 56.5 kPa (hypothesis) | No evidence: undefined atmosphere |
 
 ## 🔬 Scientific rigor

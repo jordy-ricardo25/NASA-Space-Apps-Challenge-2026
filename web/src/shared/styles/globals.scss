@@ -70,6 +70,16 @@ a {
   }
 }
 
+// Los enlaces y las imágenes no se arrastran como objetos: al mover el ratón
+// sobre ellos se selecciona texto o se pulsa, nunca aparece el "fantasma" de
+// arrastre del navegador.
+a,
+img,
+svg {
+  -webkit-user-drag: none;
+  user-drag: none;
+}
+
 ul,
 ol {
   margin: 0;

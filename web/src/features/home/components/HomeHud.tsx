@@ -15,7 +15,7 @@ import styles from "./HomeHud.module.scss";
 
 /**
  * Vista general: etiquetas clicables sobre cada módulo del sitio lunar y el
- * tablero de los cuatro ambientes habitables del reto.
+ * tablero de los ambientes habitables del reto.
  */
 export function HomeHud() {
   const { t, lang } = useLang();

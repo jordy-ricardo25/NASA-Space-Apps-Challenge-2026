@@ -178,7 +178,7 @@ export class World {
     const terrain = buildTerrain();
     this.heightAt = terrain.heightAt;
     this.scene.add(terrain.mesh);
-    // Segundo terreno, con polvo marciano, lejos del sitio lunar: ahí vive la base.
+    // Segundo terreno, con polvo marciano, lejos del sitio lunar: ahí vive la base de Marte.
     const mars = buildTerrain("mars");
     mars.mesh.position.x = MARS_X;
     this.scene.add(mars.mesh);
@@ -193,8 +193,8 @@ export class World {
     const labels: Record<string, L> = {
       iss: { es: "Estación espacial acoplada", en: "Space station docked" },
       rover: { es: "Rover presurizado listo", en: "Pressurised rover ready" },
-      "habitat-a": { es: "Hábitat marciano desplegado", en: "Mars habitat deployed" },
-      "habitat-b": { es: "Módulos de la base en línea", en: "Base modules online" },
+      "habitat-a": { es: "Hábitats de las bases desplegados", en: "Base habitats deployed" },
+      "habitat-b": { es: "Módulos de las bases en línea", en: "Base modules online" },
       rocket: { es: "Nave en plataforma", en: "Spacecraft on the pad" },
       tower: { es: "Torre de servicio conectada", en: "Service tower connected" },
       astronaut: { es: "Tripulación en superficie", en: "Crew on the surface" },
@@ -228,9 +228,9 @@ export class World {
     else this.updateOffset();
   }
 
-  /** La base está en Marte: su escena y su cabina se miran en el sitio marciano. */
+  /** La base de Marte se mira en el sitio marciano; la lunar y el resto, en el sitio lunar. */
   private zoneFor(v: ViewState): Zone {
-    return (v.mode === "focus" || v.mode === "cabin") && v.module === "base" ? "mars" : "moon";
+    return (v.mode === "focus" || v.mode === "cabin") && v.module === "marte" ? "mars" : "moon";
   }
 
   /** Cambia cielo, niebla y luz entre el sitio lunar y el marciano. */

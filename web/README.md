@@ -39,9 +39,9 @@ Variables de entorno: copiar `.env.example` como `.env.local`. Ninguna es obliga
 
 | Ruta | Pantalla | Objetivo del reto |
 |---|---|---|
-| `/` | Sitio lunar 3D con los cinco ambientes | — |
+| `/` | Sitio lunar 3D con los seis ambientes | — |
 | `/modulos` | Tarjetas de módulos y herramientas | — |
-| `/modulos/[id]` | Escena del ambiente (nave, estación, rover, traje EVA, base en Marte) | Selector de contexto |
+| `/modulos/[id]` | Escena del ambiente (nave, estación, rover, traje EVA, base lunar y base en Marte) | Selector de contexto |
 | `/modulos/[id]?view=cabina` | Cabina: llama en tiempo real, telemetría y respuesta de la tripulación | O2 |
 | `/laboratorio` | Mapa de inflamabilidad, gotas (ley d²), humo y CO de cabina | O2 |
 | `/guia` | Biblioteca PSI, ranking por ambiente, comparador, cobertura y lecciones | O1 |

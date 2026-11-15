@@ -1,13 +1,15 @@
 /**
- * Los cuatro módulos de la plataforma = los cuatro ambientes habitables del
- * reto (naves, estaciones, rovers presurizados y bases). Textos de la ficha de
+ * Los módulos de la plataforma = los ambientes habitables del reto (naves,
+ * estaciones, rovers presurizados, trajes y bases). Hay dos bases
+ * independientes: la lunar (0,165 g, atmósfera de exploración) y la marciana
+ * (0,38 g, atmósfera sin definir en las fuentes). Textos de la ficha de
  * diseño adaptados al reto (pautas §6.3) y valores del catálogo de ambientes
  * del documento maestro (§12.8).
  */
 import { l, type L } from "./i18n";
 import type { MaterialId } from "@/features/fire/engine/materials";
 
-export type ModuleId = "nave" | "estacion" | "rover" | "traje" | "base";
+export type ModuleId = "nave" | "estacion" | "rover" | "traje" | "base" | "marte";
 
 export interface AtmosphereVariant {
   id: string;
@@ -202,6 +204,43 @@ export const MODULES: ModuleDef[] = [
   {
     id: "base",
     code: "SPX-004",
+    label: l("BASE · LUNA", "BASE · MOON"),
+    name: l("Base lunar", "Lunar base"),
+    kind: l("Hábitat de superficie · Luna · 0,165 g", "Surface habitat · Moon · 0.165 g"),
+    description: l(
+      "Hábitat de larga duración en la Luna con atmósfera de exploración: 34 % de O₂ a 56,5 kPa, la misma que replicará FM2.",
+      "Long-duration habitat on the Moon with an exploration atmosphere: 34% O₂ at 56.5 kPa, the same FM2 will replicate.",
+    ),
+    specialties: [l("Habitabilidad", "Habitability"), l("Atmósfera de exploración", "Exploration atmosphere"), l("Gravedad parcial 0,165 g", "Partial gravity 0.165 g")],
+    components: [
+      { name: l("Módulos habitacionales", "Habitation modules"), info: l("Tejidos, espumas y plásticos conviven con una fracción de O₂ 63 % mayor que la terrestre.", "Fabrics, foams and plastics live with an O₂ fraction 63% above Earth's.") },
+      { name: l("Esclusas", "Airlocks"), info: l("La baja presión reduce el riesgo de descompresión y permite más caminatas.", "Low pressure cuts decompression risk and allows more surface walks.") },
+      { name: l("Centro de operaciones", "Operations centre"), info: l("Vigila humo y gases: tras un fuego, el CO es el peligro principal.", "Watches smoke and gases: after a fire, CO is the main hazard.") },
+      { name: l("Soporte vital", "Life support"), info: l("Una corriente de 5 cm/s dispersa en minutos la capa de humo del techo.", "A 5 cm/s current disperses the ceiling smoke layer within minutes.") },
+    ],
+    guide: l(
+      "En la Luna la gravedad parcial podría ser el peor caso para un incendio. Te muestro por qué.",
+      "On the Moon partial gravity could be the worst case for a fire. Let me show you why.",
+    ),
+    cabinGuide: l(
+      "Hay flotabilidad suficiente para traer oxígeno, pero no tanta como para enfriar la llama: la zona Ricitos de Oro.",
+      "There is enough buoyancy to bring oxygen, but not enough to cool the flame: the Goldilocks zone.",
+    ),
+    variants: [
+      { id: "sea", name: l("Luna · SEA", "Moon · SEA"), g: 0.165, o2: 34, P: 56.5, note: l("Atmósfera de exploración (FM2).", "Exploration atmosphere (FM2)."), sources: ["B7"] },
+      { id: "reto", name: l("Luna · reto", "Moon · challenge"), g: 0.165, o2: 30, P: 70.3, note: l("Ejemplo del reto.", "Challenge example."), sources: ["CHALLENGE"] },
+    ],
+    vent: 10,
+    volume: 56,
+    exchange: 0,
+    defaultMaterial: "pmma",
+    investigations: ["fm2", "luci", "bre"],
+    evidence: l("Sin evidencia directa en PSI: gravedad parcial", "No direct PSI evidence: partial gravity"),
+    accent: "#9fd6c2",
+  },
+  {
+    id: "marte",
+    code: "SPX-006",
     label: l("BASE · MARTE", "BASE · MARS"),
     name: l("Base marciana", "Mars base"),
     kind: l("Hábitat de superficie · Marte · 0,38 g", "Surface habitat · Mars · 0.38 g"),

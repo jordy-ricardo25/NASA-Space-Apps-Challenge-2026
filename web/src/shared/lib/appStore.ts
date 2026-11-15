@@ -32,6 +32,8 @@ export interface AppState {
   welcomed: boolean;
   /** El asistente lee sus respuestas en voz alta al terminar. */
   autoSpeak: boolean;
+  /** Al dictar, la pregunta se envía sola cuando la persona deja de hablar. */
+  autoSend: boolean;
 }
 
 export const appStore = createStore<AppState>({
@@ -50,10 +52,11 @@ export const appStore = createStore<AppState>({
   toast: null,
   welcomed: false,
   autoSpeak: true,
+  autoSend: true,
 });
 
 const KEY = "fif:prefs:v1";
-type Prefs = Pick<AppState, "lang" | "units" | "quality" | "reduceMotion" | "role" | "welcomed" | "autoSpeak">;
+type Prefs = Pick<AppState, "lang" | "units" | "quality" | "reduceMotion" | "role" | "welcomed" | "autoSpeak" | "autoSend">;
 
 /** Restaura las preferencias guardadas (se llama una vez al montar la plataforma). */
 export function loadPrefs(): void {
@@ -69,8 +72,8 @@ export function loadPrefs(): void {
 export function setPrefs(patch: Partial<Prefs>): void {
   appStore.set(patch);
   try {
-    const { lang, units, quality, reduceMotion, role, welcomed, autoSpeak } = appStore.get();
-    localStorage.setItem(KEY, JSON.stringify({ lang, units, quality, reduceMotion, role, welcomed, autoSpeak }));
+    const { lang, units, quality, reduceMotion, role, welcomed, autoSpeak, autoSend } = appStore.get();
+    localStorage.setItem(KEY, JSON.stringify({ lang, units, quality, reduceMotion, role, welcomed, autoSpeak, autoSend }));
   } catch {
     /* sin almacenamiento */
   }

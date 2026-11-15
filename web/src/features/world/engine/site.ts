@@ -156,10 +156,10 @@ export async function buildSite(heightAt: (x: number, z: number) => number, onPr
     return out;
   };
 
-  // ── Base (en Marte): tres unidades de hábitat (HDU) unidas por túneles ─────
-  // `base` se traslada al terreno marciano; `infra` es la infraestructura que
-  // se queda en el sitio lunar (paneles, antena y plataforma de aterrizaje).
-  const base = new THREE.Group();
+  // ── Bases: tres unidades de hábitat (HDU) unidas por túneles ───────────────
+  // Hay dos bases con la misma estructura: la lunar, en el sitio lunar junto a
+  // su infraestructura (`infra`: paneles, antena y plataforma), y la marciana,
+  // que se construye igual y se traslada al terreno de Marte.
   const infra = new THREE.Group();
   const HS = 0.034;
   const habTint = 0xe6e1d4;
@@ -168,35 +168,63 @@ export async function buildSite(heightAt: (x: number, z: number) => number, onPr
     [21, -11, -2.2, "habitat-b"],
     [-11, -13, 2.6, "habitat-a"],
   ];
-  for (const [x, z, rot, name] of habSpots) {
-    const mesh = modelMesh(models[name], "body", { roughness: 0.92, metalness: 0.02, tint: habTint });
-    mesh.scale.setScalar(HS);
-    mesh.rotation.y = rot;
-    mesh.position.set(x, heightAt(x, z) - 0.25, z);
-    base.add(mesh);
-  }
   const tunnelMat = std(0xcfc9ba, 0.9, 0.05);
-  const tunnel = (ax: number, az: number, bx: number, bz: number): void => {
-    const a = new THREE.Vector3(ax, heightAt(ax, az) + 1.4, az);
-    const b = new THREE.Vector3(bx, heightAt(bx, bz) + 1.4, bz);
-    const len = a.distanceTo(b);
-    const t = new THREE.Mesh(new THREE.CylinderGeometry(1.05, 1.05, len, 14), tunnelMat);
-    t.position.copy(a).lerp(b, 0.5);
-    t.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), b.clone().sub(a).normalize());
-    base.add(t);
-    for (let i = 1; i < 4; i++) {
-      const ring = new THREE.Mesh(new THREE.TorusGeometry(1.1, 0.08, 6, 18), std(0x8a8f96, 0.5, 0.6));
-      ring.position.copy(a).lerp(b, i / 4);
-      ring.quaternion.copy(t.quaternion).multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 2));
-      base.add(ring);
-    }
-  };
-  tunnel(8, -6, 15, -9);
-  tunnel(0, -6, -7, -11);
-
-  // Paneles solares orientados al Sol
+  const AS = 1.95 / models.astronaut.size.y;
   const solarTex = solarTexture();
   const panelMat = new THREE.MeshStandardMaterial({ map: solarTex, roughness: 0.35, metalness: 0.5, side: THREE.DoubleSide });
+
+  /** Hábitats, túneles, luces y astronautas de una base. */
+  const buildBaseGroup = (): THREE.Group => {
+    const base = new THREE.Group();
+    for (const [x, z, rot, name] of habSpots) {
+      const mesh = modelMesh(models[name], "body", { roughness: 0.92, metalness: 0.02, tint: habTint });
+      mesh.scale.setScalar(HS);
+      mesh.rotation.y = rot;
+      mesh.position.set(x, heightAt(x, z) - 0.25, z);
+      base.add(mesh);
+    }
+    const tunnel = (ax: number, az: number, bx: number, bz: number): void => {
+      const a = new THREE.Vector3(ax, heightAt(ax, az) + 1.4, az);
+      const b = new THREE.Vector3(bx, heightAt(bx, bz) + 1.4, bz);
+      const len = a.distanceTo(b);
+      const t = new THREE.Mesh(new THREE.CylinderGeometry(1.05, 1.05, len, 14), tunnelMat);
+      t.position.copy(a).lerp(b, 0.5);
+      t.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), b.clone().sub(a).normalize());
+      base.add(t);
+      for (let i = 1; i < 4; i++) {
+        const ring = new THREE.Mesh(new THREE.TorusGeometry(1.1, 0.08, 6, 18), std(0x8a8f96, 0.5, 0.6));
+        ring.position.copy(a).lerp(b, i / 4);
+        ring.quaternion.copy(t.quaternion).multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 2));
+        base.add(ring);
+      }
+    };
+    tunnel(8, -6, 15, -9);
+    tunnel(0, -6, -7, -11);
+    // Luces de trabajo
+    for (const [x, z] of [[11, 2], [-3, -18]] as const) {
+      const y = heightAt(x, z);
+      const m = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.09, 6, 6), std(0x8a8f96, 0.5, 0.7));
+      m.position.set(x, y + 3, z);
+      const lamp = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.18, 0.4), new THREE.MeshBasicMaterial({ color: 0xfff1cf }));
+      lamp.position.set(x, y + 6.05, z);
+      const pl = new THREE.PointLight(0xffe2b0, 160, 34, 1.8);
+      pl.position.set(x, y + 5.7, z);
+      base.add(m, lamp, pl);
+    }
+    // Astronautas (modelo de NASA) junto a la base
+    for (const [x, z, r] of [[9.5, 6, -0.6], [-4.5, 15.5, 2.4]] as const) {
+      const a = modelMesh(models.astronaut, "body", { roughness: 0.8 });
+      a.scale.setScalar(AS);
+      a.rotation.y = r;
+      a.position.set(x, heightAt(x, z), z);
+      base.add(a);
+    }
+    return base;
+  };
+  const base = buildBaseGroup();
+  const marsBase = buildBaseGroup();
+
+  // Paneles solares orientados al Sol
   const beacons: THREE.Mesh[] = [];
   for (let i = 0; i < 4; i++) {
     const x = -24 - i * 7.5, z = -2 - i * 1.5;
@@ -239,26 +267,6 @@ export async function buildSite(heightAt: (x: number, z: number) => number, onPr
     beacons.push(b);
     infra.add(b);
   }
-  // Luces de trabajo
-  for (const [x, z] of [[11, 2], [-3, -18]] as const) {
-    const y = heightAt(x, z);
-    const m = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.09, 6, 6), std(0x8a8f96, 0.5, 0.7));
-    m.position.set(x, y + 3, z);
-    const lamp = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.18, 0.4), new THREE.MeshBasicMaterial({ color: 0xfff1cf }));
-    lamp.position.set(x, y + 6.05, z);
-    const pl = new THREE.PointLight(0xffe2b0, 160, 34, 1.8);
-    pl.position.set(x, y + 5.7, z);
-    base.add(m, lamp, pl);
-  }
-  // Astronautas (modelo de NASA) junto a la base
-  const AS = 1.95 / models.astronaut.size.y;
-  for (const [x, z, r] of [[9.5, 6, -0.6], [-4.5, 15.5, 2.4]] as const) {
-    const a = modelMesh(models.astronaut, "body", { roughness: 0.8 });
-    a.scale.setScalar(AS);
-    a.rotation.y = r;
-    a.position.set(x, heightAt(x, z), z);
-    base.add(a);
-  }
   // Paneles solares y rocas del sitio marciano
   for (let i = 0; i < 3; i++) {
     const x = 24 + i * 7, z = 6 + i * 2;
@@ -268,7 +276,7 @@ export async function buildSite(heightAt: (x: number, z: number) => number, onPr
     const panel = new THREE.Mesh(new THREE.PlaneGeometry(6.4, 3), panelMat);
     panel.position.set(x, y + 3.5, z);
     panel.lookAt(panel.position.clone().add(SUN_DIR));
-    base.add(pole, panel);
+    marsBase.add(pole, panel);
   }
   const rnd = mulberry32(38);
   const rockMat = new THREE.MeshStandardMaterial({ color: 0x8a4a2c, roughness: 1, flatShading: true });
@@ -284,10 +292,10 @@ export async function buildSite(heightAt: (x: number, z: number) => number, onPr
     dummy.updateMatrix();
     rocks.setMatrixAt(i, dummy.matrix);
   }
-  base.add(rocks);
-  shadowed(base);
-  base.position.x = MARS_X;
-  root.add(base);
+  marsBase.add(rocks);
+  shadowed(marsBase);
+  marsBase.position.x = MARS_X;
+  root.add(shadowed(base), marsBase);
   root.add(shadowed(infra));
 
   // ── Traje EVA: astronauta (modelo de NASA) trabajando en la superficie lunar ─
@@ -313,7 +321,7 @@ export async function buildSite(heightAt: (x: number, z: number) => number, onPr
   eva.position.set(ex, heightAt(ex, ez), ez);
   root.add(shadowed(eva));
 
-  // Marte en el cielo lunar: desde el inicio se entra a la base marciana.
+  // Marte en el cielo lunar: desde el inicio se entra a la base de Marte.
   const marsPlanet = buildMars();
   root.add(marsPlanet);
 
@@ -394,10 +402,18 @@ export async function buildSite(heightAt: (x: number, z: number) => number, onPr
       focus: { target: new THREE.Vector3(ex, eva.position.y + 1.15, ez), offset: new THREE.Vector3(2.6, 0.7, 4.4), minDist: 2.6, maxDist: 16, ground: true },
       materials: mats(suit),
     },
-    // En la vista general la base se elige pulsando Marte; su escena vive en el terreno marciano.
     base: {
       id: "base",
       group: base,
+      anchor: new THREE.Vector3(5, baseY + 9.2, -4),
+      pick: sphere(new THREE.Vector3(5, baseY + 3, -7), 13),
+      focus: { target: new THREE.Vector3(4, baseY + 3.2, -7), offset: new THREE.Vector3(16, 9, 32), minDist: 16, maxDist: 80, ground: true },
+      materials: mats(base).filter((m) => m.color.getHex() === habTint),
+    },
+    // En la vista general la base de Marte se elige pulsando el planeta; su escena vive en el terreno marciano.
+    marte: {
+      id: "marte",
+      group: marsBase,
       anchor: MARS_POS.clone().add(new THREE.Vector3(0, 30, 0)),
       pick: sphere(MARS_POS.clone(), 34),
       focus: { target: new THREE.Vector3(MARS_X + 4, baseY + 3.2, -7), offset: new THREE.Vector3(16, 9, 32), minDist: 16, maxDist: 80, ground: true },

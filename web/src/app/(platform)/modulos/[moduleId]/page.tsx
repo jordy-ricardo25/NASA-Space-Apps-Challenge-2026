@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: PageProps<"/modulos/[moduleId
   return { title: m ? `${m.name.en} · Flame in Freefall` : "Flame in Freefall" };
 }
 
-/** Escena individual: el mismo esqueleto para los cuatro ambientes. */
+/** Escena individual: el mismo esqueleto para todos los ambientes. */
 export default async function ModulePage({ params }: PageProps<"/modulos/[moduleId]">) {
   const m = getModule((await params).moduleId);
   if (!m) notFound();

@@ -27,7 +27,7 @@ export async function POST(req: Request) {
   const a = await answerQuestion(question, lang, context ?? {});
   return Response.json(
     envelope(
-      { text: a.text, origin: a.origin, citations: a.sources },
+      { text: a.text, lang: a.lang, origin: a.origin, citations: a.sources },
       { kind: a.origin === "analysis" ? "prediction" : "catalog", evidence_level: a.evidence, sources: a.sources.map((s) => ({ id: s.id })) },
     ),
   );

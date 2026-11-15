@@ -99,7 +99,7 @@ export const INVESTIGATIONS: Investigation[] = [
     conditions: l("20–25 cm/s; 22–31 % O₂; 54–100 kPa; volumen libre 16,7–19 m³", "20–25 cm/s; 22–31% O₂; 54–100 kPa; 16.7–19 m³ free volume"),
     findings: l("1,8 mm/s a favor del flujo y 1,3 mm/s en contra; fuegos de 1,5–3,2 kW; el CO y el CO₂ pesan más que la presión y la temperatura.", "1.8 mm/s concurrent and 1.3 mm/s opposed; 1.5–3.2 kW fires; CO and CO₂ matter more than pressure and temperature."),
     limitations: l("Pocos ensayos por condición; sin tripulación; solo microgravedad.", "Few tests per condition; uncrewed; microgravity only."),
-    regime: "micro", o2: [21.5, 31], p: [54.1, 101.3], flow: [20, 25], scale: "vehicle", data: 2, vars: V("yyynyyynyy"), sources: ["B10", "B2", "SAF45"], modules: ["nave", "estacion", "rover", "base"],
+    regime: "micro", o2: [21.5, 31], p: [54.1, 101.3], flow: [20, 25], scale: "vehicle", data: 2, vars: V("yyynyyynyy"), sources: ["B10", "B2", "SAF45"], modules: ["nave", "estacion", "rover", "base", "marte"],
   },
   {
     id: "sofie", name: "SoFIE", full: "Solid Fuel Ignition and Extinction", psi: pending,
@@ -109,7 +109,7 @@ export const INVESTIGATIONS: Investigation[] = [
     conditions: l("10–40 % O₂; 20–152 kPa; 0–30 cm/s; radiación externa", "10–40% O₂; 20–152 kPa; 0–30 cm/s; external radiation"),
     findings: l("Amplía el dominio ensayado en O₂ y presión hasta las atmósferas de exploración.", "Extends the tested O₂ and pressure domain up to exploration atmospheres."),
     limitations: l("Resultados en publicación; escala de laboratorio.", "Results being published; bench scale."),
-    regime: "micro", o2: [10, 40], p: [20, 152], flow: [0, 30], scale: "bench", data: 1, vars: V("yyynynynnn"), sources: ["SOFIE"], modules: ["estacion", "rover", "base", "traje"],
+    regime: "micro", o2: [10, 40], p: [20, 152], flow: [0, 30], scale: "bench", data: 1, vars: V("yyynynynnn"), sources: ["SOFIE"], modules: ["estacion", "rover", "base", "marte", "traje"],
   },
   {
     id: "flex", name: "FLEX / FLEX-2", full: "Flame Extinguishment Experiment", psi: l("PSI-69", "PSI-69"),
@@ -139,7 +139,7 @@ export const INVESTIGATIONS: Investigation[] = [
     conditions: l("O₂ hasta 85 %", "O₂ up to 85%"),
     findings: l("Es el O₂ más alto ensayado en PSI; la llama puede arder “de adentro hacia afuera”.", "The highest O₂ tested in PSI; the flame can burn “inside out”."),
     limitations: l("Quemador de gas: no es una medición directa de un material sólido.", "Gas burner: not a direct measurement of a solid material."),
-    regime: "micro", o2: [21, 85], p: null, flow: null, scale: "bench", data: 1, vars: V("ynnn-nynnn"), sources: ["B3", "CHALLENGE"], modules: ["rover", "base", "traje"],
+    regime: "micro", o2: [21, 85], p: null, flow: null, scale: "bench", data: 1, vars: V("ynnn-nynnn"), sources: ["B3", "CHALLENGE"], modules: ["rover", "base", "marte", "traje"],
   },
   {
     id: "efield", name: "ACME · E-FIELD Flames", full: "Electric-Field Effects on Laminar Diffusion Flames", psi: l("Datos publicados en PSI", "Data published in PSI"),
@@ -149,7 +149,7 @@ export const INVESTIGATIONS: Investigation[] = [
     conditions: l("Voltaje variable; microgravedad", "Variable voltage; microgravity"),
     findings: l("El “viento iónico” devuelve a la llama esférica una forma de gota.", "The “ionic wind” gives the spherical flame a teardrop shape again."),
     limitations: l("Análogo de un mecanismo de transporte: no existe una conversión de voltios a gravedad lunar.", "Analogue of a transport mechanism: there is no volts-to-lunar-gravity conversion."),
-    regime: "micro", o2: null, p: null, flow: null, scale: "bench", data: 2, vars: V("nnnn-nnynn"), sources: ["B3"], modules: ["rover", "base"],
+    regime: "micro", o2: null, p: null, flow: null, scale: "bench", data: 2, vars: V("nnnn-nnynn"), sources: ["B3"], modules: ["rover", "base", "marte"],
   },
   {
     id: "bre", name: "ACME · BRE", full: "Burning Rate Emulator", psi: pending,
@@ -159,7 +159,7 @@ export const INVESTIGATIONS: Investigation[] = [
     conditions: l("59 ensayos; 21–40 % O₂; ≈56–100 kPa", "59 tests; 21–40% O₂; ≈56–100 kPa"),
     findings: l("Llamas azules estables durante minutos; cubre las presiones y fracciones de O₂ de las atmósferas de exploración.", "Stable blue flames for minutes; covers exploration-atmosphere pressures and O₂ fractions."),
     limitations: l("Emula materiales; no mide cada plástico directamente.", "It emulates materials; it does not measure each plastic directly."),
-    regime: "micro", o2: [21, 40], p: [56, 100], flow: null, scale: "bench", data: 1, vars: V("yynn-yynnn"), sources: ["BRE21", "B3"], modules: ["base", "rover"],
+    regime: "micro", o2: [21, 40], p: [56, 100], flow: null, scale: "bench", data: 1, vars: V("yynn-yynnn"), sources: ["BRE21", "B3"], modules: ["base", "marte", "rover"],
   },
   {
     id: "acme-sflame", name: "ACME · s-Flame", full: "Structure and Response of Spherical Diffusion Flames", psi: pending,
@@ -229,7 +229,7 @@ export const INVESTIGATIONS: Investigation[] = [
     conditions: l("Cabina de la ISS", "ISS cabin"),
     findings: l("Precursor de SAME; el polvo suspendido puede causar falsas alarmas.", "Precursor of SAME; suspended dust can cause false alarms."),
     limitations: l("Relevancia para el polvo lunar aún por verificar.", "Relevance to lunar dust still to be verified."),
-    regime: "micro", o2: null, p: null, flow: null, scale: "bench", data: 1, vars: V("nnnnnnnnyn"), sources: ["B15"], modules: ["estacion", "base"],
+    regime: "micro", o2: null, p: null, flow: null, scale: "bench", data: 1, vars: V("nnnnnnnnyn"), sources: ["B15"], modules: ["estacion", "base", "marte"],
   },
   {
     id: "luci", name: "LUCI", full: "Lunar Combustion Investigation", psi: l("No está en PSI", "Not in PSI"),
@@ -239,7 +239,7 @@ export const INVESTIGATIONS: Investigation[] = [
     conditions: l("Aire a presión normal; ≈0,165 g por rotación", "Air at normal pressure; ≈0.165 g by rotation"),
     findings: l("Primera quema prolongada en gravedad lunar simulada.", "First sustained burn in simulated lunar gravity."),
     limitations: l("Un vuelo; gravedad por rotación (Coriolis); en aire, no en atmósfera de exploración.", "One flight; gravity by rotation (Coriolis); in air, not in an exploration atmosphere."),
-    regime: "partial", o2: [21, 21], p: [101.3, 101.3], flow: null, scale: "bench", data: 2, vars: V("nnnyynnnnn"), sources: ["LUCI"], modules: ["base", "rover"],
+    regime: "partial", o2: [21, 21], p: [101.3, 101.3], flow: null, scale: "bench", data: 2, vars: V("nnnyynnnnn"), sources: ["LUCI"], modules: ["base", "marte", "rover"],
   },
   {
     id: "fm2", name: "FM2", full: "Flammability of Materials on the Moon", psi: l("Sin datos aún (misión futura)", "No data yet (future mission)"),
@@ -249,7 +249,7 @@ export const INVESTIGATIONS: Investigation[] = [
     conditions: l("21 % O₂ a 101,3 kPa y 34 % O₂ a 56,5 kPa", "21% O₂ at 101.3 kPa and 34% O₂ at 56.5 kPa"),
     findings: l("Cerrará la brecha de gravedad parcial con la atmósfera de exploración.", "It will close the partial-gravity gap in the exploration atmosphere."),
     limitations: l("Aún no hay resultados en superficie.", "No surface results yet."),
-    regime: "partial", o2: [21, 34], p: [56.5, 101.3], flow: null, scale: "surface", data: 0, vars: V("yynyynnnnn"), sources: ["B7", "FM2WEB"], modules: ["base", "rover"],
+    regime: "partial", o2: [21, 34], p: [56.5, 101.3], flow: null, scale: "surface", data: 0, vars: V("yynyynnnnn"), sources: ["B7", "FM2WEB"], modules: ["base", "marte", "rover"],
   },
 ];
 

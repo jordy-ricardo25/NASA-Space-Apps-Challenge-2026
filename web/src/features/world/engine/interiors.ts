@@ -437,8 +437,11 @@ function buildRover(): Interior {
   return { scene, spec, fog };
 }
 
-/** Hábitat de la base marciana: módulo cilíndrico con estaciones de trabajo alrededor. */
-function buildBase(): Interior {
+/**
+ * Hábitat de una base de superficie: módulo cilíndrico con estaciones de
+ * trabajo alrededor. La ventanilla da a la Luna o a Marte según la base.
+ */
+function buildBase(surface: "moon" | "mars"): Interior {
   const { scene, fog } = baseScene(0x0c0e11, 0x777a7d, [0xf6f4ee, 0x7a766e, 0.76]);
   const R = 3.0, Y0 = -1.25, Y1 = 1.45;
   const wallT = rackTex(21, "#dedfd8");
@@ -481,8 +484,8 @@ function buildBase(): Interior {
   const grow = new THREE.PointLight(0xff7ad9, 1.4, 2.2, 1.6);
   grow.position.set(-2.0, 0.3, -1.2);
   scene.add(grow);
-  // Ventanilla a la superficie de Marte
-  const winM = new THREE.MeshBasicMaterial({ map: windowTex("mars") });
+  // Ventanilla a la superficie
+  const winM = new THREE.MeshBasicMaterial({ map: windowTex(surface) });
   const w = new THREE.Mesh(new THREE.CircleGeometry(0.36, 32), winM);
   w.position.set(2.45, 0.35, -1.68);
   w.rotation.y = -0.97;
@@ -672,7 +675,8 @@ const BUILDERS: Record<ModuleId, () => Interior> = {
   nave: buildSpacecraft,
   estacion: buildStation,
   rover: buildRover,
-  base: buildBase,
+  base: () => buildBase("moon"),
+  marte: () => buildBase("mars"),
 };
 
 /** Construye (una sola vez por módulo) el interior de la cabina. */

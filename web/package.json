@@ -13,7 +13,8 @@
     "e2e": "playwright test",
     "thumbs": "node scripts/make-thumbs.mjs",
     "check": "npm run lint && npm run typecheck && npm run test && npm run build",
-    "ingest": "node --env-file=.env.local scripts/ingest.mjs"
+    "ingest": "node --env-file=.env.local scripts/ingest.mjs",
+    "knowledge-doc": "node scripts/knowledge-doc.mjs"
   },
   "dependencies": {
     "@google/genai": "^3.3.0",

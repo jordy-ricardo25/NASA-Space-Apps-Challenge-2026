@@ -354,13 +354,24 @@ npm run ingest
   del proyecto), se copia a `web/conocimiento/` y se vuelve a ejecutar el comando.
 - Al terminar indica cuántos archivos quedaron bien y cuántos mal, y guarda el detalle en
   `conocimiento/ingesta.json`.
-- Estado actual: 23 documentos indexados (22 de la bibliografía y el informe del reto).
+- Estado actual: 24 documentos indexados (22 de la bibliografía, el informe del reto y el
+  documento del proyecto).
+- El documento del proyecto se genera con `npm run knowledge-doc` a partir del contenido
+  verificado de la plataforma (ambientes, fichas, materiales, preguntas preparadas, equipo y
+  esta documentación) y se escribe en `conocimiento/`. La ingesta omite los nombres que ya
+  existen: para reemplazarlo hay que borrarlo antes del almacén.
+- Si la pregunta nombra una investigación (por ejemplo, CFI-G), su ficha de la Guía se pasa
+  al modelo como contexto, porque no todos los datos de las fichas están en los PDF.
 - Modelo: `gemini-3.5-flash-lite` (variable `GEMINI_MODEL`).
 - En Vercel hay que definir `GEMINI_API_KEY`, `GEMINI_MODEL` y `FILE_SEARCH_STORE`.
 
 Cada respuesta muestra su origen, sus fuentes y su nivel de evidencia. El micrófono nunca
-envía solo: llena el campo de texto y la persona pulsa Enviar. La lectura en voz alta usa la
-voz del navegador.
+envía solo: llena el campo de texto y la persona pulsa Enviar. El dictado usa la Web Speech
+API, que funciona en Chrome y Edge; Brave la bloquea y el chat lo avisa.
+
+La respuesta se lee en voz alta al terminar (interruptor "Lectura automática"). Por defecto
+usa la voz del navegador; con `FISH_API_KEY`, `FISH_VOICE_ID` y `FISH_MODEL` en el servidor
+usa Fish Audio (`/api/asistente/tts`) y la interfaz la declara como voz generada con IA.
 
 ---
 

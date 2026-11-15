@@ -21,6 +21,9 @@ interface VoiceBarProps {
 
 const LANGS: Lang[] = ["es", "en"];
 
+/** Brave ofrece la API de dictado, pero su servicio está desactivado. */
+const isBrave = (): boolean => typeof navigator !== "undefined" && "brave" in navigator;
+
 /**
  * Estado de la voz del asistente: qué hace el micrófono, los errores del
  * reconocimiento (con su código, para diagnosticar), el botón que corta la
@@ -42,10 +45,10 @@ export function VoiceBar({ dictation, speech, listenLang, onListenLang, autoSpea
     text = `${t(DICTATION_PHASE[phase])} ${heard} · ${dictation.secondsLeft} s`;
   } else if (notice) {
     tone = notice.kind === "error" ? "error" : "idle";
-    text = t(DICTATION_NOTICE[notice.code] ?? DICTATION_UNKNOWN);
+    text = t(DICTATION_NOTICE[notice.code === "network" && isBrave() ? "network-brave" : notice.code] ?? DICTATION_UNKNOWN);
     code = notice.kind === "error" ? notice.code : null;
   } else {
-    text = t(dictation.supported ? VOICE_TEXT.ready : VOICE_TEXT.unsupported);
+    text = t(!dictation.supported ? VOICE_TEXT.unsupported : isBrave() ? VOICE_TEXT.brave : VOICE_TEXT.ready);
   }
   const Icon = tone === "error" ? TriangleAlert : tone === "talk" ? Volume2 : Mic;
 

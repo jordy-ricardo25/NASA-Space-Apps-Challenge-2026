@@ -34,6 +34,8 @@ export function useSpeech(): Speech {
   const audio = useRef<HTMLAudioElement | null>(null);
   const audioUrl = useRef<string | null>(null);
   const request = useRef<AbortController | null>(null);
+  // Audios ya sintetizados en esta sesión: volver a escuchar una respuesta no gasta cuota.
+  const cache = useRef(new Map<string, Blob>());
 
   // El servidor dice qué voz hay; la clave nunca llega al navegador.
   useEffect(() => {
@@ -101,14 +103,20 @@ export function useSpeech(): Speech {
       }
       const ctrl = new AbortController();
       request.current = ctrl;
-      fetch("/api/asistente/tts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: clean, lang }),
-        signal: ctrl.signal,
-      })
-        .then((r) => (r.ok ? r.blob() : Promise.reject(new Error("tts"))))
+      const key = `${lang}:${clean}`;
+      const cached = cache.current.get(key);
+      const audioBlob = cached
+        ? Promise.resolve(cached)
+        : fetch("/api/asistente/tts", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: clean, lang }),
+            signal: ctrl.signal,
+          }).then((r) => (r.ok ? r.blob() : Promise.reject(new Error("tts"))));
+      audioBlob
         .then((blob) => {
+          if (cache.current.size >= 12) cache.current.clear();
+          cache.current.set(key, blob);
           if (turn.current !== mine) return undefined;
           const url = URL.createObjectURL(blob);
           const el = new Audio(url);

@@ -89,6 +89,12 @@
   border-radius: 12px;
   font-size: 13px;
   line-height: 1.5;
+
+  // Las respuestas con listas conservan sus saltos de línea.
+  > p {
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+  }
 }
 
 .user {

@@ -9,6 +9,8 @@ export const DICTATION_NOTICE: Record<string, L> = {
   "service-not-allowed": l("El navegador no permite el dictado en esta página. Usa Chrome o Edge.", "The browser does not allow dictation on this page. Use Chrome or Edge."),
   "audio-capture": l("No se encontró ningún micrófono. Conecta uno y vuelve a intentarlo.", "No microphone was found. Connect one and try again."),
   network: l("El servicio de dictado del navegador no respondió. Necesita internet y funciona en Chrome o Edge.", "The browser dictation service did not respond. It needs internet and works in Chrome or Edge."),
+  // Brave desactiva el servicio de dictado de Chromium: el error llega como "network".
+  "network-brave": l("Brave bloquea el dictado del navegador. Para dictar usa Chrome o Edge; aquí puedes escribir la pregunta.", "Brave blocks the browser dictation service. Use Chrome or Edge to dictate; here you can type the question."),
   "no-speech": l("No se oyó ninguna voz. Acércate al micrófono y vuelve a pulsarlo.", "No speech was heard. Move closer to the microphone and press it again."),
   "language-not-supported": l("El reconocimiento no admite este idioma de escucha.", "Recognition does not support this listening language."),
   "ended-early": l("El reconocimiento se cerró nada más abrirse. Revisa el permiso y el micrófono elegido en el navegador.", "Recognition closed as soon as it opened. Check the permission and the microphone selected in the browser."),
@@ -28,6 +30,7 @@ export const DICTATION_PHASE = {
 
 export const VOICE_TEXT = {
   ready: l("Micrófono listo. Llena el campo y nunca envía solo.", "Microphone ready. It fills the field and never sends on its own."),
+  brave: l("En Brave el dictado no funciona: usa Chrome o Edge, o escribe la pregunta.", "Dictation does not work in Brave: use Chrome or Edge, or type the question."),
   unsupported: l("Este navegador no ofrece dictado: escribe tu pregunta. Funciona en Chrome y Edge.", "This browser has no dictation: type your question. It works in Chrome and Edge."),
   speaking: l("Leyendo la respuesta. El micrófono se activa al terminar.", "Reading the answer aloud. The microphone is available when it ends."),
   stop: l("Detener", "Stop"),

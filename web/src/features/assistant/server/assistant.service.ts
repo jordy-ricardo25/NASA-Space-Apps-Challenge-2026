@@ -103,7 +103,7 @@ function analyse(question: string, ctx: ChatContext, lang: Lang): ChatAnswer | n
 async function askGemini(question: string, card: KnowledgeCard | null, lang: Lang): Promise<string | null> {
   const key = process.env.GEMINI_API_KEY;
   if (!key) return null;
-  const model = process.env.GEMINI_MODEL ?? "gemini-3.8-flash";
+  const model = process.env.GEMINI_MODEL ?? "gemini-3.5-flash-lite";
   const store = process.env.FILE_SEARCH_STORE;
   const system = [
     "You are FUEGO, the assistant of the Flame in Freefall fire-safety command centre.",

@@ -186,3 +186,19 @@
     }
   }
 }
+
+// Tableta y teléfono: el panel se desplaza por dentro y no tapa la barra inferior.
+@include mixins.tablet {
+  .panel {
+    bottom: calc(var(--bottombar-h) + 8px);
+    @include mixins.inner-scroll;
+  }
+}
+
+@include mixins.phone {
+  .panel {
+    inset: calc(var(--topbar-h) + 6px) 6px calc(var(--bottombar-h) + 6px) 6px;
+    width: auto;
+    padding: var(--gap-3);
+  }
+}

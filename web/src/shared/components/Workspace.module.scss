@@ -148,3 +148,41 @@
     transform: translateY(8px);
   }
 }
+
+// Teléfono: el panel aprovecha todo el ancho y se desplaza entero (título,
+// pestañas y cuerpo), para que la cabecera no se coma media pantalla. Las
+// pestañas van en una sola línea deslizable y quedan fijas arriba.
+@include mixins.phone {
+  .workspace {
+    inset: 6px;
+    display: block;
+    overflow-x: hidden;
+    @include mixins.inner-scroll;
+  }
+
+  .titles h1 {
+    font-size: 19px;
+  }
+
+  .tabs {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    background: var(--color-panel-strong);
+
+    button {
+      flex: none;
+      min-height: 40px;
+      white-space: nowrap;
+    }
+  }
+
+  .body {
+    overflow: visible;
+    // Deja sitio a Flamey, que flota abajo a la derecha.
+    padding-bottom: 72px;
+  }
+}

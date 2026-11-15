@@ -633,3 +633,60 @@
     padding: 8px;
   }
 }
+
+// Tableta en vertical: igual que en el teléfono, todo se apila y se desplaza;
+// el mapa del ambiente activo va a todo el ancho y los otros dos debajo.
+@include mixins.tablet {
+  @media (orientation: portrait) and (min-width: 641px) {
+    .lab {
+      inset: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      // Deja libre la esquina de Flamey al llegar al final.
+      padding-bottom: 62px;
+      pointer-events: auto;
+      @include mixins.inner-scroll;
+    }
+
+    .left,
+    .main,
+    .right {
+      flex: none;
+      overflow: visible;
+    }
+
+    .right {
+      display: flex;
+    }
+
+    .scroll,
+    .body {
+      flex: none;
+      overflow: visible;
+    }
+
+    .maps {
+      flex: none;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-rows: 340px 260px;
+    }
+
+    .split {
+      grid-template-rows: 320px auto;
+    }
+  }
+}
+
+@include mixins.phone {
+  .lab {
+    inset: 6px;
+    gap: 8px;
+    padding-bottom: 62px;
+  }
+
+  // Objetivos táctiles cómodos en las pestañas de análisis.
+  .tabs button {
+    min-height: 44px;
+  }
+}

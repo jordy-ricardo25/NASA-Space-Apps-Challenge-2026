@@ -243,3 +243,19 @@
     color: var(--color-text-2);
   }
 }
+
+// Teléfono: la tabla conserva sus columnas y se desliza en horizontal.
+@include mixins.phone {
+  .table {
+    display: block;
+    overflow-x: auto;
+
+    b {
+      min-width: 150px;
+    }
+  }
+
+  .bars li {
+    grid-template-columns: 96px minmax(0, 1fr) 40px;
+  }
+}

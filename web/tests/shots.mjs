@@ -13,12 +13,11 @@ const problems = [];
 page.on("console", (m) => m.type() === "error" && problems.push(`console: ${m.text()}`));
 page.on("pageerror", (e) => problems.push(`pageerror: ${e.message}`));
 page.on("response", (r) => r.status() >= 400 && problems.push(`${r.status()} ${r.url()}`));
-let first = true;
 for (const spec of routes) {
   const [route, wait] = spec.split("@");
   await page.goto(base + route, { waitUntil: "load" });
-  if (first) await page.waitForFunction(() => !document.querySelector("[role=status][class*=screen]") || document.querySelector("[class*=leaving]"), null, { timeout: 60000 }).catch(() => problems.push("boot timeout"));
-  first = false;
+  // Cada carga completa pasa por la pantalla inicial: se espera a que se retire.
+  await page.waitForFunction(() => !document.querySelector("[role=status][data-phase]"), null, { timeout: 90000 }).catch(() => problems.push("boot timeout"));
   await page.waitForTimeout(Number(wait ?? 6500));
   const name = route.replace(/[^a-z0-9]+/gi, "_").replace(/^_|_$/g, "") || "home";
   await page.screenshot({ path: `${out}/${name}.png` });

@@ -194,3 +194,63 @@
     font-size: 18px;
   }
 }
+
+// ── Tableta y teléfono ───────────────────────────────────────────────────────
+// El tablero de ambientes es una hoja inferior con desplazamiento que deja
+// libre la esquina de Flamey; las filas son objetivos táctiles cómodos.
+@include mixins.tablet {
+  .board {
+    right: 72px;
+    bottom: 8px;
+    max-height: 44%;
+    @include mixins.inner-scroll;
+
+    a {
+      min-height: 42px;
+      font-size: 12px;
+    }
+  }
+}
+
+@include mixins.phone {
+  .title {
+    top: 8px;
+    left: 10px;
+    right: 10px;
+    max-width: none;
+
+    h1 {
+      font-size: 17px;
+    }
+
+    // La pista habla de rueda y clic derecho: no aplica al tocar.
+    p {
+      display: none;
+    }
+  }
+
+  // En el teléfono las etiquetas flotantes se amontonan: el tablero ya da
+  // acceso a cada ambiente.
+  .labels {
+    display: none;
+  }
+
+  .board {
+    left: 6px;
+    right: 68px;
+    bottom: 6px;
+    width: auto;
+    max-height: 40%;
+    padding: 8px 8px 4px;
+
+    a {
+      grid-template-columns: 50px minmax(0, 1fr) 54px 58px 12px;
+      gap: 6px;
+      padding: 4px;
+    }
+  }
+
+  .boardHead {
+    font-size: 10.5px;
+  }
+}

@@ -194,3 +194,43 @@
     display: none;
   }
 }
+
+// Teléfono: quedan la marca, el ambiente activo, el idioma y el equipo.
+@include mixins.phone {
+  .bar {
+    gap: 8px;
+    padding-right: 8px;
+  }
+
+  .brand {
+    padding: 0 4px 0 10px;
+  }
+
+  .clock {
+    display: none;
+  }
+
+  .env {
+    gap: 6px;
+    min-width: 0;
+    padding: 4px 9px;
+    font-size: 11px;
+    overflow: hidden;
+
+    b {
+      letter-spacing: 0.06em;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    // En el teléfono basta el nombre y la gravedad.
+    span + span + span {
+      display: none;
+    }
+  }
+
+  .team {
+    width: 34px;
+    height: 34px;
+  }
+}

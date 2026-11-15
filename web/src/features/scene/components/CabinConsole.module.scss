@@ -446,3 +446,174 @@ $gap: 12px;
     display: none;
   }
 }
+
+// En escritorio el contenedor de los paneles no genera caja: escenario,
+// estado y telemetría siguen colocados respecto a la cabina, igual que antes.
+.sheet {
+  display: contents;
+}
+
+// ── Tableta en vertical y teléfono ───────────────────────────────────────────
+// La llama queda arriba y los tres paneles se apilan en una hoja inferior que
+// se desplaza. "Encender muestra" sube al principio del escenario.
+@mixin sheet-layout($top) {
+  .bar {
+    top: 6px;
+    left: 6px;
+    right: 6px;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 5px 8px;
+    border-radius: 22px;
+  }
+
+  .back {
+    width: 38px;
+    height: 38px;
+  }
+
+  .transport button {
+    min-width: 36px;
+    height: 36px;
+    font-size: 12px;
+  }
+
+  .sheet {
+    position: absolute;
+    inset: $top 6px 6px 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-bottom: 62px;
+    overflow-x: hidden;
+    pointer-events: auto;
+    @include mixins.inner-scroll;
+  }
+
+  .left,
+  .right,
+  .charts {
+    position: relative;
+    inset: auto;
+    width: auto;
+    height: auto;
+    flex: none;
+    overflow: visible;
+  }
+
+  .left > * {
+    order: 2;
+  }
+
+  .left > h3 {
+    order: 0;
+  }
+
+  .left > .ignite {
+    order: 1;
+    height: 46px;
+    margin-top: 0;
+    font-size: 13px;
+  }
+
+  .matNote {
+    display: block;
+    font-size: 12px;
+  }
+
+  .alertBox,
+  .scroll {
+    flex: none;
+    overflow: visible;
+  }
+
+  .actions button {
+    min-height: 42px;
+    font-size: 12.5px;
+  }
+
+  .log {
+    min-height: 0;
+    font-size: 12px;
+  }
+
+  // Dos gráficas por fila, con altura fija para que se lean.
+  .charts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: 118px 118px auto;
+  }
+
+  .kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    div {
+      border-top: 1px solid var(--color-line-soft);
+
+      &:nth-child(odd) {
+        border-left: 0;
+      }
+    }
+
+    span {
+      font-size: 11px;
+    }
+  }
+}
+
+@include mixins.tablet {
+  @media (orientation: portrait) {
+    @include sheet-layout(52%);
+
+    // En tableta: telemetría arriba y, debajo, escenario y estado lado a lado.
+    .sheet {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      align-content: start;
+      align-items: start;
+    }
+
+    .charts {
+      grid-column: 1 / -1;
+      order: -1;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-rows: 120px auto;
+    }
+
+    .kpis {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+}
+
+@include mixins.phone {
+  @include sheet-layout(55%);
+
+  .sheet {
+    display: flex;
+  }
+
+  .charts {
+    order: 0;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: 118px 118px auto;
+  }
+
+  .kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  // En el teléfono la barra muestra el estado y el tiempo; el reloj baja de tamaño.
+  .state {
+    margin-left: 0;
+    padding: 4px 8px;
+  }
+
+  .transport {
+    margin-left: auto;
+
+    time {
+      min-width: 40px;
+      font-size: 12px;
+    }
+  }
+}

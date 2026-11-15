@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { answerQuestion } from "@/features/assistant/server/assistant.service";
+import { HISTORY_TURNS, answerQuestion } from "@/features/assistant/server/assistant.service";
 import { envelope } from "@/shared/types/api";
 
 export const maxDuration = 30;
@@ -7,6 +7,11 @@ export const maxDuration = 30;
 const body = z.object({
   question: z.string().trim().min(1).max(400),
   lang: z.enum(["es", "en"]).catch("es"),
+  // Turnos anteriores: dan memoria al modelo y permiten responder "sí" a lo que Flamey ofreció.
+  history: z
+    .array(z.object({ role: z.enum(["user", "bot"]), text: z.string().max(1500) }))
+    .max(HISTORY_TURNS)
+    .catch([]),
   context: z
     .object({
       module: z.string().max(24).optional(),
@@ -25,8 +30,8 @@ const body = z.object({
 export async function POST(req: Request) {
   const parsed = body.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return Response.json({ error: "Invalid question" }, { status: 400 });
-  const { question, lang, context } = parsed.data;
-  const a = await answerQuestion(question, lang, context ?? {});
+  const { question, lang, context, history } = parsed.data;
+  const a = await answerQuestion(question, lang, context ?? {}, history);
   return Response.json(
     envelope(
       { text: a.text, lang: a.lang, origin: a.origin, citations: a.sources, rows: a.rows },

@@ -4,13 +4,15 @@
  *  2. Análisis del escenario → números calculados por el motor físico (nunca redactados).
  *  3. Búsqueda en el catálogo: la ficha de la investigación nombrada en la
  *     pregunta (Guía) o una ficha de la base de conocimiento, con sus fuentes.
- *  4. (Opcional) Gemini con File Search, si hay claves configuradas en el servidor;
- *     recibe la ficha como contexto y, si falla o responde sin apoyo, se usa la ficha.
+ *  4. (Opcional) Modelo de lenguaje, si está configurado en el servidor: primero
+ *     el modelo del equipo en Ollama (OLLAMA_BASE_URL) y, si no está o no
+ *     responde, Gemini con File Search (GEMINI_API_KEY). Recibe la ficha como
+ *     contexto y, si falla o responde sin apoyo, se usa la ficha.
  *  5. Sin evidencia → se abstiene.
  *
  * Si la persona fijó un hallazgo de NASA PSI en la Guía, la pregunta se
  * responde sobre ese hallazgo con el paquete del backend del equipo (factores
- * del índice y filas del CSV): con Gemini si hay clave y, si no, con las
+ * del índice y filas del CSV): con el modelo de lenguaje si lo hay y, si no, con las
  * cifras del paquete ordenadas.
  */
 import { KNOWLEDGE, type KnowledgeCard } from "@/content/knowledge";
@@ -20,12 +22,16 @@ import { getModule } from "@/content/modules";
 import { getSource } from "@/content/sources";
 import { assess } from "@/features/fire/engine/analysis";
 import { MATERIALS, type MaterialId } from "@/features/fire/engine/materials";
-import { findingPack } from "@/features/psi/server/psi.service";
+import { PSI_ENV } from "@/features/psi/lib/env";
+import { findingPack, ladderFor, type FindingPack } from "@/features/psi/server/psi.service";
 import type { EvidenceLevel } from "@/shared/types/api";
 import { detectLang } from "../lib/detectLang";
 import { FAQ, NO_ANSWER, findPrepared, normalize } from "../lib/faq";
 import { findingBlock, findingSummary } from "../lib/findingText";
+import { detectTopic, pendingTopics, topicAnswer, topicAsk } from "../lib/findingTopics";
 import { PERSONA, RULES } from "../lib/persona";
+import { knowledgeBase } from "./knowledgeBase";
+import { askOllama, ollamaConfig, resolveModel } from "./ollama";
 
 export interface ChatContext {
   module?: string;
@@ -40,6 +46,56 @@ export interface ChatContext {
   explain?: boolean;
 }
 
+/** Un turno anterior de la conversación. */
+export interface ChatTurn {
+  role: "user" | "bot";
+  text: string;
+}
+
+/** Turnos anteriores que recibe el modelo (los mismos que el Flamey de Johnatan). */
+export const HISTORY_TURNS = 6;
+
+/** Turnos que recibe el modelo de Ollama (los que usa el Flamey de Johnatan). */
+const LOCAL_TURNS = 2;
+
+/** Respuestas cortas que aceptan lo que Flamey acaba de ofrecer. */
+// El mensaje entero debe ser una afirmación: "Si arde, ¿qué hago?" no lo es.
+const AFFIRMATIVE = /^[\s¡]*(?:(?:s[ií]|claro|dale|ok|okay|vale|bueno|de una|yes|yeah|sure)[\s,.!]*(?:por favor|please)?|por favor|please)[\s.!]*$/i;
+
+/**
+ * Un "sí" responde a la última pregunta que hizo Flamey: se toma esa pregunta
+ * como la consulta, para que todas las capas la entiendan.
+ */
+export function followUp(question: string, history: ChatTurn[]): string {
+  if (question.length > 24 || !AFFIRMATIVE.test(question)) return question;
+  const last = [...history].reverse().find((turn) => turn.role === "bot")?.text.trim() ?? "";
+  const asked = /[^.?!¿\n]*\?$/.exec(last)?.[0].trim();
+  if (!asked) return question;
+  // "¿Quieres saber cómo…?" se convierte en la consulta "¿Cómo…?".
+  const direct = asked.replace(/^(quieres saber|do you want to know)\s+/i, "");
+  const query = direct.charAt(0).toUpperCase() + direct.slice(1);
+  return last.includes(`¿${asked}`) ? `¿${query}` : query;
+}
+
+/** Con lo que Flamey cierra la explicación de un hallazgo; un "sí" lo retoma. */
+const OFFER: Record<Lang, string> = {
+  es: "¿Quieres saber cómo se apaga una llama así?",
+  en: "Do you want to know how a flame like this is put out?",
+};
+const ABOUT_SUPPRESSION = /apag|supres|extin|mitig|put out|suppress|extinguish/i;
+const ABOUT_SUIT = /\beva\b|traje|\bsuit/i;
+/** Módulo de la plataforma que corresponde al traje en el backend. */
+const SUIT_MODULE = Object.keys(PSI_ENV).find((id) => PSI_ENV[id] === "eva");
+
+/** El mismo hallazgo evaluado en el traje: cifras del backend, para comparar. */
+function suitNote(pack: FindingPack, suit: FindingPack, lang: Lang): string {
+  const o2 = (suit.environment.o2_fraction * 100).toFixed(0);
+  const atm = suit.environment.pressure_atm.toFixed(2).replace(".", lang === "es" ? "," : ".");
+  return lang === "es"
+    ? `En ${suit.environment.label} (${o2} % de O₂ a ${atm} atm) el índice RPI de este mismo hallazgo es ${suit.finding.rpi} de 100; en ${pack.environment.label} es ${pack.finding.rpi} de 100.`
+    : `In ${suit.environment.label} (${o2}% O₂ at ${atm} atm) the RPI index of this same finding is ${suit.finding.rpi} out of 100; in ${pack.environment.label} it is ${pack.finding.rpi} out of 100.`;
+}
+
 export interface ChatAnswer {
   text: string;
   /** Idioma de la respuesta: el de la pregunta. */
@@ -49,6 +105,28 @@ export interface ChatAnswer {
   evidence?: EvidenceLevel;
   /** Filas del CSV de NASA PSI que respaldan una respuesta sobre un hallazgo. */
   rows?: { file: string; row: number; quality: number }[];
+  /** Modelo de lenguaje que redactó la respuesta ("ollama:qwen2.5:1.5b", "gemini"); vacío si no hubo. */
+  by?: string;
+  /** Preguntas siguientes sobre el hallazgo que aún no se han hecho (solo en Flamey local). */
+  suggestions?: string[];
+  /** Tema del hallazgo que se acaba de responder, para no volver a ofrecerlo. */
+  topic?: string;
+}
+
+/**
+ * Quién redacta cuando hace falta un modelo de lenguaje:
+ *  - "auto": el chat general. Gemini con File Search y, de respaldo, Ollama.
+ *  - "local": la sección de Flamey local. Solo Ollama; si falla, la respuesta calculada.
+ *  - "fast": sin modelo, como el modo "Rápido" del Flamey de Johnatan.
+ */
+export type AssistantEngine = "auto" | "local" | "fast";
+
+export interface AnswerOptions {
+  engine?: AssistantEngine;
+  /** Modelo de Ollama elegido en la interfaz; vacío para el de la configuración. */
+  model?: string;
+  /** Temas del hallazgo ya respondidos en esta conversación (los lleva la pantalla). */
+  covered?: string[];
 }
 
 const STOP = new Set("de la el en y a los las un una que por para con del al se es lo como mas the of and to in is a for on with what why how does do it an are que cual como cuando donde por si no me te su sus this that puede podria".split(" "));
@@ -69,19 +147,44 @@ const MATERIAL_WORDS: [MaterialId, string[]][] = [
 ];
 const BURN_WORDS = ["arde", "arder", "quema", "inflamable", "inflamabilidad", "margen", "limite", "propaga", "burn", "burns", "flammable", "flammability", "margin", "limit", "spread", "seguro", "safe", "riesgo", "risk"];
 
-function searchCards(question: string): { card: KnowledgeCard; score: number } | null {
+/** Fichas de conocimiento ordenadas por coincidencia con la pregunta (la mejor primero). */
+function rankCards(question: string, pool: KnowledgeCard[] = KNOWLEDGE): { card: KnowledgeCard; score: number }[] {
   const tokens = normalize(question).split(" ").filter((w) => w.length > 1 && !STOP.has(w));
-  let best: { card: KnowledgeCard; score: number } | null = null;
-  for (const card of KNOWLEDGE) {
+  return pool.map((card) => {
     const body = normalize(`${card.text.es} ${card.text.en}`);
     let score = 0;
     for (const tk of tokens) {
       if (card.keys.includes(tk)) score += 3;
       else if (tk.length >= 4 && body.includes(tk)) score += 1;
     }
-    if (!best || score > best.score) best = { card, score };
-  }
+    return { card, score };
+  }).sort((a, b) => b.score - a.score);
+}
+
+function searchCards(question: string, pool: KnowledgeCard[] = KNOWLEDGE): { card: KnowledgeCard; score: number } | null {
+  const best = rankCards(question, pool)[0];
   return best && best.score >= 4 ? best : null;
+}
+
+/**
+ * Fichas que acompañan a la pregunta cuando el modelo no tiene buscador de
+ * documentos. Son pocas a propósito: un modelo pequeño mezcla los datos de
+ * fichas distintas.
+ */
+const CONTEXT_CARDS = 2;
+
+/** Cifras de un texto, sin las de fórmulas y siglas (CO2, B17) ni las de subíndices. */
+function figures(text: string): number[] {
+  return (text.replace(/[A-Za-z]+-?\d+/g, " ").match(/\d+(?:[.,]\d+)?/g) ?? []).map((x) => Number(x.replace(",", ".")));
+}
+
+/**
+ * Cifras de la respuesta que no están en los datos entregados al modelo.
+ * Un modelo pequeño a veces combina o inventa números: esa respuesta se descarta.
+ */
+export function inventedFigures(answer: string, data: string): number[] {
+  const given = figures(data);
+  return figures(answer).filter((n) => !given.some((g) => Math.abs(g - n) < 1e-9));
 }
 
 const COMMON_WORDS = new Set(["same", "slice", "spice", "flex", "bass", "daft"]);
@@ -107,7 +210,7 @@ function findInvestigation(question: string): Investigation | null {
 }
 
 /** La ficha de una investigación (los mismos datos de la Guía) como texto citable. */
-function investigationCard(inv: Investigation): KnowledgeCard {
+export function investigationCard(inv: Investigation): KnowledgeCard {
   const dot = (x: string): string => (/[.!?]$/.test(x) ? x : `${x}.`);
   const text = (lang: Lang): string =>
     [
@@ -164,7 +267,6 @@ export function scenarioVerdict(mat: MaterialId, ctx: ChatContext & { g: number;
   return { text, origin: "analysis", sources: cite(a.sources.slice(0, 4)), evidence: a.evidence };
 }
 
-/** Consulta opcional a Gemini (File Search), anclada a la ficha encontrada. */
 /**
  * Cita de un documento del almacén. Los PDF de la bibliografía se llaman
  * "(n) Título.pdf" y corresponden a la fuente Bn del catálogo; el resto se
@@ -186,6 +288,7 @@ const GEMINI_TIMEOUT_MS = 12000;
 
 /** Marca con la que el modelo avisa de que no encontró la respuesta (vale para cualquier idioma). */
 const NO_EVIDENCE = "[NO_EVIDENCE]";
+const NO_EVIDENCE_WORD = "NO_EVIDENCE";
 
 /**
  * Lo que la persona tiene en pantalla y lo que el modelo físico calcula para
@@ -210,27 +313,186 @@ function scenarioBlock(ctx: ChatContext): string {
   return lines.join("\n");
 }
 
-async function askGemini(question: string, card: KnowledgeCard | null, lang: Lang, ctx: ChatContext = {}, finding = ""): Promise<{ text: string; docs: string[]; abstained: boolean } | null> {
+/** Respuesta de un modelo de lenguaje, con lo que la respalda. */
+interface ModelAnswer {
+  text: string;
+  /** Títulos de los documentos del almacén consultados (solo Gemini). */
+  docs: string[];
+  /** Fuentes del catálogo de las fichas que se le dieron como contexto (solo Ollama). */
+  cited: string[];
+  abstained: boolean;
+  /** Modelo que respondió. */
+  by: string;
+}
+
+const log = (msg: string): void => console.info(`[asistente] ${msg}`);
+
+/** Instrucciones de sistema comunes a cualquier modelo: rol, reglas, idioma y contexto. */
+function systemPrompt(lang: Lang, search: string, blocks: string[]): string {
+  return [
+    ...PERSONA,
+    ...RULES,
+    search,
+    // El propio modelo responde en el idioma de la pregunta: no hay una segunda petición de traducción.
+    `Answer in the same language as the user's question, whatever it is. If the language of the question is unclear, answer in ${lang === "es" ? "Spanish" : "English"}.`,
+    `If the information is missing, start your answer with the marker ${NO_EVIDENCE} and then say, in the language of the question, that you could not find it in our NASA sources.`,
+    "At most 130 words, short clear sentences, no tables, no headings.",
+    ...blocks,
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
+/** El modelo avisó de que no encontró la respuesta. */
+const abstains = (text: string): boolean => text.includes(NO_EVIDENCE_WORD) || text.includes(NO_ANSWER.es) || text.includes(NO_ANSWER.en);
+
+/** La marca de abstención con o sin corchetes: los modelos pequeños a veces los omiten. */
+const NO_EVIDENCE_MARK = /\[?NO_EVIDENCE\]?/g;
+
+/**
+ * Modelo de lenguaje del chat general: Gemini si hay clave y, si no, el del
+ * equipo en Ollama. Sin ninguno, el asistente responde solo con sus fichas.
+ */
+export const assistantModel = (): "ollama" | "gemini" | "none" => (process.env.GEMINI_API_KEY ? "gemini" : ollamaConfig() ? "ollama" : "none");
+
+/**
+ * Consulta opcional al modelo de lenguaje, anclada a la ficha encontrada.
+ * El orden depende del motor pedido (AssistantEngine).
+ */
+async function askModel(question: string, card: KnowledgeCard | null, lang: Lang, ctx: ChatContext = {}, more: ModelExtras = {}): Promise<ModelAnswer | null> {
+  const finding = more.pack ? [findingBlock(more.pack), ...(more.notes ?? [])].join("\n") : "";
+  if (more.engine === "fast") return null;
+  if (more.engine === "local") return askLocalModel(question, card, lang, ctx, more);
+  const cloud = await askGemini(question, card, lang, ctx, finding, more.history);
+  if (cloud && !cloud.abstained) return cloud;
+  // Gemini no respondió o se abstuvo: segundo intento con el modelo de Ollama,
+  // con un tope de tiempo para que los dos intentos quepan en los 30 s de la ruta.
+  const local = await askLocalModel(question, card, lang, ctx, { ...more, timeout: FALLBACK_TIMEOUT_MS });
+  return local && !local.abstained ? local : (cloud ?? local);
+}
+
+/** Tiempo máximo del modelo de Ollama cuando actúa de respaldo de Gemini. */
+const FALLBACK_TIMEOUT_MS = 12000;
+
+/** Lo que acompaña a una consulta al modelo además de la pregunta y la ficha. */
+interface ModelExtras {
+  /** Hallazgo de PSI fijado. */
+  pack?: FindingPack | null;
+  /** Datos calculados que se añaden al hallazgo (por ejemplo, su comparación con el traje). */
+  notes?: string[];
+  /** Turnos anteriores de la conversación. */
+  history?: ChatTurn[];
+  engine?: AssistantEngine;
+  model?: string;
+  /** Tope de tiempo (ms) para el modelo de Ollama en esta consulta. */
+  timeout?: number;
+}
+
+/**
+ * Instrucciones para el modelo de Ollama: cortas y en el idioma de la pregunta.
+ * Los modelos pequeños (1–3 B) no siguen un prompt largo en inglés, así que
+ * reciben las mismas reglas de rigor resumidas, como en el Flamey de Johnatan.
+ */
+function localSystem(lang: Lang): string {
+  const es = lang === "es";
+  const format = es
+    ? "Responde en español, claro y breve: máximo 70 palabras, frases cortas, sin títulos, sin listas y sin asteriscos. Primero la conclusión, después el dato que la respalda y su límite."
+    : "Answer in English, clear and brief: at most 70 words, short sentences, no headings, no lists, no asterisks. Conclusion first, then the supporting fact and its limit.";
+  return (
+    es
+      ? [
+          "Eres Flamey, asistente de seguridad contra incendios en naves, estaciones y bases espaciales, del equipo Andora Labs. No eres la NASA ni hablas en su nombre.",
+          format,
+          "Usa solo los DATOS que recibes. Repite las cifras tal como están; no calcules ni inventes otras.",
+          "En gravedad parcial (Luna, Marte) no hay mediciones directas: es una predicción y debes decirlo.",
+          `Si los DATOS no responden la pregunta, escribe solo: ${NO_EVIDENCE}`,
+        ]
+      : [
+          "You are Flamey, a fire-safety assistant for spacecraft, stations and space bases, built by team Andora Labs. You are not NASA and do not speak for NASA.",
+          format,
+          "Use only the DATA you receive. Repeat figures exactly as given; never compute or invent others.",
+          "Partial gravity (Moon, Mars) has no direct measurements: it is a prediction and you must say so.",
+          `If the DATA does not answer the question, write only: ${NO_EVIDENCE}`,
+        ]
+  ).join("\n");
+}
+
+/**
+ * Prevención para la tercera parte de un hallazgo: la primera frase de la
+ * ficha de supresión, con su fuente. No se redacta ninguna recomendación propia.
+ */
+function prevention(lang: Lang): { text: string; sources: string[] } {
+  const card = KNOWLEDGE.find((k) => k.id === "suppression");
+  const first = card?.text[lang].split(/(?<=\.)\s/)[0] ?? "";
+  return { text: first, sources: first ? (card?.sources ?? []) : [] };
+}
+
+/** El escenario en pantalla, ya calculado por el motor físico, en una o dos frases. */
+function scenarioData(ctx: ChatContext, lang: Lang): string {
+  if (ctx.o2 == null || ctx.p == null || ctx.g == null) return "";
+  if (ctx.mat && ctx.mat in MATERIALS) return scenarioVerdict(ctx.mat as MaterialId, { ...ctx, g: ctx.g, o2: ctx.o2, p: ctx.p }, lang).text;
+  const env = getModule(ctx.module);
+  return lang === "es"
+    ? `Escenario en pantalla: ${env ? env.name.es : "sin módulo"}, gravedad ${ctx.g} g, oxígeno ${ctx.o2} % a ${ctx.p} kPa.`
+    : `Scenario on screen: ${env ? env.name.en : "no module"}, gravity ${ctx.g} g, oxygen ${ctx.o2}% at ${ctx.p} kPa.`;
+}
+
+/**
+ * Consulta al modelo de Ollama. No tiene buscador de documentos: recibe como
+ * datos el hallazgo de PSI, el escenario calculado o las fichas de conocimiento
+ * más cercanas a la pregunta, y solo se le pregunta si hay algún dato que darle.
+ */
+async function askLocalModel(question: string, card: KnowledgeCard | null, lang: Lang, ctx: ChatContext, more: ModelExtras): Promise<ModelAnswer | null> {
+  const base = ollamaConfig();
+  if (!base) return null;
+  const cfg = { ...base, ...(more.model ? { model: more.model } : {}), ...(more.timeout ? { timeout: Math.min(base.timeout, more.timeout) } : {}) };
+  const pack = more.pack ?? null;
+  // La sección local busca en toda la base de conocimiento; el chat general, en sus fichas.
+  const pool = more.engine === "local" ? knowledgeBase(investigationCard) : KNOWLEDGE;
+  // Un hallazgo de PSI trae su propia evidencia y una ficha ya elegida basta:
+  // con más de un tema, un modelo pequeño mezcla los datos de uno con otro.
+  const extra =
+    pack || card
+      ? []
+      : rankCards(question, pool)
+          .filter((r) => r.score >= 2)
+          .slice(0, CONTEXT_CARDS)
+          .map((r) => r.card);
+  const cards = [...(card ? [card] : []), ...extra];
+  const data = [pack ? findingSummary(pack, lang) : "", ...(more.notes ?? []), scenarioData(ctx, lang), ...cards.map((c) => c.text[lang])].filter(Boolean);
+  if (!data.length) return null;
+  const user = `${lang === "es" ? "DATOS" : "DATA"}:\n${data.map((d) => (d.startsWith("- ") ? d : `- ${d}`)).join("\n")}\n\n${lang === "es" ? "Pregunta" : "Question"}: ${question}`;
+  // Solo los dos últimos mensajes: con más historial, un modelo pequeño se repite.
+  const history = (more.history ?? []).slice(-LOCAL_TURNS).map((turn) => ({ role: turn.role === "user" ? ("user" as const) : ("assistant" as const), content: turn.text }));
+  log(`pregunta="${question.slice(0, 80)}" modelo=ollama:${cfg.model || "automático"} datos=${pack ? "hallazgo PSI" : cards.map((c) => c.id).join(",") || "escenario"} turnos=${history.length}`);
+  const text = await askOllama(cfg, localSystem(lang), user, log, history);
+  if (!text) return null;
+  // Las cifras pueden venir de los datos o de lo ya dicho en la conversación.
+  const invented = inventedFigures(text, [user, ...history.map((turn) => turn.content)].join("\n"));
+  if (invented.length) {
+    log(`Ollama escribió cifras que no están en los datos (${invented.join(", ")}): se descarta la respuesta`);
+    return null;
+  }
+  // Un hallazgo se explica con sus cifras: una respuesta sin ninguna es relleno del modelo.
+  if (pack && !abstains(text) && figures(text).length === 0) {
+    log("Ollama explicó el hallazgo sin citar ninguna cifra de los datos: se descarta la respuesta");
+    return null;
+  }
+  return { text: text.replace(NO_EVIDENCE_MARK, "").trim(), docs: [], cited: [...new Set(extra.flatMap((c) => c.sources))], abstained: abstains(text), by: `ollama:${(await resolveModel(cfg)) ?? ""}` };
+}
+
+/** Consulta a Gemini con File Search. */
+async function askGemini(question: string, card: KnowledgeCard | null, lang: Lang, ctx: ChatContext = {}, finding = "", history: ChatTurn[] = []): Promise<ModelAnswer | null> {
   const key = process.env.GEMINI_API_KEY;
   if (!key) return null;
   const model = process.env.GEMINI_MODEL ?? "gemini-3.5-flash-lite";
   const store = process.env.FILE_SEARCH_STORE?.trim();
   const scenario = scenarioBlock(ctx);
-  const system = [
-    ...PERSONA,
-    ...RULES,
+  const system = systemPrompt(
+    lang,
     "Always search the file-search documents before answering. Most are written in English: search with English terms and acronyms even when the question is in Spanish. The project document also holds a bank of questions and answers about the platform.",
-    // El propio modelo responde en el idioma de la pregunta: no hay una segunda petición de traducción.
-    `Answer in the same language as the user's question, whatever it is. If the language of the question is unclear, answer in ${lang === "es" ? "Spanish" : "English"}.`,
-    `If the information is missing, start your answer with the marker ${NO_EVIDENCE} and then say, in the language of the question, that you could not find it in our NASA sources.`,
-    "At most 130 words, short clear sentences, no tables, no headings.",
-    scenario,
-    finding,
-    card ? `Context:\n${card.text[lang]}` : "",
-  ].join("\n");
-  // TODO(diagnóstico): registro temporal en la terminal del servidor. Retirar
-  // cuando el almacén quede verificado en la demo.
-  const log = (msg: string): void => console.info(`[asistente] ${msg}`);
+    [scenario, finding, card ? `Context:\n${card.text[lang]}` : ""],
+  );
   const started = Date.now();
   log(`pregunta="${question.slice(0, 80)}" modelo=${model} almacén=${store ? (STORE_FORMAT.test(store) ? "configurado" : "FORMATO INVÁLIDO (debe ser fileSearchStores/...)") : "SIN CONFIGURAR"} ficha=${card?.id ?? "ninguna"}`);
   try {
@@ -239,7 +501,7 @@ async function askGemini(question: string, card: KnowledgeCard | null, lang: Lan
       headers: { "Content-Type": "application/json", "x-goog-api-key": key },
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: system }] },
-        contents: [{ role: "user", parts: [{ text: question }] }],
+        contents: [...history.slice(-HISTORY_TURNS).map((turn) => ({ role: turn.role === "user" ? "user" : "model", parts: [{ text: turn.text }] })), { role: "user", parts: [{ text: question }] }],
         ...(store ? { tools: [{ fileSearch: { fileSearchStoreNames: [store] } }] } : {}),
       }),
       signal: AbortSignal.timeout(GEMINI_TIMEOUT_MS),
@@ -256,9 +518,9 @@ async function askGemini(question: string, card: KnowledgeCard | null, lang: Lan
     const docs = [...new Set((cand?.groundingMetadata?.groundingChunks ?? []).flatMap((c) => c.retrievedContext?.title ?? []))];
     // Hay apoyo si respondió con documentos, con una ficha, con el escenario calculado o con un hallazgo de PSI.
     const grounded = docs.length > 0 || !!card || !!scenario || !!finding;
-    const abstained = !!text && (text.includes(NO_EVIDENCE) || text.includes(NO_ANSWER.es) || text.includes(NO_ANSWER.en));
+    const abstained = !!text && abstains(text);
     log(`respuesta en ${Date.now() - started} ms · fin=${cand?.finishReason ?? "?"} · fuentes=${docs.length}${docs.length ? ` [${docs.map((d) => d.slice(0, 40)).join(" | ")}]` : " (SIN FUENTES del almacén)"} · texto=${text ? `${text.length} caracteres` : "vacío"}${abstained ? " · el modelo se abstuvo" : ""}`);
-    return text && grounded ? { text: text.replaceAll(NO_EVIDENCE, "").trim(), docs, abstained } : null;
+    return text && grounded ? { text: text.replace(NO_EVIDENCE_MARK, "").trim(), docs, cited: [], abstained, by: "gemini" } : null;
   } catch (e) {
     log(`ERROR al llamar a la API tras ${Date.now() - started} ms: ${e instanceof Error ? `${e.name}: ${e.message}` : String(e)}`);
     return null;
@@ -271,7 +533,10 @@ async function askGemini(question: string, card: KnowledgeCard | null, lang: Lan
  * conversación (o de la interfaz) y solo decide cuando la pregunta es
  * demasiado corta o ambigua para reconocer su idioma.
  */
-export async function answerQuestion(question: string, hint: Lang, ctx: ChatContext = {}): Promise<ChatAnswer> {
+export async function answerQuestion(asked: string, hint: Lang, ctx: ChatContext = {}, history: ChatTurn[] = [], options: AnswerOptions = {}): Promise<ChatAnswer> {
+  const question = followUp(asked, history);
+  const run = { engine: options.engine ?? "auto", model: options.model };
+  const pool = run.engine === "auto" ? KNOWLEDGE : knowledgeBase(investigationCard);
   const prepared = findPrepared(question);
   // Una pregunta preparada se responde en el idioma en que está escrita.
   const lang: Lang = (prepared ? (normalize(prepared.q.en) === normalize(question) && normalize(prepared.q.es) !== normalize(question) ? "en" : normalize(prepared.q.es) === normalize(question) && normalize(prepared.q.en) !== normalize(question) ? "es" : null) : null) ?? detectLang(question) ?? hint;
@@ -288,17 +553,60 @@ export async function answerQuestion(question: string, hint: Lang, ctx: ChatCont
   // Hallazgo de PSI fijado: la respuesta trata de ese hallazgo. Si ya no existe
   // para ese ambiente, la pregunta sigue por el camino general.
   const pack = ctx.finding ? await findingPack(ctx.finding.key, ctx.finding.env) : null;
-  if (pack) {
-    // El escenario del Laboratorio no se mezcla: el hallazgo trae su propio ambiente.
-    const explained = await askGemini(question, null, lang, {}, findingBlock(pack));
-    const docs = explained && !explained.abstained ? explained.docs.map(citeDocument) : [];
-    const sources = [...cite(["PSI"]), ...docs];
+  if (pack && run.engine !== "auto") {
+    // Flamey local: los temas de dato exacto se responden con los campos del
+    // backend, haya o no modelo, para que ninguna cifra dependa de su redacción.
+    const topicId = detectTopic(question);
+    const next = pendingTopics(pack, new Set([...(options.covered ?? []), ...(topicId ? [topicId] : [])]));
+    const closing = next[0] ? `\n\n${topicAsk(next[0], lang)}` : "";
+    const suggestions = next.slice(0, 3).map((id) => topicAsk(id, lang));
+    const rows = pack.evidence.slice(0, 6);
+    if (topicId) {
+      const answer = topicAnswer(topicId, pack, lang, {
+        suit: topicId === "suit" && SUIT_MODULE && pack.environment.key !== "eva" ? await findingPack(pack.finding.key, SUIT_MODULE) : null,
+        ladder: topicId === "replace" ? await ladderFor(pack.environment) : null,
+        suppression: topicId === "extinguish" ? KNOWLEDGE.find((k) => k.id === "suppression")?.text[lang] : undefined,
+      });
+      if (answer) return { lang, text: `${answer.text}${closing}`, origin: "psi", sources: cite(["PSI", ...answer.sources]), rows, suggestions, topic: topicId };
+    }
+    // Explicación general: el modelo redacta con las cifras del hallazgo y lo que
+    // el backend dice del avance de la llama; si falla, quedan las cifras ordenadas.
+    const notes = [topicAnswer("speed", pack, lang)?.text ?? ""].filter(Boolean);
+    const explained = await askModel(question, null, lang, {}, { pack, notes, history, ...run });
+    const used = explained && !explained.abstained ? explained : null;
+    const tip = prevention(lang);
     return {
       lang,
-      text: explained && !explained.abstained ? explained.text : findingSummary(pack, lang),
+      text: `${used ? used.text : [findingSummary(pack, lang, tip.text), ...notes].join("\n\n")}${closing}`,
+      origin: "psi",
+      sources: cite(["PSI", ...(used ? [] : tip.sources)]),
+      rows,
+      by: used?.by,
+      suggestions,
+    };
+  }
+  if (pack) {
+    // Como en el Flamey de Johnatan: si se pregunta por el traje, se trae el mismo hallazgo evaluado allí.
+    const suit = ABOUT_SUIT.test(question) && SUIT_MODULE && pack.environment.key !== "eva" ? await findingPack(pack.finding.key, SUIT_MODULE) : null;
+    const notes = suit ? [suitNote(pack, suit, lang)] : [];
+    // Una pregunta sobre cómo apagar se responde con la ficha de supresión, que tiene fuente.
+    const topic = ABOUT_SUPPRESSION.test(question) ? (KNOWLEDGE.find((k) => k.id === "suppression") ?? null) : null;
+    // El escenario del Laboratorio no se mezcla: el hallazgo trae su propio ambiente.
+    // Con la ficha de supresión, el modelo recibe solo esa ficha: mezclarla con el hallazgo lo confunde y lo alarga.
+    const explained = topic ? await askModel(question, topic, lang, {}, run) : await askModel(question, null, lang, {}, { pack, notes, history, ...run });
+    const used = explained && !explained.abstained ? explained : null;
+    const tip = prevention(lang);
+    // Sin modelo: la ficha de supresión si se preguntó por ella; si no, las cifras del hallazgo.
+    const text = used ? used.text : topic ? topic.text[lang] : [findingSummary(pack, lang, tip.text), ...notes].join("\n\n");
+    const sources = [...cite(["PSI", ...(topic ? topic.sources : used ? [] : tip.sources)]), ...(used ? used.docs.map(citeDocument) : [])];
+    return {
+      lang,
+      // Flamey cierra ofreciendo el siguiente paso; un "sí" lo retoma.
+      text: topic ? text : `${text}\n\n${OFFER[lang]}`,
       origin: "psi",
       sources: sources.filter((x, i) => sources.findIndex((y) => y.id === x.id) === i).slice(0, 5),
       rows: pack.evidence.slice(0, 6),
+      by: used?.by,
     };
   }
   // Explicación de un escenario probado en la pestaña de materiales: el modelo
@@ -306,10 +614,10 @@ export async function answerQuestion(question: string, hint: Lang, ctx: ChatCont
   // conclusión calculada.
   if (ctx.explain && ctx.mat && ctx.mat in MATERIALS && ctx.g != null && ctx.o2 != null && ctx.p != null) {
     const verdict = scenarioVerdict(ctx.mat as MaterialId, { ...ctx, g: ctx.g, o2: ctx.o2, p: ctx.p }, lang);
-    const explained = await askGemini(question, null, lang, ctx);
+    const explained = await askModel(question, null, lang, ctx, { history, ...run });
     if (explained && !explained.abstained) {
       const sources = [...verdict.sources, ...explained.docs.map(citeDocument)];
-      return { ...verdict, lang, text: explained.text, sources: sources.filter((x, i) => sources.findIndex((y) => y.id === x.id) === i).slice(0, 5) };
+      return { ...verdict, lang, by: explained.by, text: explained.text, sources: sources.filter((x, i) => sources.findIndex((y) => y.id === x.id) === i).slice(0, 5) };
     }
     return { ...verdict, lang };
   }
@@ -317,14 +625,14 @@ export async function answerQuestion(question: string, hint: Lang, ctx: ChatCont
   if (analysis) return { ...analysis, lang };
   // La ficha de la investigación nombrada tiene prioridad sobre la búsqueda por palabras.
   const named = findInvestigation(question);
-  const found = named ? { card: investigationCard(named) } : searchCards(question);
-  const generated = await askGemini(question, found?.card ?? null, lang, ctx);
+  const found = named ? { card: investigationCard(named) } : searchCards(question, pool);
+  const generated = await askModel(question, found?.card ?? null, lang, ctx, { history, ...run });
   // Si el modelo se abstiene (aunque sea a medias), vale más la ficha verificada que una respuesta parcial.
   if (generated && !generated.abstained) {
     // Se citan los documentos consultados y, si la hubo, las fuentes de la ficha (sin duplicar).
-    const sources = [...generated.docs.map(citeDocument), ...cite(found?.card.sources ?? [])];
+    const sources = [...generated.docs.map(citeDocument), ...cite([...(found?.card.sources ?? []), ...generated.cited])];
     const unique = sources.filter((x, i) => sources.findIndex((y) => y.id === x.id) === i).slice(0, 5);
-    return { lang, text: generated.text, origin: "documents", sources: unique, evidence: found?.card.evidence };
+    return { lang, text: generated.text, origin: "documents", sources: unique, evidence: found?.card.evidence, by: generated.by };
   }
   if (found) return { lang, text: found.card.text[lang], origin: "documents", sources: cite(found.card.sources), evidence: found.card.evidence };
   // Sin evidencia: en español o inglés, el texto aprobado; en otro idioma, la frase del propio modelo.
@@ -333,4 +641,4 @@ export async function answerQuestion(question: string, hint: Lang, ctx: ChatCont
 }
 
 /** Número de preguntas preparadas y fichas (para el estado del sistema). */
-export const assistantStats = (): { prepared: number; cards: number } => ({ prepared: FAQ.length, cards: KNOWLEDGE.length });
+export const assistantStats = (): { prepared: number; cards: number; model: ReturnType<typeof assistantModel> } => ({ prepared: FAQ.length, cards: KNOWLEDGE.length, model: assistantModel() });

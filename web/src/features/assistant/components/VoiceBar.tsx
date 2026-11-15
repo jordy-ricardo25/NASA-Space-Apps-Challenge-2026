@@ -1,6 +1,6 @@
 "use client";
 
-import { Mic, Square, TriangleAlert, Volume2 } from "lucide-react";
+import { Mic, Square, TriangleAlert, Volume2, VolumeX } from "lucide-react";
 import type { Lang } from "@/content/i18n";
 import { useLang } from "@/shared/hooks/useLang";
 import type { Dictation } from "../hooks/useDictation";
@@ -14,6 +14,9 @@ interface VoiceBarProps {
   /** Idioma de escucha, separado del idioma de la interfaz. */
   listenLang: Lang;
   onListenLang: (lang: Lang) => void;
+  /** Lectura automática de las respuestas. */
+  autoSpeak: boolean;
+  onAutoSpeak: (on: boolean) => void;
 }
 
 const LANGS: Lang[] = ["es", "en"];
@@ -21,9 +24,9 @@ const LANGS: Lang[] = ["es", "en"];
 /**
  * Estado de la voz del asistente: qué hace el micrófono, los errores del
  * reconocimiento (con su código, para diagnosticar), el botón que corta la
- * voz y el idioma de escucha.
+ * voz, el idioma de escucha y el interruptor de la lectura automática.
  */
-export function VoiceBar({ dictation, speech, listenLang, onListenLang }: VoiceBarProps) {
+export function VoiceBar({ dictation, speech, listenLang, onListenLang, autoSpeak, onAutoSpeak }: VoiceBarProps) {
   const { t } = useLang();
   const { phase, notice } = dictation;
   const heard = (dictation.activeLang ?? listenLang).toUpperCase();
@@ -72,6 +75,20 @@ export function VoiceBar({ dictation, speech, listenLang, onListenLang }: VoiceB
               </button>
             ))}
           </div>
+        )}
+        {speech.supported && (
+          <button
+            type="button"
+            className={styles.auto}
+            role="switch"
+            aria-checked={autoSpeak}
+            title={t(autoSpeak ? VOICE_TEXT.autoOn : VOICE_TEXT.autoOff)}
+            onClick={() => onAutoSpeak(!autoSpeak)}
+          >
+            {autoSpeak ? <Volume2 size={14} aria-hidden="true" /> : <VolumeX size={14} aria-hidden="true" />}
+            {t(VOICE_TEXT.autoRead)}
+            <i aria-hidden="true" />
+          </button>
         )}
       </div>
       {speech.provider === "fish" && <p className={styles.ai}>{t(VOICE_TEXT.aiVoice)}</p>}

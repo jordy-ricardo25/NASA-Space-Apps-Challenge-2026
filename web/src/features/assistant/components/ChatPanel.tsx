@@ -7,7 +7,8 @@ import type { ActiveEnv } from "@/features/shell/hooks/useActiveEnv";
 import { MATERIALS } from "@/features/fire/engine/materials";
 import { EvidenceBadge } from "@/shared/components/EvidenceBadge";
 import { useLang } from "@/shared/hooks/useLang";
-import { appStore } from "@/shared/lib/appStore";
+import { appStore, setPrefs } from "@/shared/lib/appStore";
+import { useStore } from "@/shared/lib/store";
 import type { ApiEnvelope, EvidenceLevel } from "@/shared/types/api";
 import { useDictation } from "../hooks/useDictation";
 import { useSpeech } from "../hooks/useSpeech";
@@ -32,7 +33,7 @@ type ChatValue = { text: string; origin: Message["origin"]; citations: Message["
 /**
  * Chat del asistente FUEGO: respuestas con origen, fuentes y nivel de
  * evidencia; dictado controlado (el micrófono llena el campo de texto y la
- * persona pulsa Enviar) y lectura en voz alta.
+ * persona pulsa Enviar) y lectura automática de la respuesta en voz alta.
  * Mientras el asistente habla, el micrófono queda deshabilitado.
  */
 export function ChatPanel({ env }: { env: ActiveEnv }) {
@@ -42,6 +43,7 @@ export function ChatPanel({ env }: { env: ActiveEnv }) {
   const [busy, setBusy] = useState(false);
   // Idioma de escucha: separado del idioma de la interfaz.
   const [listenLang, setListenLang] = useState<Lang>(lang);
+  const autoSpeak = useStore(appStore, (st) => st.autoSpeak);
   const onDictated = useCallback((text: string) => setInput(text.slice(0, MAX_QUESTION)), []);
   const dictation = useDictation({ onText: onDictated });
   const speech = useSpeech();
@@ -82,13 +84,15 @@ export function ChatPanel({ env }: { env: ActiveEnv }) {
         if (!res.ok) throw new Error("chat");
         const data = (await res.json()) as ApiEnvelope<ChatValue>;
         setMessages((m) => [...m, { role: "bot", text: data.value.text, origin: data.value.origin, citations: data.value.citations, evidence: data.evidence_level }]);
+        // Lectura automática: solo el texto de la respuesta, nunca los chips de las fuentes.
+        if (appStore.get().autoSpeak) speak(data.value.text, lang);
       } catch {
         setMessages((m) => [...m, { role: "bot", text: t(l("No pude conectar con el servicio. Inténtalo de nuevo.", "I couldn't reach the service. Please try again.")), origin: "none" }]);
       } finally {
         setBusy(false);
       }
     },
-    [busy, env, lang, stopDictation, stopSpeaking, t],
+    [busy, env, lang, speak, stopDictation, stopSpeaking, t],
   );
 
   // Dictado controlado: llena el campo y nunca envía solo. Se apaga a los 30 s.
@@ -100,6 +104,11 @@ export function ChatPanel({ env }: { env: ActiveEnv }) {
     stopSpeaking(); // el asistente se calla antes de escuchar, para no oírse a sí mismo
     dictation.start(listenLang, input);
     inputRef.current?.focus();
+  };
+
+  const toggleAutoSpeak = (on: boolean): void => {
+    setPrefs({ autoSpeak: on });
+    if (!on) stopSpeaking();
   };
 
   const mood: FuegoMood = listening ? "listen" : busy ? "think" : speaking ? "talk" : "idle";
@@ -173,7 +182,7 @@ export function ChatPanel({ env }: { env: ActiveEnv }) {
         )}
       </div>
 
-      <VoiceBar dictation={dictation} speech={speech} listenLang={listenLang} onListenLang={setListenLang} />
+      <VoiceBar dictation={dictation} speech={speech} listenLang={listenLang} onListenLang={setListenLang} autoSpeak={autoSpeak} onAutoSpeak={toggleAutoSpeak} />
       <form
         className={styles.form}
         onSubmit={(e) => {

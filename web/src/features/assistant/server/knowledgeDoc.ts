@@ -21,7 +21,10 @@ import { GAPS, RADAR, STAGE_LABEL, type Stage } from "@/content/radar";
 import { SOURCES, getSource } from "@/content/sources";
 import { TEAM } from "@/content/team";
 import { MATERIAL_LIST } from "@/features/fire/engine/materials";
+import { CARD_QUESTIONS, PLATFORM_QUESTIONS } from "@/content/questionBank";
+import { ROUTES } from "@/content/routes";
 import { FAQ, NO_ANSWER } from "../lib/faq";
+import { PERSONA, RULES } from "../lib/persona";
 
 /** Texto bilingüe: español y, a continuación, la versión en inglés. */
 const both = (v: L): string => (v.es === v.en ? v.es : `${v.es} (EN: ${v.en})`);
@@ -56,6 +59,22 @@ export function buildKnowledgeDoc(projectDoc: string): string {
 
   p("# Flame in Freefall — documento del proyecto para el asistente Flamey");
   p("", "Este documento describe la plataforma Flame in Freefall, del equipo Andora Labs, para el reto Flame in Freefall del NASA Space Apps Challenge 2026. Se genera a partir del contenido verificado de la plataforma: cada bloque indica su fuente. Si un dato no aparece aquí ni en la bibliografía, la respuesta correcta es que no hay evidencia.");
+
+  h(2, "0. Instrucciones para el asistente (rol y reglas)");
+  p("Estas son las instrucciones con las que trabaja Flamey. Se repiten aquí para que cualquier respuesta sobre su forma de trabajar salga de este texto.", "");
+  h(3, "Rol");
+  for (const line of PERSONA) p(`- ${line}`);
+  h(3, "Reglas de rigor");
+  for (const line of RULES) p(`- ${line}`);
+  h(3, "Cómo responder");
+  p(
+    "- Responde en el idioma de la pregunta.",
+    "- Primero la conclusión; después la evidencia y sus límites; al final, qué implica para la tripulación o el diseño, solo si las fuentes lo respaldan.",
+    "- Si la pregunta es sobre la plataforma (qué hay, cómo se usa, quién la hizo), responde con el banco de preguntas de la sección 13 y con la sección 12.",
+    "- Si la pregunta nombra una investigación, un ambiente o un material, usa su ficha (secciones 3, 4 y 5).",
+    "- Si la pregunta pide un número de margen o de frontera y no llega el bloque 'Model result', explica la física y remite al Laboratorio o a la cabina, que lo calculan.",
+    `- Si no hay evidencia, dilo con claridad: "${NO_ANSWER.es}"`,
+  );
 
   h(2, "1. Qué es la plataforma y quién la hizo");
   p(`Flame in Freefall es un ${both(APP_TAGLINE)}.`, "", both(TEAM.pitch), "", `- Equipo: ${TEAM.name}.`, `- ${both(TEAM.challenge)}.`, `- ${both(TEAM.event)}.`, `- ${both(TEAM.disclaimer)}`);
@@ -160,6 +179,62 @@ export function buildKnowledgeDoc(projectDoc: string): string {
 
   h(2, "12. Documentación técnica de la plataforma");
   p(projectDoc.replace(/^# .*$/m, "").trim());
+
+  // ── Banco de preguntas ────────────────────────────────────────────────────
+  h(2, "13. Banco de preguntas y respuestas");
+  p("Preguntas que haría cualquier persona, con la respuesta que debe dar el asistente. Las respuestas salen del contenido verificado de las secciones anteriores.");
+  const qa = (q: string, a: string): void => void p("", `**P: ${q}**`, "", `R: ${a}`);
+
+  h(3, "Sobre la plataforma");
+  for (const x of PLATFORM_QUESTIONS) qa(both(x.q), both(x.a));
+  for (const f of FAQ) {
+    const card = f.card ? KNOWLEDGE.find((k) => k.id === f.card) : undefined;
+    qa(both(f.q), both(card ? card.text : f.a));
+  }
+
+  h(3, "Sobre las secciones del sitio");
+  for (const r of ROUTES) qa(`¿Qué hay en ${r.label.es}? (EN: What is in ${r.label.en}?)`, `${both(r.description)} Ruta: ${r.href}.`);
+
+  h(3, "Sobre la física y la seguridad contra incendios");
+  for (const k of KNOWLEDGE) {
+    for (const q of CARD_QUESTIONS[k.id] ?? []) qa(both(q), `${both(k.text)} Nivel de evidencia: ${k.evidence ?? "no asignado"}. Fuentes: ${cite(k.sources)}.`);
+  }
+  for (const m of MYTHS) qa(`¿Es cierto que: ${m.myth.es} (EN: Is it true that: ${m.myth.en})`, `No. ${both(m.fact)} Fuentes: ${cite(m.sources)}.`);
+
+  h(3, "Sobre cada ambiente");
+  for (const m of MODULES) {
+    const v = m.variants[0]!;
+    const air = v.undefinedAtmosphere
+      ? { es: `ninguna fuente fija todavía su atmósfera de cabina; la plataforma explora como hipótesis ${v.o2} % de oxígeno a ${v.P} kPa y lo marca como sin evidencia`, en: `no source fixes its cabin atmosphere yet; the platform explores ${v.o2}% oxygen at ${v.P} kPa as a hypothesis and marks it as no evidence` }
+      : { es: `${v.o2} % de oxígeno a ${v.P} kPa (presión parcial de oxígeno ${((v.o2 / 100) * v.P).toFixed(1)} kPa)`, en: `${v.o2}% oxygen at ${v.P} kPa (oxygen partial pressure ${((v.o2 / 100) * v.P).toFixed(1)} kPa)` };
+    qa(
+      `¿Qué atmósfera y qué gravedad tiene ${m.name.es}? (EN: What atmosphere and gravity does the ${m.name.en} have?)`,
+      `${m.name.es} (${m.code}): gravedad ${v.g} g; ${air.es}. ${m.evidence.es} (EN: ${m.name.en} (${m.code}): gravity ${v.g} g; ${air.en}. ${m.evidence.en}) Fuentes: ${cite(v.sources)}.`,
+    );
+    qa(`¿Qué es ${m.name.es} en la plataforma? (EN: What is the ${m.name.en} in the platform?)`, `${both(m.description)} ${both(m.guide)}`);
+    qa(
+      `¿Qué investigaciones son las más relevantes para ${m.name.es}? (EN: Which investigations are most relevant to the ${m.name.en}?)`,
+      `${m.investigations.map((id) => INVESTIGATIONS.find((i) => i.id === id)?.name ?? id).join(", ")}. La Guía las ordena por ambiente en la pestaña Ranking por ambiente.`,
+    );
+  }
+
+  h(3, "Sobre cada investigación");
+  for (const i of INVESTIGATIONS) {
+    qa(`¿Qué es ${i.name}? (EN: What is ${i.name}?)`, `${i.name} (${i.full}), ${both(i.platform)}, ${i.years}. ${both(i.objective)} Fuentes: ${cite(i.sources)}.`);
+    qa(`¿Qué combustible y qué condiciones usó ${i.name}? (EN: Which fuel and conditions did ${i.name} use?)`, `Combustible: ${both(i.fuel)}. Condiciones: ${both(i.conditions)}. Oxígeno ensayado: ${range(i.o2, "%")}; presión: ${range(i.p, "kPa")}; flujo: ${range(i.flow, "cm/s")}.`);
+    qa(`¿Qué descubrió ${i.name} y qué limitaciones tiene? (EN: What did ${i.name} find and what are its limitations?)`, `Hallazgo: ${both(i.findings)} Limitación: ${both(i.limitations)}`);
+  }
+
+  h(3, "Sobre cada material");
+  for (const m of MATERIAL_LIST) {
+    const f = m.frontier;
+    qa(
+      `¿Con cuánto oxígeno arde ${m.short.es}? (EN: At what oxygen level does ${m.short.en} burn?)`,
+      f
+        ? `La frontera de propagación de ${m.short.es} en el flujo más desfavorable (${f.uStar} cm/s) es ${f.locMin} % de oxígeno a 101,3 kPa, con una incertidumbre de ±${f.sigma} puntos dentro del dominio ensayado. Cambia con el flujo, la presión y la gravedad: el valor para un ambiente concreto lo calcula el Laboratorio, con su intervalo y su nivel de evidencia. ${both(f.protocol)} Fuentes: ${cite(f.sources)}.`
+        : `Sin evidencia: nuestras fuentes no publican una frontera de oxígeno comparable para ${m.short.es}, y la plataforma no genera ninguna. ${both(m.note)}`,
+    );
+  }
 
   return `${out.join("\n").replace(/\n{3,}/g, "\n\n")}\n`;
 }

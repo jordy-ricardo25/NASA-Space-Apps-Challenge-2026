@@ -334,6 +334,16 @@ Flamey es la mascota y el asistente: una llama con carita que **cae y se vuelve 
 cuya forma sigue la gravedad del ambiente activo (gota amarilla en 1 g, esfera azul en
 microgravedad).
 
+En la primera visita, Flamey ofrece un **recorrido de seis pasos** por las partes del sitio
+(`src/content/tour.ts`): en cada paso resalta en la navegación la sección de la que habla.
+Se puede saltar, no vuelve a salir y se restablece en Ajustes.
+
+El modelo trabaja con el rol de **ingeniero de seguridad contra incendios de naves**, formado
+en el marco de prevención, detección y supresión de NASA (`features/assistant/lib/persona.ts`).
+No es personal de NASA ni habla en su nombre. Recibe además el escenario que la persona tiene
+en pantalla y lo que el modelo físico calcula para él (frontera, margen, nivel de evidencia y
+alertas), para interpretarlo; nunca calcula cifras propias.
+
 Responde por capas, de la más segura a la más abierta:
 
 1. **Pregunta preparada:** respuesta aprobada por el equipo, al instante.
@@ -360,6 +370,10 @@ npm run ingest
   `conocimiento/ingesta.json`.
 - Estado actual: 24 documentos indexados (22 de la bibliografía, el informe del reto y el
   documento del proyecto).
+- El documento del proyecto es el **documento maestro** del asistente: lleva su rol y sus
+  reglas y un banco de unas 155 preguntas con respuesta (plataforma, secciones, física,
+  ambientes, investigaciones y materiales), generado desde el contenido verificado. Para
+  reemplazarlo en el almacén: `REPLACE="Documento del proyecto Flame in Freefall.md" npm run ingest`.
 - El documento del proyecto se genera con `npm run knowledge-doc` a partir del contenido
   verificado de la plataforma (ambientes, fichas, materiales, preguntas preparadas, equipo y
   esta documentación) y se escribe en `conocimiento/`. La ingesta omite los nombres que ya

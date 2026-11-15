@@ -107,6 +107,47 @@ describe("asistente con el modelo de Ollama", () => {
     expect(a.text).toContain("Frontera estimada");
   });
 
+  /** Ollama se abstiene con los datos y luego da la respuesta indicada al razonar. */
+  const abstainsThen = (reasoning: string): ReturnType<typeof vi.fn> => {
+    const mock = vi.fn(async () => Response.json({ message: { content: reasoning } }));
+    mock.mockImplementationOnce(async () => Response.json({ message: { content: "[NO_EVIDENCE]" } }));
+    vi.stubGlobal("fetch", mock);
+    return mock;
+  };
+
+  it("en el Analista PSI, si los datos no responden, el modelo razona como ingeniero y se marca así", async () => {
+    const fetchMock = abstainsThen("El oro no arde, pero conduce el calor. Habría que ensayarlo.");
+    const a = await answerQuestion("¿Se puede usar oro en el traje EVA?", "es", {}, [], { engine: "local" });
+    expect(a.extrapolated).toBe(true);
+    // Primero el dato verificado relacionado (con su fuente) y debajo el razonamiento, marcado.
+    expect(a.text).toContain("Los trajes trabajan a baja presión");
+    expect(a.text).toContain("Como razonamiento de ingeniería, no como dato medido: El oro no arde");
+    expect(a.sources.length).toBeGreaterThan(0);
+    const sent = JSON.parse(String((fetchMock.mock.calls[1] as [string, RequestInit])[1].body)) as { messages: { content: string }[] };
+    expect(sent.messages[0]?.content).toContain("ingeniero aeroespacial");
+  });
+
+  it("un razonamiento con cifras sin fuente se descarta y queda la ficha verificada", async () => {
+    abstainsThen("El oro funde a 1064 grados.");
+    const a = await answerQuestion("¿Se puede usar oro en el traje EVA?", "es", {}, [], { engine: "local" });
+    expect(a.extrapolated).toBeUndefined();
+    expect(a.origin).toBe("documents");
+    expect(a.text).not.toContain("1064");
+  });
+
+  it("si el modelo responde con los datos, no hay razonamiento", async () => {
+    ollama(Response.json({ message: { content: "Los trajes trabajan a baja presión." } }));
+    const a = await answerQuestion("¿Por qué los trajes trabajan a baja presión?", "es", {}, [], { engine: "local" });
+    expect(a.extrapolated).toBeUndefined();
+    expect(a.origin).not.toBe("none");
+  });
+
+  it("el chat general no razona sin datos", async () => {
+    ollama(Response.json({ message: { content: "El oro no arde." } }));
+    const a = await answerQuestion("¿Se puede usar oro en el traje EVA?", "es");
+    expect(a.extrapolated).toBeUndefined();
+  });
+
   it("si Ollama falla, queda la conclusión calculada por el motor físico", async () => {
     ollama(new Response("model not found", { status: 404 }));
     const a = await answerQuestion("Explícame este resultado", "es", SCENARIO);

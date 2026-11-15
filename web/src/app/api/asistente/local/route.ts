@@ -57,7 +57,7 @@ export async function POST(req: Request) {
   const a = await answerQuestion(question, lang, context ?? {}, history, { engine, model, covered });
   return Response.json(
     envelope(
-      { text: a.text, lang: a.lang, origin: a.origin, citations: a.sources, rows: a.rows, by: a.by ?? null, suggestions: a.suggestions ?? [], topic: a.topic ?? null },
+      { text: a.text, lang: a.lang, origin: a.origin, citations: a.sources, rows: a.rows, by: a.by ?? null, suggestions: a.suggestions ?? [], topic: a.topic ?? null, extrapolated: a.extrapolated ?? false },
       { kind: a.origin === "analysis" ? "prediction" : a.origin === "psi" ? "derived" : "catalog", evidence_level: a.evidence, sources: a.sources.map((s) => ({ id: s.id })) },
     ),
   );

@@ -111,6 +111,8 @@ export interface ChatAnswer {
   suggestions?: string[];
   /** Tema del hallazgo que se acaba de responder, para no volver a ofrecerlo. */
   topic?: string;
+  /** La respuesta es un razonamiento del modelo porque los datos no cubren la pregunta: no es evidencia. */
+  extrapolated?: boolean;
 }
 
 /**
@@ -371,6 +373,58 @@ async function askModel(question: string, card: KnowledgeCard | null, lang: Lang
   return local && !local.abstained ? local : (cloud ?? local);
 }
 
+/** Tiempo máximo de cada consulta al modelo en el Analista PSI: caben dos en los 30 s de la ruta. */
+const LOCAL_TIMEOUT_MS = 13000;
+
+/** Con qué empieza una respuesta razonada, para que también se oiga al leerla en voz alta. */
+const EXTRAPOLATION_NOTE: Record<Lang, string> = {
+  es: "No encontré un dato de NASA PSI que responda exactamente eso. Como razonamiento de ingeniería, no como dato medido:",
+  en: "I found no NASA PSI data that answers exactly that. As engineering reasoning, not as a measured fact:",
+};
+
+/** Rol del modelo cuando razona sin datos: ingeniero aeroespacial de seguridad contra incendios. */
+const ENGINEER: Record<Lang, string> = {
+  es: [
+    "Eres Flamey, ingeniero aeroespacial especialista en seguridad contra incendios en naves, trajes y hábitats espaciales, del equipo Andora Labs. No eres la NASA ni hablas en su nombre.",
+    "Los datos de NASA PSI no responden esta pregunta. Razona como ingeniero a partir de principios físicos conocidos: si el material arde o se oxida, cuánto oxígeno y qué presión hay en el ambiente, la gravedad, las fuentes de ignición, cómo conduce el calor y la electricidad, y qué función cumpliría la pieza.",
+    "Responde en español, en un máximo de 80 palabras, con frases cortas, sin títulos, sin listas y sin asteriscos. Empieza por la conclusión.",
+    "No des cifras. No cites normas, misiones, estudios ni fuentes concretas. Termina diciendo qué habría que ensayar para confirmarlo.",
+    "Si la pregunta no tiene que ver con la ingeniería espacial, dilo en una sola frase.",
+  ].join("\n"),
+  en: [
+    "You are Flamey, an aerospace engineer specialised in fire safety for spacecraft, suits and space habitats, from team Andora Labs. You are not NASA and do not speak for NASA.",
+    "NASA PSI data does not answer this question. Reason as an engineer from known physical principles: whether the material burns or oxidises, how much oxygen and what pressure the environment has, gravity, ignition sources, how it conducts heat and electricity, and what role the part would play.",
+    "Answer in English, in at most 80 words, with short sentences, no headings, no lists and no asterisks. Start with the conclusion.",
+    "Give no figures. Do not cite standards, missions, studies or specific sources. End by saying what would have to be tested to confirm it.",
+    "If the question has nothing to do with space engineering, say so in a single sentence.",
+  ].join("\n"),
+};
+
+/**
+ * Razonamiento del modelo cuando los datos no cubren la pregunta (solo en el
+ * Analista PSI, con un modelo de Ollama elegido). No es evidencia: no puede
+ * traer cifras y siempre se entrega marcado como razonamiento.
+ * @param related Fichas cercanas a la pregunta, como contexto que puede no aplicar.
+ */
+async function extrapolate(question: string, lang: Lang, model: string | undefined, related: string[]): Promise<{ text: string; by: string } | null> {
+  const base = ollamaConfig();
+  // OLLAMA_REASONING=off lo apaga: un modelo pequeño razona mal y conviene poder desactivarlo.
+  if (!base || process.env.OLLAMA_REASONING?.trim().toLowerCase() === "off") return null;
+  const cfg = { ...base, ...(model ? { model } : {}), timeout: Math.min(base.timeout, LOCAL_TIMEOUT_MS) };
+  const context = related.length ? `${lang === "es" ? "Contexto de la plataforma (puede no aplicar)" : "Platform context (may not apply)"}:\n${related.map((r) => `- ${r}`).join("\n")}\n\n` : "";
+  const user = `${context}${lang === "es" ? "Pregunta" : "Question"}: ${question}`;
+  log(`pregunta="${question.slice(0, 80)}" modelo=ollama:${cfg.model || "automático"} razonamiento sin datos`);
+  const text = await askOllama(cfg, ENGINEER[lang], user, log);
+  if (!text || abstains(text)) return null;
+  // Sin fuente no hay cifra: cualquier número que no venga del contexto descarta el razonamiento.
+  const invented = inventedFigures(text, user);
+  if (invented.length) {
+    log(`el razonamiento trae cifras sin fuente (${invented.join(", ")}): se descarta`);
+    return null;
+  }
+  return { text: `${EXTRAPOLATION_NOTE[lang]} ${text.replace(NO_EVIDENCE_MARK, "").trim()}`, by: `ollama:${(await resolveModel(cfg)) ?? ""}` };
+}
+
 /** Temas cuya respuesta sale de las filas del hallazgo; el resto no las muestra como respaldo. */
 const BACKED_BY_ROWS: ReadonlySet<string> = new Set(["why", "evidence", "speed", "conditions", "pending"]);
 
@@ -538,7 +592,10 @@ async function askGemini(question: string, card: KnowledgeCard | null, lang: Lan
  */
 export async function answerQuestion(asked: string, hint: Lang, ctx: ChatContext = {}, history: ChatTurn[] = [], options: AnswerOptions = {}): Promise<ChatAnswer> {
   const question = followUp(asked, history);
-  const run = { engine: options.engine ?? "auto", model: options.model };
+  const engine = options.engine ?? "auto";
+  // En el Analista PSI cada consulta al modelo tiene un tope: puede haber una segunda, de razonamiento.
+  const run = { engine, model: options.model, ...(engine === "local" ? { timeout: LOCAL_TIMEOUT_MS } : {}) };
+
   const pool = run.engine === "auto" ? KNOWLEDGE : knowledgeBase(investigationCard);
   const prepared = findPrepared(question);
   // Una pregunta preparada se responde en el idioma en que está escrita.
@@ -577,6 +634,11 @@ export async function answerQuestion(asked: string, hint: Lang, ctx: ChatContext
     const notes = [topicAnswer("speed", pack, lang)?.text ?? ""].filter(Boolean);
     const explained = await askModel(question, null, lang, {}, { pack, notes, history, ...run });
     const used = explained && !explained.abstained ? explained : null;
+    // El modelo dice que los datos del hallazgo no responden la pregunta: razona como ingeniero, y se marca así.
+    if (explained?.abstained) {
+      const reasoned = await extrapolate(question, lang, run.model, [findingSummary(pack, lang)]);
+      if (reasoned) return { lang, text: reasoned.text, origin: "none", sources: [], by: reasoned.by, extrapolated: true, suggestions };
+    }
     const tip = prevention(lang);
     return {
       lang,
@@ -630,6 +692,7 @@ export async function answerQuestion(asked: string, hint: Lang, ctx: ChatContext
   // La ficha de la investigación nombrada tiene prioridad sobre la búsqueda por palabras.
   const named = findInvestigation(question);
   const found = named ? { card: investigationCard(named) } : searchCards(question, pool);
+  // Analista PSI: si la pregunta nombra algo que los datos no tienen, el modelo razona como ingeniero.
   const generated = await askModel(question, found?.card ?? null, lang, ctx, { history, ...run });
   // Si el modelo se abstiene (aunque sea a medias), vale más la ficha verificada que una respuesta parcial.
   if (generated && !generated.abstained) {
@@ -637,6 +700,15 @@ export async function answerQuestion(asked: string, hint: Lang, ctx: ChatContext
     const sources = [...generated.docs.map(citeDocument), ...cite([...(found?.card.sources ?? []), ...generated.cited])];
     const unique = sources.filter((x, i) => sources.findIndex((y) => y.id === x.id) === i).slice(0, 5);
     return { lang, text: generated.text, origin: "documents", sources: unique, evidence: found?.card.evidence, by: generated.by };
+  }
+  // Analista PSI: los datos verificados van primero. Solo si el modelo dice que no responden la
+  // pregunta, o no hay ninguna ficha, razona como ingeniero; ese texto se marca como razonamiento.
+  if (engine === "local" && (generated?.abstained || !found)) {
+    const reasoned = await extrapolate(question, lang, run.model, found ? [found.card.text[lang]] : []);
+    // Un modelo pequeño también se abstiene donde no debe: la ficha verificada nunca se oculta,
+    // va primero y el razonamiento queda debajo, marcado.
+    if (reasoned && found) return { lang, text: `${found.card.text[lang]}\n\n${reasoned.text}`, origin: "documents", sources: cite(found.card.sources), evidence: found.card.evidence, by: reasoned.by, extrapolated: true };
+    if (reasoned) return { lang, text: reasoned.text, origin: "none", sources: [], by: reasoned.by, extrapolated: true };
   }
   if (found) return { lang, text: found.card.text[lang], origin: "documents", sources: cite(found.card.sources), evidence: found.card.evidence };
   // Sin evidencia: en español o inglés, el texto aprobado; en otro idioma, la frase del propio modelo.

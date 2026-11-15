@@ -144,3 +144,21 @@ respuesta calculada y se marca como "Cifras calculadas, sin modelo":
 1. Una negativa ("Lo siento…") se descarta.
 2. Una cifra que no estaba en los datos descarta la respuesta.
 3. La explicación de un hallazgo debe citar al menos una cifra de los datos.
+
+## Razonamiento cuando los datos no responden
+
+En el Analista PSI, si el modelo dice que los datos no responden la pregunta
+(por ejemplo, "¿se puede usar oro en el traje EVA?"), hace una segunda consulta
+en el papel de ingeniero aeroespacial de seguridad contra incendios:
+
+- La respuesta muestra primero la ficha verificada relacionada, con su fuente, y
+  debajo el razonamiento, que empieza con "No encontré un dato de NASA PSI que
+  responda exactamente eso" y lleva la etiqueta "Incluye razonamiento del
+  modelo, sin evidencia".
+- El razonamiento no puede traer cifras: si trae alguna, se descarta.
+- Solo existe con un modelo de Ollama; el modo rápido y el Flamey general no razonan.
+- `OLLAMA_REASONING=off` lo apaga.
+
+Límite conocido: con `qwen2.5:1.5b` el razonamiento es a menudo incorrecto
+(en las pruebas dijo que el oro "podría ser inflamable"). Para mostrarlo en
+público conviene un modelo más grande o dejarlo apagado.

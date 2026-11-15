@@ -27,8 +27,6 @@ export interface KnowledgeChunk extends KnowledgeCard {
 /** Palabras de un título que sirven para encontrar el fragmento. */
 const keysOf = (...texts: string[]): string[] => [...new Set(texts.flatMap((x) => normalize(x).split(" ")).filter((w) => w.length >= 4))];
 
-const both = (v: L): string[] => [v.es, v.en];
-
 let cache: KnowledgeChunk[] | null = null;
 
 /**
@@ -47,7 +45,8 @@ export function knowledgeBase(investigationCard: (inv: Investigation) => Knowled
   }));
   const myths: KnowledgeChunk[] = MYTHS.map((m) => ({
     id: `myth:${m.id}`,
-    keys: keysOf(...both(m.myth)),
+    // Sin palabras clave propias: un mito solo gana a una ficha revisada si su texto coincide mucho.
+    keys: [],
     text: { es: `Mito: ${m.myth.es} Hecho: ${m.fact.es}`, en: `Myth: ${m.myth.en} Fact: ${m.fact.en}` },
     sources: m.sources,
     kind: "myth",
@@ -56,7 +55,7 @@ export function knowledgeBase(investigationCard: (inv: Investigation) => Knowled
   // Las preguntas que responden con una ficha ya están cubiertas por esa ficha.
   const questions: KnowledgeChunk[] = [...PLATFORM_QUESTIONS.map((q) => ({ ...q, sources: [] as string[] })), ...FAQ.filter((f) => !f.card).map((f) => ({ q: f.q, a: f.a, sources: f.sources ?? [] }))].map((item, i) => ({
     id: `question:${i + 1}`,
-    keys: keysOf(...both(item.q)),
+    keys: [],
     text: { es: `${item.q.es} ${item.a.es}`, en: `${item.q.en} ${item.a.en}` },
     sources: item.sources,
     kind: "question",

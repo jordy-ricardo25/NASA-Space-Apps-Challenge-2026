@@ -419,6 +419,12 @@
   .byData {
     color: var(--color-info);
   }
+
+  // Razonamiento sin evidencia: color de precaución, ícono y texto (nunca verde).
+  .byReasoning {
+    border-color: var(--color-risk-caution);
+    color: var(--color-risk-caution);
+  }
 }
 
 // Sugerencias en una sola línea: si no caben, se deslizan sin mostrar barra.

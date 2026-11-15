@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useImperativeHandle, useRef, useState, type Ref } from "react";
-import { Cpu, Database, FileCheck2, Mic, Send, SlidersHorizontal, Trash2, Volume2, Zap } from "lucide-react";
+import { Cpu, Database, FileCheck2, Mic, Send, SlidersHorizontal, Trash2, TriangleAlert, Volume2, Zap } from "lucide-react";
 import { l, type Lang } from "@/content/i18n";
 import { type AskContext } from "@/features/assistant/components/MaterialPanel";
 import { VoiceBar } from "@/features/assistant/components/VoiceBar";
@@ -31,9 +31,11 @@ interface LocalMessage {
   suggestions?: string[];
   /** Idioma de la respuesta, para leerla en voz alta. */
   lang?: Lang;
+  /** Razonamiento del modelo sin datos que lo respalden. */
+  extrapolated?: boolean;
 }
 
-type LocalValue = { text: string; lang?: Lang; citations: NonNullable<LocalMessage["citations"]>; rows?: LocalMessage["rows"]; by: string | null; suggestions?: string[]; topic?: string | null };
+type LocalValue = { text: string; lang?: Lang; citations: NonNullable<LocalMessage["citations"]>; rows?: LocalMessage["rows"]; by: string | null; suggestions?: string[]; topic?: string | null; extrapolated?: boolean };
 
 /** Escenario de la pestaña de parámetros o hallazgo recién elegido. */
 export type LocalContext = AskContext & { finding?: { key: string; env: string } };
@@ -124,7 +126,7 @@ export function LocalChat({ ref, finding, engine, onBusy, hidden }: LocalChatPro
         const data = (await res.json()) as ApiEnvelope<LocalValue>;
         if (mine !== epoch.current) return;
         if (data.value.topic && !covered.current.includes(data.value.topic)) covered.current = [...covered.current, data.value.topic].slice(-12);
-        setMessages((m) => [...m, { role: "bot", text: data.value.text, by: data.value.by, citations: data.value.citations, rows: data.value.rows, suggestions: data.value.suggestions, lang: data.value.lang }]);
+        setMessages((m) => [...m, { role: "bot", text: data.value.text, by: data.value.by, citations: data.value.citations, rows: data.value.rows, suggestions: data.value.suggestions, lang: data.value.lang, extrapolated: data.value.extrapolated }]);
         if (appStore.get().autoSpeak) speak(data.value.text, data.value.lang ?? now.lang);
       } catch {
         if (mine !== epoch.current) return;
@@ -225,7 +227,12 @@ export function LocalChat({ ref, finding, engine, onBusy, hidden }: LocalChatPro
             )}
             {m.role === "bot" && (
               <div className={styles.meta}>
-                {m.by ? (
+                {m.extrapolated ? (
+                  <span className={styles.byReasoning}>
+                    <TriangleAlert size={12} aria-hidden="true" />
+                    {t(l("Incluye razonamiento del modelo, sin evidencia", "Includes model reasoning, no evidence"))}
+                  </span>
+                ) : m.by ? (
                   <span className={styles.byModel}>
                     <Cpu size={12} aria-hidden="true" />
                     {t(l("Redactado por", "Written by"))} {m.by.replace(/^ollama:/, "")}

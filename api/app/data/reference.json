@@ -133,16 +133,8 @@
     ],
     "test_conditions": {
       "gravity_g": 0.165,
-      "pressure_psia_tested": [
-        8.2,
-        14.7
-      ],
-      "o2_percent_scan_at_8_2_psia": [
-        37.0,
-        33.0,
-        29.0,
-        25.0
-      ],
+      "pressure_psia_tested": [8.2, 14.7],
+      "o2_percent_scan_at_8_2_psia": [37.0, 33.0, 29.0, 25.0],
       "expected_lunar_loc_o2_percent": "24% - 26% O2 (a 8.2 psia)",
       "pmma_hls_reference_test": "34% O2 a 8.2 psia",
       "sibal_reference_test": "21% O2 a 14.7 psia (tasa de propagación descendente en 1/6 g simulado: 0.086 a 0.11 cm/s)"

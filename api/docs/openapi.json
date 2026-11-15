@@ -8,9 +8,7 @@
   "paths": {
     "/api/meta": {
       "get": {
-        "tags": [
-          "metadatos"
-        ],
+        "tags": ["metadatos"],
         "summary": "Entornos, pesos y materiales",
         "operationId": "meta_api_meta_get",
         "responses": {
@@ -29,9 +27,7 @@
     },
     "/api/ingest": {
       "post": {
-        "tags": [
-          "metadatos"
-        ],
+        "tags": ["metadatos"],
         "summary": "Reconstruir la base desde DATASET_DIR",
         "operationId": "ingest_api_ingest_post",
         "responses": {
@@ -50,9 +46,7 @@
     },
     "/api/findings": {
       "get": {
-        "tags": [
-          "hallazgos"
-        ],
+        "tags": ["hallazgos"],
         "summary": "Ranking por entorno",
         "operationId": "findings_api_findings_get",
         "parameters": [
@@ -146,9 +140,7 @@
     },
     "/api/matrix": {
       "get": {
-        "tags": [
-          "hallazgos"
-        ],
+        "tags": ["hallazgos"],
         "summary": "Matriz hallazgo x entorno",
         "operationId": "matrix_api_matrix_get",
         "responses": {
@@ -167,9 +159,7 @@
     },
     "/api/provenance/{source_file}": {
       "get": {
-        "tags": [
-          "procedencia"
-        ],
+        "tags": ["procedencia"],
         "summary": "Fila cruda, banderas y calidad",
         "operationId": "provenance_api_provenance__source_file__get",
         "parameters": [
@@ -209,9 +199,7 @@
     },
     "/api/lab/simulate": {
       "post": {
-        "tags": [
-          "laboratorio"
-        ],
+        "tags": ["laboratorio"],
         "summary": "Contrafactual de atmosfera",
         "operationId": "simulate_api_lab_simulate_post",
         "requestBody": {
@@ -250,9 +238,7 @@
     },
     "/api/incidents": {
       "get": {
-        "tags": [
-          "incidentes"
-        ],
+        "tags": ["incidentes"],
         "summary": "Revalidacion historica",
         "operationId": "incidents_api_incidents_get",
         "responses": {
@@ -275,9 +261,7 @@
     },
     "/api/spinoffs": {
       "get": {
-        "tags": [
-          "beneficio terrestre"
-        ],
+        "tags": ["beneficio terrestre"],
         "summary": "Aplicaciones en Tierra",
         "operationId": "spinoffs_api_spinoffs_get",
         "responses": {
@@ -300,9 +284,7 @@
     },
     "/api/export": {
       "get": {
-        "tags": [
-          "informe"
-        ],
+        "tags": ["informe"],
         "summary": "Informe de mision en md o json",
         "operationId": "export_api_export_get",
         "parameters": [
@@ -351,9 +333,7 @@
     },
     "/api/investigations": {
       "get": {
-        "tags": [
-          "investigaciones"
-        ],
+        "tags": ["investigaciones"],
         "summary": "Listado de experimentos",
         "operationId": "investigations_api_investigations_get",
         "responses": {
@@ -376,9 +356,7 @@
     },
     "/api/investigations/{clave}/variation": {
       "get": {
-        "tags": [
-          "investigaciones"
-        ],
+        "tags": ["investigaciones"],
         "summary": "Variables que cambian entre corridas",
         "operationId": "variation_api_investigations__clave__variation_get",
         "parameters": [
@@ -418,9 +396,7 @@
     },
     "/api/similarity": {
       "get": {
-        "tags": [
-          "comparacion"
-        ],
+        "tags": ["comparacion"],
         "summary": "Similitud entre experimentos",
         "operationId": "similarity_api_similarity_get",
         "parameters": [
@@ -467,9 +443,7 @@
     },
     "/api/hardware": {
       "get": {
-        "tags": [
-          "hardware"
-        ],
+        "tags": ["hardware"],
         "summary": "Arbol de facilidades y proyectos",
         "operationId": "hardware_api_hardware_get",
         "responses": {
@@ -492,9 +466,7 @@
     },
     "/api/gaps": {
       "get": {
-        "tags": [
-          "vacios"
-        ],
+        "tags": ["vacios"],
         "summary": "Celdas sin evidencia y brechas declaradas",
         "operationId": "gaps_api_gaps_get",
         "responses": {
@@ -513,9 +485,7 @@
     },
     "/api/oxygen-ladder": {
       "get": {
-        "tags": [
-          "atmosfera"
-        ],
+        "tags": ["atmosfera"],
         "summary": "Umbrales de material a lo largo del O2",
         "operationId": "oxygen_ladder_api_oxygen_ladder_get",
         "responses": {
@@ -534,9 +504,7 @@
     },
     "/api/lab/gravity-band": {
       "post": {
-        "tags": [
-          "laboratorio"
-        ],
+        "tags": ["laboratorio"],
         "summary": "Banda ug a 1 g",
         "operationId": "gravity_band_api_lab_gravity_band_post",
         "requestBody": {
@@ -575,9 +543,7 @@
     },
     "/api/measurements": {
       "get": {
-        "tags": [
-          "sensores"
-        ],
+        "tags": ["sensores"],
         "summary": "Que se midio y con que",
         "operationId": "measurements_api_measurements_get",
         "responses": {
@@ -596,9 +562,7 @@
     },
     "/api/findings/{clave}/context": {
       "get": {
-        "tags": [
-          "interpretacion"
-        ],
+        "tags": ["interpretacion"],
         "summary": "Paquete listo para un LLM",
         "operationId": "finding_context_api_findings__clave__context_get",
         "parameters": [
@@ -648,9 +612,7 @@
     },
     "/api/rules": {
       "get": {
-        "tags": [
-          "reglas"
-        ],
+        "tags": ["reglas"],
         "summary": "Mitos y hechos de la guia oficial",
         "operationId": "rules_api_rules_get",
         "responses": {
@@ -669,9 +631,7 @@
     },
     "/api/facilities": {
       "get": {
-        "tags": [
-          "hardware"
-        ],
+        "tags": ["hardware"],
         "summary": "Instalaciones con masa y volumen",
         "operationId": "facilities_api_facilities_get",
         "responses": {
@@ -690,9 +650,7 @@
     },
     "/api/fm2": {
       "get": {
-        "tags": [
-          "atmosfera"
-        ],
+        "tags": ["atmosfera"],
         "summary": "Payload lunar planificado",
         "operationId": "fm2_api_fm2_get",
         "responses": {
@@ -711,9 +669,7 @@
     },
     "/api/incidents/{slug}/source": {
       "get": {
-        "tags": [
-          "incidentes"
-        ],
+        "tags": ["incidentes"],
         "summary": "Extracto del informe original",
         "operationId": "incident_source_api_incidents__slug__source_get",
         "parameters": [
@@ -753,9 +709,7 @@
     },
     "/health": {
       "get": {
-        "tags": [
-          "metadatos"
-        ],
+        "tags": ["metadatos"],
         "summary": "Estado del servicio",
         "operationId": "health_health_get",
         "responses": {
@@ -831,11 +785,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "area",
-          "detail",
-          "bound"
-        ],
+        "required": ["area", "detail", "bound"],
         "title": "DeclaredGap"
       },
       "EnvironmentOut": {
@@ -918,13 +868,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "file",
-          "row",
-          "quality",
-          "flags",
-          "raw"
-        ],
+        "required": ["file", "row", "quality", "flags", "raw"],
         "title": "EvidenceRow"
       },
       "FacilitiesOut": {
@@ -945,10 +889,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "facilities",
-          "investigations"
-        ],
+        "required": ["facilities", "investigations"],
         "title": "FacilitiesOut"
       },
       "FacilityInvestigation": {
@@ -1082,12 +1023,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "name",
-          "value",
-          "weight",
-          "contribution"
-        ],
+        "required": ["name", "value", "weight", "contribution"],
         "title": "FactorOut"
       },
       "FindingOut": {
@@ -1239,10 +1175,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "payload",
-          "note"
-        ],
+        "required": ["payload", "note"],
         "title": "Fm2Out"
       },
       "GapCell": {
@@ -1300,11 +1233,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "cells",
-          "declared",
-          "note"
-        ],
+        "required": ["cells", "declared", "note"],
         "title": "GapsOut"
       },
       "GravityBandIn": {
@@ -1417,10 +1346,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "key",
-          "observations"
-        ],
+        "required": ["key", "observations"],
         "title": "HardwareExperiment"
       },
       "HardwareNodeOut": {
@@ -1450,13 +1376,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "label",
-          "facility",
-          "hardware",
-          "project",
-          "experiments"
-        ],
+        "required": ["label", "facility", "hardware", "project", "experiments"],
         "title": "HardwareNodeOut"
       },
       "IncidentOut": {
@@ -1554,12 +1474,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "slug",
-          "excerpt",
-          "lines",
-          "chars"
-        ],
+        "required": ["slug", "excerpt", "lines", "chars"],
         "title": "IncidentSourceOut"
       },
       "IngestOut": {
@@ -1752,13 +1667,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "limit",
-          "excess",
-          "quenched",
-          "rate_mm_s",
-          "curve"
-        ],
+        "required": ["limit", "excess", "quenched", "rate_mm_s", "curve"],
         "title": "LabOut"
       },
       "LadderAnchor": {
@@ -1773,10 +1682,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "o2",
-          "label"
-        ],
+        "required": ["o2", "label"],
         "title": "LadderAnchor"
       },
       "LadderMaterial": {
@@ -1798,11 +1704,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "material",
-          "class",
-          "steps"
-        ],
+        "required": ["material", "class", "steps"],
         "title": "LadderMaterial"
       },
       "LadderStep": {
@@ -1862,13 +1764,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "key",
-          "experiment",
-          "environment",
-          "rpi",
-          "band"
-        ],
+        "required": ["key", "experiment", "environment", "rpi", "band"],
         "title": "MatrixCell"
       },
       "MatrixOut": {
@@ -1889,10 +1785,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "findings",
-          "environment_means"
-        ],
+        "required": ["findings", "environment_means"],
         "title": "MatrixOut"
       },
       "MeasurementItem": {
@@ -1911,11 +1804,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "instrument",
-          "variable",
-          "kind"
-        ],
+        "required": ["instrument", "variable", "kind"],
         "title": "MeasurementItem"
       },
       "MeasurementOut": {
@@ -1940,11 +1829,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "experiment",
-          "measurements",
-          "kinds"
-        ],
+        "required": ["experiment", "measurements", "kinds"],
         "title": "MeasurementOut"
       },
       "MeasurementsOut": {
@@ -1969,11 +1854,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "experiments",
-          "missing_variables",
-          "note"
-        ],
+        "required": ["experiments", "missing_variables", "note"],
         "title": "MeasurementsOut"
       },
       "Message": {
@@ -1988,10 +1869,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "role",
-          "content"
-        ],
+        "required": ["role", "content"],
         "title": "Message"
       },
       "MetaOut": {
@@ -2072,11 +1950,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "steps",
-          "materials",
-          "anchors"
-        ],
+        "required": ["steps", "materials", "anchors"],
         "title": "OxygenLadderOut"
       },
       "ProvenanceOut": {
@@ -2098,11 +1972,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "source_file",
-          "observations",
-          "rows"
-        ],
+        "required": ["source_file", "observations", "rows"],
         "title": "ProvenanceOut"
       },
       "ProvenanceRow": {
@@ -2135,13 +2005,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "row",
-          "flags",
-          "rules",
-          "quality",
-          "raw"
-        ],
+        "required": ["row", "flags", "rules", "quality", "raw"],
         "title": "ProvenanceRow"
       },
       "RuleOut": {
@@ -2213,11 +2077,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "rules",
-          "count",
-          "source"
-        ],
+        "required": ["rules", "count", "source"],
         "title": "RulesOut"
       },
       "SimilarityPair": {
@@ -2250,13 +2110,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "a",
-          "b",
-          "similarity",
-          "shared",
-          "differing"
-        ],
+        "required": ["a", "b", "similarity", "shared", "differing"],
         "title": "SimilarityPair"
       },
       "SpinoffOut": {
@@ -2275,11 +2129,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "name",
-          "source",
-          "benefit"
-        ],
+        "required": ["name", "source", "benefit"],
         "title": "SpinoffOut"
       },
       "ValidationError": {
@@ -2308,11 +2158,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "loc",
-          "msg",
-          "type"
-        ],
+        "required": ["loc", "msg", "type"],
         "title": "ValidationError"
       },
       "VariationColumn": {
@@ -2357,10 +2203,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "column",
-          "distinct"
-        ],
+        "required": ["column", "distinct"],
         "title": "VariationColumn"
       },
       "VariationOut": {

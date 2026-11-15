@@ -371,6 +371,9 @@ async function askModel(question: string, card: KnowledgeCard | null, lang: Lang
   return local && !local.abstained ? local : (cloud ?? local);
 }
 
+/** Temas cuya respuesta sale de las filas del hallazgo; el resto no las muestra como respaldo. */
+const BACKED_BY_ROWS: ReadonlySet<string> = new Set(["why", "evidence", "speed", "conditions", "pending"]);
+
 /** Tiempo máximo del modelo de Ollama cuando actúa de respaldo de Gemini. */
 const FALLBACK_TIMEOUT_MS = 12000;
 
@@ -567,7 +570,7 @@ export async function answerQuestion(asked: string, hint: Lang, ctx: ChatContext
         ladder: topicId === "replace" ? await ladderFor(pack.environment) : null,
         suppression: topicId === "extinguish" ? KNOWLEDGE.find((k) => k.id === "suppression")?.text[lang] : undefined,
       });
-      if (answer) return { lang, text: `${answer.text}${closing}`, origin: "psi", sources: cite(["PSI", ...answer.sources]), rows, suggestions, topic: topicId };
+      if (answer) return { lang, text: `${answer.text}${closing}`, origin: "psi", sources: cite(["PSI", ...answer.sources]), rows: BACKED_BY_ROWS.has(topicId) ? rows : undefined, suggestions, topic: topicId };
     }
     // Explicación general: el modelo redacta con las cifras del hallazgo y lo que
     // el backend dice del avance de la llama; si falla, quedan las cifras ordenadas.
@@ -605,7 +608,8 @@ export async function answerQuestion(asked: string, hint: Lang, ctx: ChatContext
       text: topic ? text : `${text}\n\n${OFFER[lang]}`,
       origin: "psi",
       sources: sources.filter((x, i) => sources.findIndex((y) => y.id === x.id) === i).slice(0, 5),
-      rows: pack.evidence.slice(0, 6),
+      // La ficha de supresión es general: las filas del hallazgo no la respaldan.
+      rows: topic ? undefined : pack.evidence.slice(0, 6),
       by: used?.by,
     };
   }

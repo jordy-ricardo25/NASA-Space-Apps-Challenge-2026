@@ -224,7 +224,10 @@ export function topicAnswer(id: TopicId, pack: FindingPack, lang: Lang, extras: 
       const tested =
         f.o2_min == null || f.o2_max == null || f.o2_max <= 0
           ? es ? "La base no registra el oxígeno del ensayo" : "The database does not record the test oxygen"
-          : es ? `El ensayo cubrió de ${pct(f.o2_min)} a ${pct(f.o2_max)} de O₂` : `The test covered ${pct(f.o2_min)} to ${pct(f.o2_max)} O₂`;
+          : f.o2_min <= 0
+            ? // El backend usa 0 cuando la fila no registra el mínimo: solo se afirma el máximo.
+              es ? `El ensayo llegó hasta ${pct(f.o2_max)} de O₂ (la base no registra el mínimo)` : `The test went up to ${pct(f.o2_max)} O₂ (the database does not record the minimum)`
+            : es ? `El ensayo cubrió de ${pct(f.o2_min)} a ${pct(f.o2_max)} de O₂` : `The test covered ${pct(f.o2_min)} to ${pct(f.o2_max)} O₂`;
       const pressure = f.pressure_atm == null ? "" : es ? ` a una presión mediana de ${n(f.pressure_atm, 2)} atm` : ` at a median pressure of ${n(f.pressure_atm, 2)} atm`;
       const here = es
         ? ` ${e.label} tiene ${pct(e.o2_fraction)} de O₂ a ${n(e.pressure_atm, 2)} atm y ${n(e.gravity_g, e.gravity_g ? 3 : 0)} g.`

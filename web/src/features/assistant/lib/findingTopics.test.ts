@@ -84,6 +84,7 @@ describe("temas de un hallazgo de PSI", () => {
     expect(availableTopics({ ...PACK, environment: { ...PACK.environment, key: "eva" } })).not.toContain("suit");
     expect(pendingTopics(PACK, new Set(["why", "suit"])).slice(0, 2)).toEqual(["speed", "conditions"]);
     expect(topicAnswer("evidence", { ...PACK, finding: { ...PACK.finding, observations: 1 } }, "es")?.text).toContain("guarda 1 observación,");
+    expect(topicAnswer("conditions", { ...PACK, finding: { ...PACK.finding, o2_min: 0 } }, "es")?.text).toContain("llegó hasta 21 % de O₂ (la base no registra el mínimo)");
     // Preguntas que antes caían en el tema equivocado.
     expect(detectTopic("¿Qué material se probó?")).toBe("conditions");
     expect(detectTopic("¿De dónde sale ese riesgo?")).toBe("why");

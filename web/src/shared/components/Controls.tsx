@@ -47,15 +47,16 @@ interface SegmentedProps<T extends string> {
   value: T;
   options: { value: T; label: string; title?: string }[];
   onChange: (v: T) => void;
+  /** Ya no hace falta: las opciones siempre pasan a otra línea si no caben. */
   wrap?: boolean;
 }
 
 /** Selector de opciones excluyentes (pestañas pequeñas o chips). */
-export function Segmented<T extends string>({ label, value, options, onChange, wrap }: SegmentedProps<T>) {
+export function Segmented<T extends string>({ label, value, options, onChange }: SegmentedProps<T>) {
   return (
     <div className={styles.segmented} role="group" aria-label={label}>
       {label && <span className={styles.segLabel}>{label}</span>}
-      <div className={`${styles.segRow} ${wrap ? styles.wrap : ""}`}>
+      <div className={styles.segRow}>
         {options.map((o) => (
           <button key={o.value} type="button" aria-pressed={o.value === value} title={o.title} onClick={() => onChange(o.value)}>
             {o.label}

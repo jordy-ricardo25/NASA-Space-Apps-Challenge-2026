@@ -70,7 +70,7 @@ $gap: 12px;
 
   b {
     font: 600 13px var(--font-display);
-    @include mixins.truncate;
+    overflow-wrap: anywhere;
   }
 }
 
@@ -183,15 +183,20 @@ $gap: 12px;
   width: $left;
   gap: 9px;
   padding: 12px 14px;
-  overflow: hidden;
+  // Si los controles no caben, se desplazan dentro del panel: nada se corta.
+  overflow-x: hidden;
+  @include mixins.inner-scroll;
   border-top: 2px solid var(--accent);
+
+  > * {
+    flex: none;
+  }
 }
 
 .matNote {
   font-size: 11px;
   line-height: 1.35;
   color: var(--color-text-3);
-  @include mixins.clamp(3);
 
   b {
     color: var(--accent);
@@ -274,7 +279,9 @@ $gap: 12px;
     transition: all 0.15s;
 
     span {
-      @include mixins.truncate;
+      min-width: 0;
+      line-height: 1.25;
+      overflow-wrap: anywhere;
     }
 
     svg {
@@ -312,7 +319,7 @@ $gap: 12px;
   li {
     display: flex;
     gap: 8px;
-    @include mixins.truncate;
+    overflow-wrap: anywhere;
 
     &:first-child {
       color: var(--color-text);

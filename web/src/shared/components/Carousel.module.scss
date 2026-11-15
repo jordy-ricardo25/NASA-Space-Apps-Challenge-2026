@@ -1,0 +1,130 @@
+@use "mixins";
+
+// Carrusel con scroll-snap. `--per-view` decide cuántas tarjetas se ven.
+.carousel {
+  --per-view: 3;
+  --gap: 14px;
+  flex: 1 0 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  @include mixins.tablet {
+    --per-view: 2;
+  }
+
+  @include mixins.phone {
+    --per-view: 1;
+  }
+}
+
+.track {
+  position: relative; // referencia de offsetLeft para las diapositivas
+  flex: 1 1 0;
+  min-height: 300px;
+  display: flex;
+  gap: var(--gap);
+  // El margen interior deja sitio al foco y a la elevación de las tarjetas.
+  padding: 4px;
+  scroll-padding-inline: 4px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  border-radius: var(--radius-m);
+  @include mixins.focus-ring;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  // El encaje solo actúa cuando no hay deslizamiento automático (pausado o con
+  // movimiento reducido); si no, lo frenaría a cada tarjeta.
+  &[data-snap="true"] {
+    scroll-snap-type: x mandatory;
+  }
+}
+
+.slide {
+  flex: 0 0 calc((100% - var(--gap) * (var(--per-view) - 1)) / var(--per-view));
+  min-width: 0;
+  display: flex;
+  scroll-snap-align: start;
+
+  > * {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+.controls {
+  flex: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.arrow {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--color-line-strong);
+  border-radius: 50%;
+  color: var(--color-accent);
+  transition: background 0.15s, color 0.15s;
+  @include mixins.focus-ring;
+
+  &:hover {
+    background: var(--color-accent);
+    color: var(--color-bg-deep);
+  }
+
+  &[data-kind="play"] {
+    width: 30px;
+    height: 30px;
+    border-color: var(--color-line-soft);
+    color: var(--color-text-2);
+  }
+}
+
+.dots {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+// Zona de toque de 24 px con un punto de 8 px dentro.
+.dot {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  @include mixins.focus-ring;
+
+  &::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border: 1px solid var(--color-text-3);
+    border-radius: 50%;
+    transition: background 0.15s, width 0.2s var(--ease-out);
+  }
+
+  &:hover::before {
+    border-color: var(--color-accent);
+  }
+
+  &[aria-current="true"]::before {
+    width: 18px;
+    border-radius: 999px;
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+  }
+}

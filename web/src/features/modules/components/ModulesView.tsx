@@ -6,6 +6,8 @@ import { ArrowRight } from "lucide-react";
 import { l, type L } from "@/content/i18n";
 import { MODULES } from "@/content/modules";
 import { MODULE_ROUTE, ROUTES } from "@/content/routes";
+import { Carousel } from "@/shared/components/Carousel";
+import { ClampText } from "@/shared/components/ClampText";
 import { Workspace } from "@/shared/components/Workspace";
 import { useLang } from "@/shared/hooks/useLang";
 import { gravity, num } from "@/shared/lib/format";
@@ -25,7 +27,8 @@ const route = (id: string) => ROUTES.find((r) => r.id === id)!;
 
 /**
  * Selector de módulos: los cuatro ambientes habitables del reto y las
- * herramientas de análisis, en una grilla de tarjetas con el botón "Entrar".
+ * herramientas de análisis, en un carrusel de tarjetas con el botón "Entrar".
+ * Toda la tarjeta lleva a su módulo (el enlace "Entrar" la cubre entera).
  */
 export function ModulesView() {
   const { t, lang } = useLang();
@@ -54,36 +57,34 @@ export function ModulesView() {
       title={l("Elige un ambiente o una herramienta", "Choose an environment or a tool")}
       lede={l("Cada módulo es uno de los ambientes habitables del reto y cambia el contexto de toda la plataforma.", "Each module is one of the challenge's habitable environments and sets the context for the whole platform.")}
     >
-      <ul className={styles.grid}>
+      <Carousel label={t(l("Módulos de la plataforma", "Platform modules"))}>
         {cards.map((c, i) => (
-          <li key={c.href} style={c.accent ? ({ "--accent": c.accent } as React.CSSProperties) : undefined}>
-            <Link href={c.href} className={styles.card}>
-              <header>
-                <b>
-                  {String(i + 1).padStart(2, "0")}. {t(c.title)}
-                </b>
-                <code>{c.code}</code>
-              </header>
-              <div className={styles.shot}>
-                {/* Miniaturas ya optimizadas (WebP de 720 px): se sirven tal cual. */}
-                <Image src={c.image} alt="" fill sizes="(max-width: 1180px) 50vw, 25vw" priority={i < 4} unoptimized />
-              </div>
-              <p>{t(c.text)}</p>
-              <footer>
-                <span className={styles.chips}>
-                  {c.chips?.map((x) => (
-                    <i key={x}>{x}</i>
-                  ))}
-                </span>
-                <span className={styles.enter}>
-                  {t(l("Entrar", "Enter"))}
-                  <ArrowRight size={15} aria-hidden="true" />
-                </span>
-              </footer>
-            </Link>
-          </li>
+          <article key={c.href} className={styles.card} style={c.accent ? ({ "--accent": c.accent } as React.CSSProperties) : undefined}>
+            <header>
+              <h2>
+                {String(i + 1).padStart(2, "0")}. {t(c.title)}
+              </h2>
+              <code>{c.code}</code>
+            </header>
+            <div className={styles.shot}>
+              {/* Miniaturas ya optimizadas (WebP de 720 px): se sirven tal cual. */}
+              <Image src={c.image} alt="" fill sizes="(max-width: 640px) 100vw, (max-width: 1100px) 50vw, 33vw" priority={i < 3} unoptimized />
+            </div>
+            <ClampText lines={3}>{t(c.text)}</ClampText>
+            <footer>
+              <span className={styles.chips}>
+                {c.chips?.map((x) => (
+                  <i key={x}>{x}</i>
+                ))}
+              </span>
+              <Link href={c.href} className={styles.enter} aria-label={`${t(l("Entrar", "Enter"))}: ${t(c.title)}`}>
+                {t(l("Entrar", "Enter"))}
+                <ArrowRight size={15} aria-hidden="true" />
+              </Link>
+            </footer>
+          </article>
         ))}
-      </ul>
+      </Carousel>
     </Workspace>
   );
 }

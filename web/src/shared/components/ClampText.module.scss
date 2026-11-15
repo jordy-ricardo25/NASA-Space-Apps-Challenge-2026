@@ -1,0 +1,44 @@
+@use "mixins";
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 0;
+}
+
+.text {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: var(--lines);
+  line-clamp: var(--lines);
+  max-width: 100%;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+
+  &[data-open="true"] {
+    display: block;
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
+    overflow: visible;
+  }
+}
+
+// Queda por encima del enlace que cubre la tarjeta (ver "Entrar" en Módulos).
+.more {
+  position: relative;
+  z-index: 1;
+  min-height: 24px;
+  padding: 2px 0;
+  font: 600 12px var(--font-display);
+  letter-spacing: 0.06em;
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  @include mixins.focus-ring;
+
+  &:hover {
+    color: var(--color-text);
+  }
+}

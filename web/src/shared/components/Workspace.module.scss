@@ -13,10 +13,16 @@
 
 .head {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: flex-end;
-  gap: 20px;
+  gap: 8px 20px;
+  flex: none;
   padding: 14px 18px 10px;
+
+  @include mixins.phone {
+    padding: 10px 12px 8px;
+  }
 }
 
 .titles {
@@ -42,19 +48,33 @@
 
 .aside {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 10px;
-  flex: none;
+  min-width: 0;
 }
 
 .tabs {
   display: flex;
+  flex-wrap: wrap;
   gap: 2px;
+  flex: none;
   padding: 0 18px;
   border-bottom: 1px solid var(--color-line);
 
+  @include mixins.phone {
+    padding: 0 8px;
+  }
+
   button {
     padding: 8px 14px 9px;
+    @include mixins.focus-ring;
+
+    @include mixins.phone {
+      padding: 7px 9px 8px;
+      letter-spacing: 0.04em;
+    }
+
     border-bottom: 2px solid transparent;
     margin-bottom: -1px;
     font: 600 12px var(--font-display);
@@ -74,12 +94,20 @@
   }
 }
 
+// Si el contenido no cabe, se desplaza el cuerpo del panel (nunca la página):
+// así ninguna tarjeta tiene que encogerse hasta cortar su texto.
 .body {
   flex: 1;
   min-height: 0;
   padding: 14px 18px 14px;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
+  @include mixins.inner-scroll;
+
+  @include mixins.phone {
+    padding: 10px 12px 12px;
+  }
 }
 
 .pager {

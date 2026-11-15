@@ -17,13 +17,32 @@
   --c: var(--color-success);
 }
 
+// Las filas nunca bajan de la altura de su contenido: si no caben, se desplaza
+// el cuerpo del panel en vez de cortar el texto de los nodos.
 .grid {
-  flex: 1;
-  min-height: 0;
+  flex: 1 0 auto;
   display: grid;
   grid-template-columns: 148px repeat(4, minmax(0, 1fr));
-  grid-template-rows: auto repeat(var(--rows), minmax(0, 1fr));
+  grid-template-rows: auto repeat(var(--rows), minmax(min-content, 1fr));
   gap: 10px 12px;
+
+  @include mixins.tablet {
+    grid-template-columns: 104px repeat(4, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  // Móvil: cada línea de trabajo es un bloque vertical con sus cuatro etapas.
+  @include mixins.phone {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+.corner {
+  @include mixins.phone {
+    display: none;
+  }
 }
 
 .stage {
@@ -36,8 +55,19 @@
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--c);
+  overflow-wrap: anywhere;
+
+  @include mixins.tablet {
+    font-size: 12px;
+    letter-spacing: 0.06em;
+  }
+
+  @include mixins.phone {
+    display: none;
+  }
 
   i {
+    flex: none;
     display: grid;
     place-items: center;
     width: 22px;
@@ -52,12 +82,24 @@
 
 .lane {
   display: contents;
+
+  @include mixins.phone {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+  }
 }
 
 .laneName {
   align-self: center;
   font: 700 clamp(15px, 1.25vw, 18px) / 1.2 var(--font-display);
   color: var(--color-text);
+  overflow-wrap: anywhere;
+
+  @include mixins.phone {
+    align-self: flex-start;
+  }
 }
 
 .node {
@@ -65,7 +107,7 @@
   display: flex;
   flex-direction: column;
   gap: 5px;
-  min-height: 0;
+  min-width: 0;
   padding: 11px 14px 10px;
   border: 1px solid var(--color-line-soft);
   border-left: 3px solid var(--c);
@@ -85,30 +127,34 @@
   }
 
   p {
-    flex: none;
-    margin-bottom: auto;
     font-size: clamp(12px, 0.92vw, 13.5px);
     line-height: 1.45;
     color: var(--color-text-2);
-    @include mixins.clamp(3);
   }
 
   @include mixins.compact-h {
     padding: 8px 12px;
-
-    p {
-      @include mixins.clamp(2);
-    }
   }
+}
+
+// Nombre de la etapa dentro del nodo: solo en móvil, donde no hay cabeceras.
+.nodeStage {
+  display: none;
+  @include mixins.eyebrow;
+  color: var(--c);
+
+  @include mixins.phone {
+    display: block;
+  }
+}
+
+.text {
+  flex: none;
+  margin-bottom: auto;
 }
 
 .src {
   flex: none;
-  overflow: hidden;
-
-  > span {
-    flex-wrap: nowrap;
-  }
 }
 
 .arrow {
@@ -118,31 +164,43 @@
   margin-top: -9px;
   color: var(--c);
   overflow: visible;
+
+  @include mixins.phone {
+    display: none;
+  }
 }
 
 // ── Mapa de brechas ──────────────────────────────────────────────────────────
 .gaps {
-  flex: 1;
-  min-height: 0;
+  flex: 1 0 auto;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-template-rows: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(min-content, 1fr));
   gap: 14px;
+
+  @include mixins.phone {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+  }
 }
 
 .gap {
   display: flex;
   flex-direction: column;
   gap: 7px;
-  min-height: 0;
+  min-width: 0;
   padding: 18px 22px 16px;
   border: 1px solid var(--color-line-soft);
   border-radius: var(--radius-m);
   background: var(--color-panel-raise);
-  overflow: hidden;
+
+  @include mixins.phone {
+    padding: 14px;
+  }
 
   header {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
     gap: 12px;

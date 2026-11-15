@@ -11,6 +11,7 @@ import { MODULES, getModule } from "@/content/modules";
 import type { Myth } from "@/content/myths";
 import { getSource } from "@/content/sources";
 import { patchQuery } from "@/features/scene/lib/scenario";
+import { ClampText } from "@/shared/components/ClampText";
 import { Segmented, Slider } from "@/shared/components/Controls";
 import { SourceChips } from "@/shared/components/EvidenceBadge";
 import { Pager, Workspace } from "@/shared/components/Workspace";
@@ -114,13 +115,15 @@ export function GuideView({ investigations, myths }: { investigations: Investiga
           </div>
           <div className={styles.cards}>
             {shown.map((i) => (
-              <button key={i.id} type="button" className={styles.card} onClick={() => set({ id: i.id })}>
+              <article key={i.id} className={styles.card}>
                 <span className={styles.fam} data-family={i.family}>
                   {t(FAMILY_LABEL[i.family])}
                 </span>
-                <b>{i.name}</b>
+                <button type="button" className={styles.open} onClick={() => set({ id: i.id })}>
+                  <b>{i.name}</b>
+                </button>
                 <em>{i.full}</em>
-                <p>{t(i.objective)}</p>
+                <ClampText className={styles.objective}>{t(i.objective)}</ClampText>
                 <dl className={styles.facts}>
                   <div>
                     <dt>O₂</dt>
@@ -143,7 +146,7 @@ export function GuideView({ investigations, myths }: { investigations: Investiga
                     ))}
                   </span>
                 </span>
-              </button>
+              </article>
             ))}
           </div>
         </div>

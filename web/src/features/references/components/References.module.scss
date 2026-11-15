@@ -13,6 +13,7 @@
 
 .filters {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 12px;
   flex: none;
@@ -23,7 +24,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  flex: 1;
+  flex: 1 1 220px;
   min-width: 0;
   height: 40px;
   padding: 0 14px;
@@ -56,7 +57,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  flex: none;
+  min-width: 0;
 
   span {
     @include mixins.eyebrow;
@@ -64,6 +65,7 @@
 
   select {
     height: 40px;
+    min-width: 0;
     max-width: 250px;
     padding: 0 12px;
     border: 1px solid var(--color-line);
@@ -113,22 +115,28 @@
   color: var(--color-text-2);
 }
 
+// Los títulos de las fuentes hacen salto de línea: las filas crecen con ellos
+// y, si no caben, se desplaza el cuerpo del panel.
 .sources {
-  flex: 1;
-  min-height: 0;
+  flex: 1 0 auto;
   display: flex;
   flex-direction: column;
   gap: 12px;
 
   ul {
-    flex: 1;
-    min-height: 0;
+    flex: 1 0 auto;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-template-rows: repeat(5, minmax(0, 1fr));
+    grid-template-rows: repeat(5, minmax(min-content, 1fr));
     grid-auto-flow: column;
     gap: 8px 14px;
     list-style: none;
+
+    @include mixins.phone {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: none;
+      grid-auto-flow: row;
+    }
   }
 
   a {
@@ -176,12 +184,17 @@
     font: 600 15px var(--font-display);
   }
 
+  b,
+  em {
+    overflow-wrap: anywhere;
+  }
+
   em {
     display: block;
     font-size: 13px;
     font-style: normal;
+    line-height: 1.35;
     color: var(--color-text-2);
-    @include mixins.truncate;
   }
 
   svg {
@@ -191,6 +204,8 @@
 
   footer {
     display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
     justify-content: space-between;
     align-items: center;
     flex: none;
@@ -200,24 +215,30 @@
 }
 
 .cards {
-  flex: 1;
-  min-height: 0;
+  flex: 1 0 auto;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  grid-auto-rows: minmax(0, 1fr);
+  grid-auto-rows: minmax(min-content, 1fr);
   gap: 14px;
   list-style: none;
+
+  @include mixins.tablet {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @include mixins.phone {
+    grid-template-columns: minmax(0, 1fr);
+  }
 
   li {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    min-height: 0;
+    min-width: 0;
     padding: 18px 20px 16px;
     border: 1px solid var(--color-line-soft);
     border-radius: var(--radius-m);
     background: var(--color-panel-raise);
-    overflow: hidden;
   }
 
   h2 {
@@ -236,8 +257,10 @@
     align-items: center;
     gap: 6px;
     margin-top: auto;
+    max-width: 100%;
     @include mixins.mono;
     font-size: 12.5px;
+    overflow-wrap: anywhere;
   }
 }
 
@@ -248,6 +271,10 @@
 
 .ai {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  @include mixins.phone {
+    grid-template-columns: minmax(0, 1fr);
+  }
 
   li {
     border-left: 3px solid var(--color-accent);

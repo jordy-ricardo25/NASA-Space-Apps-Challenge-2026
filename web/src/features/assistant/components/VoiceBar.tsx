@@ -1,6 +1,6 @@
 "use client";
 
-import { Mic, Square, TriangleAlert, Volume2, VolumeX } from "lucide-react";
+import { Mic, Send, Square, TriangleAlert, Volume2, VolumeX } from "lucide-react";
 import type { Lang } from "@/content/i18n";
 import { useLang } from "@/shared/hooks/useLang";
 import type { Dictation } from "../hooks/useDictation";
@@ -17,6 +17,9 @@ interface VoiceBarProps {
   /** Lectura automática de las respuestas. */
   autoSpeak: boolean;
   onAutoSpeak: (on: boolean) => void;
+  /** Envío automático al terminar de hablar. */
+  autoSend: boolean;
+  onAutoSend: (on: boolean) => void;
 }
 
 const LANGS: Lang[] = ["es", "en"];
@@ -27,9 +30,10 @@ const isBrave = (): boolean => typeof navigator !== "undefined" && "brave" in na
 /**
  * Estado de la voz del asistente: qué hace el micrófono, los errores del
  * reconocimiento (con su código, para diagnosticar), el botón que corta la
- * voz, el idioma de escucha y el interruptor de la lectura automática.
+ * voz, el idioma del dictado y los interruptores de envío automático y de
+ * lectura automática.
  */
-export function VoiceBar({ dictation, speech, listenLang, onListenLang, autoSpeak, onAutoSpeak }: VoiceBarProps) {
+export function VoiceBar({ dictation, speech, listenLang, onListenLang, autoSpeak, onAutoSpeak, autoSend, onAutoSend }: VoiceBarProps) {
   const { t } = useLang();
   const { phase, notice } = dictation;
   const heard = (dictation.activeLang ?? listenLang).toUpperCase();
@@ -48,7 +52,7 @@ export function VoiceBar({ dictation, speech, listenLang, onListenLang, autoSpea
     text = t(DICTATION_NOTICE[notice.code === "network" && isBrave() ? "network-brave" : notice.code] ?? DICTATION_UNKNOWN);
     code = notice.kind === "error" ? notice.code : null;
   } else {
-    text = t(!dictation.supported ? VOICE_TEXT.unsupported : isBrave() ? VOICE_TEXT.brave : VOICE_TEXT.ready);
+    text = t(!dictation.supported ? VOICE_TEXT.unsupported : isBrave() ? VOICE_TEXT.brave : autoSend ? VOICE_TEXT.readyAuto : VOICE_TEXT.ready);
   }
   const Icon = tone === "error" ? TriangleAlert : tone === "talk" ? Volume2 : Mic;
 
@@ -78,6 +82,13 @@ export function VoiceBar({ dictation, speech, listenLang, onListenLang, autoSpea
               </button>
             ))}
           </div>
+        )}
+        {dictation.supported && (
+          <button type="button" className={styles.auto} role="switch" aria-checked={autoSend} title={t(autoSend ? VOICE_TEXT.autoSendOn : VOICE_TEXT.autoSendOff)} onClick={() => onAutoSend(!autoSend)}>
+            <Send size={13} aria-hidden="true" />
+            {t(VOICE_TEXT.autoSend)}
+            <i aria-hidden="true" />
+          </button>
         )}
         {speech.supported && (
           <button

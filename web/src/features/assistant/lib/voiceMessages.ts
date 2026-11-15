@@ -29,14 +29,18 @@ export const DICTATION_PHASE = {
 } as const;
 
 export const VOICE_TEXT = {
-  ready: l("Micrófono listo. Llena el campo y nunca envía solo.", "Microphone ready. It fills the field and never sends on its own."),
+  ready: l("Micrófono listo. Llena el campo; tú pulsas Enviar.", "Microphone ready. It fills the field; you press Send."),
+  readyAuto: l("Micrófono listo. Al terminar de hablar, la pregunta se envía sola.", "Microphone ready. When you stop talking, the question is sent automatically."),
+  autoSend: l("Envío automático", "Auto-send"),
+  autoSendOn: l("Envío automático activado: la pregunta se envía al terminar de hablar", "Auto-send is on: the question is sent when you stop talking"),
+  autoSendOff: l("Envío automático apagado: el dictado solo llena el campo", "Auto-send is off: dictation only fills the field"),
   brave: l("En Brave el dictado no funciona: usa Chrome o Edge, o escribe la pregunta.", "Dictation does not work in Brave: use Chrome or Edge, or type the question."),
   unsupported: l("Este navegador no ofrece dictado: escribe tu pregunta. Funciona en Chrome y Edge.", "This browser has no dictation: type your question. It works in Chrome and Edge."),
   speaking: l("Leyendo la respuesta. El micrófono se activa al terminar.", "Reading the answer aloud. The microphone is available when it ends."),
   stop: l("Detener", "Stop"),
   stopVoice: l("Detener la voz", "Stop the voice"),
-  listenLang: l("Idioma de escucha", "Listening language"),
-  listenShort: l("Escucha", "Listen in"),
+  listenLang: l("Idioma del dictado por voz (no traduce las respuestas)", "Voice dictation language (it does not translate answers)"),
+  listenShort: l("Dictado en", "Dictate in"),
   autoRead: l("Lectura automática", "Read aloud"),
   autoOn: l("Lectura automática activada: pulsa para silenciarla", "Read aloud is on: press to mute it"),
   autoOff: l("Lectura automática silenciada: pulsa para activarla", "Read aloud is muted: press to turn it on"),

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { MessageCircle, X } from "lucide-react";
 import { l, type L } from "@/content/i18n";
 import { useActiveEnv, type ActiveEnv } from "@/features/shell/hooks/useActiveEnv";
+import { useHandheld } from "@/shared/hooks/useHandheld";
 import { useLang } from "@/shared/hooks/useLang";
 import { appStore, setPrefs } from "@/shared/lib/appStore";
 import { useStore } from "@/shared/lib/store";
@@ -46,7 +47,9 @@ export function AssistantDock() {
   const [introDone, setIntroDone] = useState(false);
   // En las vistas 3D el mensaje aparece solo; en las pantallas de trabajo
   // espera a que pulsen la mascota, para no tapar controles ni gráficas.
-  const auto = floating || env.section === "cabin";
+  // En teléfono y tableta el mensaje taparía la hoja de paneles: solo sale al tocar a Flamey.
+  const handheld = useHandheld();
+  const auto = !handheld && (floating || env.section === "cabin");
   const bubble = askedKey === key || (auto && hiddenKey !== key);
   const intro = booted && !introDone;
 

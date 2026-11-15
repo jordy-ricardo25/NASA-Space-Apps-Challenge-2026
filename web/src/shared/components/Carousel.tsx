@@ -4,6 +4,7 @@ import { Children, useCallback, useEffect, useId, useRef, useState } from "react
 import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 import { l } from "@/content/i18n";
 import { useLang } from "@/shared/hooks/useLang";
+import { useHandheld } from "@/shared/hooks/useHandheld";
 import { useReducedMotion } from "@/shared/hooks/useReducedMotion";
 import styles from "./Carousel.module.scss";
 
@@ -63,7 +64,10 @@ export function Carousel({ label, children, speed = 60 }: CarouselProps) {
   const maxIndex = Math.max(0, count - perView);
   const pages = Math.ceil(count / perView);
   const page = index >= maxIndex ? pages - 1 : Math.floor(index / perView);
-  const canPlay = !reduced && count > perView;
+  // En teléfono y tableta se pasa con el dedo, tarjeta a tarjeta: sin avance
+  // automático (que además consume batería). En escritorio no cambia.
+  const handheld = useHandheld();
+  const canPlay = !reduced && !handheld && count > perView;
   const playing = canPlay && !stopped && !hover && !focus && !touch;
 
   /** Lleva la diapositiva `i` al borde izquierdo; pasa del final al inicio y viceversa. */

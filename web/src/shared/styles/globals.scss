@@ -163,3 +163,50 @@ html[data-reduce-motion="true"] {
     transition-duration: 0.01ms !important;
   }
 }
+
+// ── Tableta y teléfono ───────────────────────────────────────────────────────
+// Nada de esto se aplica en escritorio. La barra lateral pasa a ser una barra
+// inferior y los paneles dejan de ser translúcidos: el desenfoque de fondo
+// sobre el lienzo 3D es lo que más frena a un teléfono.
+@mixin lite-surfaces {
+  :root {
+    --color-panel: rgba(6, 19, 35, 0.97);
+    --color-panel-strong: rgba(5, 15, 28, 0.985);
+    --color-panel-raise: rgba(18, 54, 83, 0.72);
+    --shadow-panel: 0 8px 22px rgba(0, 0, 0, 0.4);
+  }
+
+  *,
+  *::before,
+  *::after {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+@include mixins.tablet {
+  :root {
+    --sidebar-w: 0px;
+    --bottombar-h: 58px;
+  }
+
+  @include lite-surfaces;
+
+  html,
+  body {
+    // Los toques no hacen zoom doble ni resaltan en azul.
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+  }
+}
+
+@include mixins.touch {
+  @include lite-surfaces;
+}
+
+@include mixins.phone {
+  :root {
+    --topbar-h: 48px;
+  }
+}

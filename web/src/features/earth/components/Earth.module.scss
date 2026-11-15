@@ -328,3 +328,60 @@
     }
   }
 }
+
+// ── Tableta en vertical y teléfono ───────────────────────────────────────────
+// La lista de casos va arriba y el caso elegido debajo, a todo el ancho; el
+// cuerpo del panel se desplaza.
+@mixin stacked {
+  .layout {
+    flex: 1 0 auto;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .list {
+    grid-auto-rows: auto;
+
+    button {
+      min-height: 48px;
+      padding: 8px 12px;
+    }
+
+    output {
+      width: 78px;
+    }
+  }
+
+  .detail {
+    padding: 14px 14px 12px;
+    overflow: visible;
+  }
+
+  .project {
+    flex-wrap: wrap;
+    gap: 10px;
+
+    a {
+      height: 40px;
+    }
+  }
+}
+
+@include mixins.tablet {
+  @media (orientation: portrait) {
+    @include stacked;
+  }
+}
+
+@include mixins.phone {
+  @include stacked;
+
+  .why {
+    padding: 8px 12px;
+  }
+
+  .stat {
+    text-align: left;
+  }
+}
+

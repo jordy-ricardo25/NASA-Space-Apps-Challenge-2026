@@ -30,7 +30,7 @@
 // Área de contenido: las rutas colocan aquí sus paneles sobre el 3D.
 .content {
   position: fixed;
-  inset: var(--topbar-h) 0 0 var(--sidebar-w);
+  inset: var(--topbar-h) 0 var(--bottombar-h) var(--sidebar-w);
   z-index: 10;
   // El área deja pasar el ratón al 3D y sus hijos lo heredan; cada panel se
   // activa con su propio `pointer-events: auto`. No se repite aquí una regla

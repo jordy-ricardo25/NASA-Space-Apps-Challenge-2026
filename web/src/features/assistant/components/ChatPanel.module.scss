@@ -275,3 +275,24 @@
     box-shadow: 0 0 0 7px rgba(255, 92, 108, 0);
   }
 }
+
+// Teléfono: el chat ocupa toda la pantalla bajo la barra superior.
+@include mixins.phone {
+  .panel {
+    inset: var(--topbar-h) 0 0 0;
+    width: auto;
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
+  }
+
+  .msg {
+    font-size: 14px;
+  }
+
+  // 16 px evita que iOS haga zoom al enfocar el campo.
+  .form input {
+    height: 40px;
+    font-size: 16px;
+  }
+}

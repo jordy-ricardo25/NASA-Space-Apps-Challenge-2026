@@ -280,3 +280,14 @@
     transform: scale(1.25);
   }
 }
+
+// Tableta en vertical: el mapa del ambiente activo ocupa la fila superior.
+@include mixins.tablet {
+  @media (orientation: portrait) and (min-width: 641px) {
+    .featured {
+      grid-row: auto;
+      grid-column: 1 / -1;
+      order: -1;
+    }
+  }
+}

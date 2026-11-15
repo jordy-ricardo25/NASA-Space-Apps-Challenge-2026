@@ -115,6 +115,13 @@
   }
 }
 
+/// Dispositivo táctil (teléfono o tableta), tenga el ancho que tenga.
+@mixin touch {
+  @media (pointer: coarse) and (hover: none) {
+    @content;
+  }
+}
+
 /// Panel dentro del flujo normal (añade position: relative para las marcas de esquina).
 @mixin panel-box($strong: false) {
   position: relative;

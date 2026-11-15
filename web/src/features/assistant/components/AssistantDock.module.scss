@@ -177,3 +177,36 @@
     transform: translateY(8px) scale(0.96);
   }
 }
+
+// Tableta y teléfono: Flamey va abajo a la derecha, sobre la barra inferior,
+// siempre del mismo tamaño; su mensaje se abre hacia la izquierda.
+@include mixins.tablet {
+  .dock,
+  .floating,
+  .docked {
+    left: auto;
+    right: 8px;
+    bottom: calc(var(--bottombar-h) + 8px);
+    flex-direction: row-reverse;
+  }
+
+  .mascot {
+    padding: 2px;
+    border: 1px solid var(--color-line-strong);
+    background: var(--color-bg-deep);
+    box-shadow: 0 0 14px var(--color-accent-soft);
+
+    > span {
+      --size: 46px !important;
+    }
+  }
+
+  .bubble,
+  .floating .bubble,
+  .docked .bubble,
+  .cabin .bubble {
+    position: static;
+    max-width: min(300px, calc(100vw - 84px));
+    margin: 0 0 4px;
+  }
+}

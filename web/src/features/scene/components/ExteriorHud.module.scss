@@ -443,3 +443,177 @@
     bottom: 240px;
   }
 }
+
+// En escritorio el contenedor de la ficha no genera caja: sus dos paneles
+// siguen colocados respecto a la escena, igual que antes.
+.sheet {
+  display: contents;
+}
+
+// ── Tableta en vertical y teléfono ───────────────────────────────────────────
+// El 3D queda arriba y la ficha con la atmósfera pasa a una hoja inferior que
+// se desplaza por dentro. "Entrar a la cabina" sube justo bajo el título.
+@mixin sheet-layout($top) {
+  .crumb {
+    top: 8px;
+    left: 8px;
+    gap: 8px;
+
+    // La pista habla de rueda y clic derecho: no aplica al tocar.
+    p {
+      display: none;
+    }
+  }
+
+  .back {
+    width: 40px;
+    height: 40px;
+  }
+
+  .sheet {
+    position: absolute;
+    inset: $top 6px 6px 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    // Deja libre la esquina de Flamey al llegar al final.
+    padding-bottom: 62px;
+    overflow-x: hidden;
+    pointer-events: auto;
+    @include mixins.inner-scroll;
+  }
+
+  .info,
+  .telemetry {
+    position: relative;
+    inset: auto;
+    width: auto;
+    height: auto;
+    flex: none;
+    overflow: visible;
+  }
+
+  .info > * {
+    order: 3;
+  }
+
+  .info > .head {
+    order: 0;
+  }
+
+  .info > .cta {
+    order: 1;
+    margin-top: 0;
+  }
+
+  .info > .desc {
+    order: 2;
+  }
+
+  .primary {
+    height: 44px;
+  }
+
+  .secondary {
+    height: 40px;
+  }
+
+  .comps button {
+    min-height: 40px;
+    font-size: 12.5px;
+  }
+
+  .compInfo,
+  .kind,
+  .telNote {
+    font-size: 12px;
+  }
+
+  .compInfo {
+    min-height: 0;
+  }
+
+  // Controles de cámara: columna en el borde derecho del 3D.
+  .controls {
+    left: auto;
+    right: 8px;
+    top: 8px;
+    bottom: auto;
+    translate: none;
+    flex-direction: column;
+    border-radius: 22px;
+
+    button {
+      width: 40px;
+      height: 40px;
+    }
+  }
+
+  // El análisis ocupa toda el área y se desplaza por dentro.
+  .details {
+    inset: 6px;
+    z-index: 4;
+    @include mixins.inner-scroll;
+  }
+
+  .detailGrid {
+    flex: none;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .alerts {
+    flex: none;
+    overflow: visible;
+  }
+
+  .rank span {
+    font-size: 12px;
+  }
+}
+
+@include mixins.tablet {
+  // Flamey vive abajo a la derecha: la nota de la atmósfera no llega hasta él.
+  .telNote {
+    padding-right: 58px;
+  }
+
+  @media (orientation: portrait) {
+    @include sheet-layout(54%);
+
+    // En tableta la ficha y la atmósfera van lado a lado.
+    .sheet {
+      flex-direction: row;
+      align-items: flex-start;
+    }
+
+    .info {
+      flex: 1.25 1 0;
+    }
+
+    .telemetry {
+      flex: 1 1 0;
+    }
+  }
+}
+
+@include mixins.phone {
+  @include sheet-layout(56%);
+
+  .sheet {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .info,
+  .telemetry {
+    flex: none;
+  }
+
+  .crumb h1 {
+    font-size: 17px;
+  }
+
+  .head h2 {
+    font-size: 20px;
+  }
+}

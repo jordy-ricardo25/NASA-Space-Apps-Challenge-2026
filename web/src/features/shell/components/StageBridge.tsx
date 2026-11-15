@@ -30,6 +30,12 @@ export function StageBridge() {
           : { mode: "focus", module: m.id, shiftX: wide ? 150 : 0, shiftY: wide ? 20 : 60 };
       worldCtl.configure(toSimConfig(m, s));
     }
+    // Tableta y teléfono: los paneles son una hoja inferior, así que el centro
+    // óptico sube para que el módulo o la llama queden en la franja libre.
+    if (window.innerWidth <= 1100) {
+      const lift = Math.round(window.innerHeight * (view.mode === "overview" ? 0.12 : view.mode === "ambient" ? 0 : 0.21));
+      view = { ...view, shiftX: 0, shiftY: lift };
+    }
     worldCtl.setView(view);
   }, [pathname, query]);
 

@@ -126,6 +126,15 @@ export function CabinConsole({ module: m }: { module: ModuleDef }) {
         </div>
       </header>
 
+      {/* Comparador: la misma llama en la Tierra */}
+      <figure className={styles.inset}>
+        <div data-inset="earth" />
+        <figcaption>{t(l("Misma llama en la Tierra · 1 g", "Same flame on Earth · 1 g"))}</figcaption>
+      </figure>
+
+      {/* En escritorio el contenedor no genera caja (display: contents); en
+          tableta y teléfono es la hoja inferior que se desplaza. */}
+      <div className={styles.sheet}>
       {/* Escenario */}
       <aside className={styles.left}>
         <h3>{t(l("ESCENARIO", "SCENARIO"))}</h3>
@@ -207,12 +216,6 @@ export function CabinConsole({ module: m }: { module: ModuleDef }) {
         </section>
       </aside>
 
-      {/* Comparador: la misma llama en la Tierra */}
-      <figure className={styles.inset}>
-        <div data-inset="earth" />
-        <figcaption>{t(l("Misma llama en la Tierra · 1 g", "Same flame on Earth · 1 g"))}</figcaption>
-      </figure>
-
       {/* Telemetría */}
       <section className={styles.charts} aria-label={t(l("Telemetría", "Telemetry"))}>
         <Sparkline title={t(l("POTENCIA", "FIRE POWER"))} display={`${num(snap?.Q ?? 0, 2, lang)} kW`} t={hist.t} series={[{ values: hist.q, color: "#ff8738", fill: true }]} yMaxFloor={0.5} tone={(snap?.Q ?? 0) > 0.05 ? "warn" : "ok"} />
@@ -250,6 +253,7 @@ export function CabinConsole({ module: m }: { module: ModuleDef }) {
           </div>
         </div>
       </section>
+      </div>
     </div>
   );
 }

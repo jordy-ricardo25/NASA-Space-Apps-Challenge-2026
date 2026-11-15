@@ -368,6 +368,9 @@ npm run ingest
   al modelo como contexto, porque no todos los datos de las fichas están en los PDF.
 - Modelo: `gemini-3.5-flash-lite` (variable `GEMINI_MODEL`).
 - En Vercel hay que definir `GEMINI_API_KEY`, `GEMINI_MODEL` y `FILE_SEARCH_STORE`.
+- En Vercel también hay que definir `API_BASE_URL` (ver "Datos reales del backend"). Sin ella
+  la web no llama al backend y muestra la copia de respaldo; `/api/health` lo delata con
+  `"backend": "not_configured"`.
 
 Cada respuesta muestra su origen, sus fuentes y su nivel de evidencia, y va **en el idioma
 de la pregunta**: el propio modelo responde en ese idioma en una sola petición (no hay una

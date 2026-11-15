@@ -54,6 +54,9 @@ export function ExteriorHud({ module: m }: { module: ModuleDef }) {
         </div>
       </header>
 
+      {/* En escritorio el contenedor no genera caja (display: contents); en
+          tableta y teléfono es la hoja inferior que se desplaza. */}
+      <div className={styles.sheet}>
       <aside className={styles.info}>
         <div className={styles.head}>
           <span className={styles.code}>ID: {m.code}</span>
@@ -126,6 +129,7 @@ export function ExteriorHud({ module: m }: { module: ModuleDef }) {
             : t(m.evidence)}
         </p>
       </section>
+      </div>
 
       <div className={styles.controls} role="toolbar" aria-label={t(l("Controles de cámara", "Camera controls"))}>
         <button type="button" aria-pressed={rotating} onClick={() => worldCtl.toggleRotate()} title={t(l("Giro automático", "Auto-rotate"))}>

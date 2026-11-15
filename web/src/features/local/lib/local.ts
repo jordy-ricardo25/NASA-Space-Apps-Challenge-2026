@@ -12,11 +12,8 @@ export const FAST = "fast";
 /** Módulos con ambiente propio en el backend (la nave comparte el de la estación). */
 export const LOCAL_ENVS: ModuleId[] = ["estacion", "base", "rover", "traje", "marte"];
 
-/** Hallazgos por página en el ranking antes de medir el panel (después, los que quepan). */
-export const PAGE_SIZE = 3;
-
-/** Alto de una tarjeta del ranking con sus tres factores (px). */
-export const CARD_HEIGHT = 158;
+/** Hallazgos por página en el ranking: la lista de cada página se desliza dentro de su panel. */
+export const PAGE_SIZE = 5;
 
 /** Un hallazgo elegido, con el texto corto que se muestra en el chat. */
 export interface LocalFinding {

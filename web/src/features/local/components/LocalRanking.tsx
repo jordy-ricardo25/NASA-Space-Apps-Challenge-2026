@@ -6,13 +6,9 @@ import { getModule, type ModuleId } from "@/content/modules";
 import { BAND, FACTOR, MODE } from "@/features/assistant/lib/findingText";
 import type { PsiData, PsiFinding } from "@/features/psi/server/psi.service";
 import { useLang } from "@/shared/hooks/useLang";
-import { useSize } from "@/shared/hooks/useSize";
 import { gravity, num, signed } from "@/shared/lib/format";
-import { CARD_HEIGHT, LOCAL_ENVS, PAGE_SIZE } from "../lib/local";
+import { LOCAL_ENVS, PAGE_SIZE } from "../lib/local";
 import styles from "./Local.module.scss";
-
-/** Separación entre tarjetas del ranking (px), igual que en la hoja de estilos. */
-const GAP = 6;
 
 const BAND_ICON: Record<string, typeof ShieldAlert> = { critical: ShieldAlert, high: ShieldAlert, moderate: TriangleAlert, low: ShieldCheck };
 
@@ -87,9 +83,8 @@ interface RankingProps {
  */
 export function LocalRanking({ psi, live, page, onPage, activeKey, busy, onInterpret }: RankingProps) {
   const { lang, t } = useLang();
-  // Se muestran las tarjetas que caben en el alto del panel: la lista nunca desplaza la pantalla.
-  const list = useSize<HTMLOListElement>({ width: 360, height: PAGE_SIZE * (CARD_HEIGHT + GAP) });
-  const size = Math.max(1, Math.min(5, Math.floor((list.height + GAP) / (CARD_HEIGHT + GAP))));
+  // Cada página es una lista que se desliza hacia abajo dentro del panel; la pantalla no se desplaza.
+  const size = PAGE_SIZE;
   const pages = Math.max(1, Math.ceil(psi.findings.length / size));
   const current = Math.min(page, pages - 1);
   const shown = psi.findings.slice(current * size, current * size + size);
@@ -104,7 +99,7 @@ export function LocalRanking({ psi, live, page, onPage, activeKey, busy, onInter
         </p>
         {!live && <p className={styles.backup}>{t(l("Copia de respaldo: el backend no respondió, sin factores por hallazgo.", "Backup copy: the backend did not respond, no per-finding factors."))}</p>}
       </header>
-      <ol ref={list.ref}>
+      <ol key={current}>
         {shown.map((f, i) => {
           const Icon = BAND_ICON[f.band] ?? TriangleAlert;
           const top = [...(f.factors ?? [])].sort((a, b) => b.contribution - a.contribution).slice(0, 3);

@@ -78,7 +78,7 @@ export function SettingsView() {
             type="button"
             className={styles.reset}
             onClick={() => {
-              setPrefs({ welcomed: false });
+              setPrefs({ welcomed: false, toured: false });
               toast(l("Bienvenida restablecida", "Welcome restored"));
             }}
           >

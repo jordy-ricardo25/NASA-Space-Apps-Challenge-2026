@@ -30,6 +30,8 @@ export interface AppState {
   toast: L | null;
   /** El guía ya dio la bienvenida (el recorrido inicial se vio o se saltó). */
   welcomed: boolean;
+  /** El recorrido inicial de Flamey ya se vio o se saltó. */
+  toured: boolean;
   /** Paso del recorrido inicial de Flamey; `null` si no está en marcha. */
   tour: number | null;
   /** El asistente lee sus respuestas en voz alta al terminar. */
@@ -53,13 +55,14 @@ export const appStore = createStore<AppState>({
   online: null,
   toast: null,
   welcomed: false,
+  toured: false,
   tour: null,
   autoSpeak: true,
   autoSend: true,
 });
 
 const KEY = "fif:prefs:v1";
-type Prefs = Pick<AppState, "lang" | "units" | "quality" | "reduceMotion" | "role" | "welcomed" | "autoSpeak" | "autoSend">;
+type Prefs = Pick<AppState, "lang" | "units" | "quality" | "reduceMotion" | "role" | "welcomed" | "toured" | "autoSpeak" | "autoSend">;
 
 /** Restaura las preferencias guardadas (se llama una vez al montar la plataforma). */
 export function loadPrefs(): void {
@@ -75,8 +78,8 @@ export function loadPrefs(): void {
 export function setPrefs(patch: Partial<Prefs>): void {
   appStore.set(patch);
   try {
-    const { lang, units, quality, reduceMotion, role, welcomed, autoSpeak, autoSend } = appStore.get();
-    localStorage.setItem(KEY, JSON.stringify({ lang, units, quality, reduceMotion, role, welcomed, autoSpeak, autoSend }));
+    const { lang, units, quality, reduceMotion, role, welcomed, toured, autoSpeak, autoSend } = appStore.get();
+    localStorage.setItem(KEY, JSON.stringify({ lang, units, quality, reduceMotion, role, welcomed, toured, autoSpeak, autoSend }));
   } catch {
     /* sin almacenamiento */
   }

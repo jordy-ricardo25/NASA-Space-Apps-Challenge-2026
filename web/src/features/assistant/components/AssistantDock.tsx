@@ -41,6 +41,7 @@ export function AssistantDock() {
   const chatOpen = useStore(appStore, (s) => s.chatOpen);
   const welcomed = useStore(appStore, (s) => s.welcomed);
   const tour = useStore(appStore, (s) => s.tour);
+  const toured = useStore(appStore, (s) => s.toured);
   const floating = env.section === "home" || env.section === "module";
   const key = `${env.section}:${env.module?.id ?? ""}`;
   // Sección cuyo mensaje ya se recogió y sección cuyo mensaje se pidió con un clic.
@@ -65,8 +66,8 @@ export function AssistantDock() {
   // Primera visita: al terminar la entrada, Flamey ofrece un recorrido corto
   // por las partes del sitio. Se puede saltar y no vuelve a salir.
   useEffect(() => {
-    if (introDone && !welcomed && appStore.get().tour === null) appStore.set({ tour: 0 });
-  }, [introDone, welcomed]);
+    if (introDone && !toured && appStore.get().tour === null) appStore.set({ tour: 0 });
+  }, [introDone, toured]);
 
   // Cada sección trae un mensaje nuevo, que se recoge solo tras unos segundos.
   useEffect(() => {
@@ -89,7 +90,7 @@ export function AssistantDock() {
   const step = tour !== null ? TOUR[tour] : undefined;
   const endTour = (): void => {
     appStore.set({ tour: null });
-    setPrefs({ welcomed: true });
+    setPrefs({ welcomed: true, toured: true });
     setHiddenKey(key);
   };
   const nextTour = (): void => (tour !== null && tour < TOUR.length - 1 ? appStore.set({ tour: tour + 1 }) : endTour());

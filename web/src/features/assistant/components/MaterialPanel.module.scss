@@ -1,0 +1,221 @@
+@use "mixins";
+
+// Pestaña "Materiales" de Flamey: tres pasos y el resultado, en una columna que se desliza dentro del panel.
+.panel {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px 14px;
+  @include mixins.inner-scroll;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.env {
+  margin-top: -4px;
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--color-text-3);
+}
+
+.step {
+  display: block;
+  @include mixins.eyebrow;
+}
+
+// Material que no está en ningún catálogo: se pregunta por escrito.
+.other {
+  display: flex;
+  gap: 6px;
+  margin-top: -4px;
+
+  input {
+    flex: 1;
+    min-width: 0;
+    height: 32px;
+    padding: 0 12px;
+    border: 1px solid var(--color-line);
+    border-radius: 999px;
+    background: rgba(3, 10, 20, 0.6);
+    font-size: 12.5px;
+    color: var(--color-text);
+    outline: none;
+
+    &:focus-visible {
+      border-color: var(--color-line-strong);
+    }
+  }
+
+  button {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--color-line);
+    border-radius: 50%;
+    color: var(--color-accent);
+    cursor: pointer;
+    @include mixins.focus-ring;
+
+    &:disabled {
+      opacity: 0.45;
+      cursor: default;
+    }
+  }
+}
+
+.sliders {
+  display: grid;
+  gap: 8px;
+}
+
+// Resultado: el nivel lleva color, ícono y texto. "Sin evidencia" es gris, nunca verde.
+.result {
+  --c: var(--color-evidence-none);
+  display: grid;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-line-soft);
+  border-left: 3px solid var(--c);
+  border-radius: var(--radius-m);
+  background: var(--color-panel-raise);
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--color-text-2);
+  transition: opacity 0.15s;
+
+  &[data-level="high"] {
+    --c: var(--color-risk-high);
+  }
+
+  &[data-level="caution"] {
+    --c: var(--color-risk-caution);
+  }
+
+  &[data-level="low"] {
+    --c: var(--color-risk-low);
+  }
+
+  &[aria-busy="true"] {
+    opacity: 0.6;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    > svg {
+      flex: none;
+      color: var(--c);
+    }
+
+    div {
+      flex: 1;
+      min-width: 0;
+    }
+
+    h3 {
+      font: 600 13.5px / 1.25 var(--font-display);
+      color: var(--c);
+    }
+
+    span {
+      font-size: 11.5px;
+      color: var(--color-text-3);
+    }
+  }
+
+  p {
+    overflow-wrap: anywhere;
+  }
+}
+
+.figures {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+
+  div {
+    padding: 6px 10px;
+    border: 1px solid var(--color-line-soft);
+    border-radius: var(--radius-s);
+  }
+
+  dt {
+    @include mixins.eyebrow;
+  }
+
+  dd {
+    @include mixins.mono;
+    font-size: 14px;
+    color: var(--color-text);
+  }
+}
+
+.note {
+  color: var(--color-risk-caution);
+}
+
+.backend {
+  padding-top: 8px;
+  border-top: 1px solid var(--color-line-soft);
+  font-size: 12px;
+
+  b {
+    font-weight: 600;
+    color: var(--color-text);
+  }
+}
+
+.fail {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-risk-high);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  button,
+  a {
+    flex: 1 1 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 34px;
+    padding: 0 12px;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-s);
+    font-size: 12.5px;
+    color: var(--color-text);
+    cursor: pointer;
+    @include mixins.focus-ring;
+
+    &:hover:not(:disabled) {
+      border-color: var(--color-line-strong);
+      color: var(--color-accent);
+      text-decoration: none;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+  }
+
+  button {
+    border-color: var(--color-line-strong);
+    background: var(--color-accent-soft);
+    color: var(--color-accent);
+  }
+}

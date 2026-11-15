@@ -12,6 +12,16 @@ export type Units = "si" | "psi";
 export type Quality = "auto" | "high" | "low";
 export type Role = "operator" | "engineer" | "researcher" | "student";
 
+/** Hallazgo de NASA PSI sobre el que la persona pregunta al asistente. */
+export interface ChatFinding {
+  /** Clave del hallazgo en el backend (`experimento::material::modo`). */
+  key: string;
+  /** Módulo de la plataforma para el que se calculó (nave, base, marte…). */
+  env: string;
+  /** Texto corto que se muestra en el chat. */
+  label: string;
+}
+
 export interface AppState {
   lang: Lang;
   units: Units;
@@ -25,6 +35,10 @@ export interface AppState {
   /** El motor 3D no pudo iniciar (sin WebGL). */
   noWebgl: boolean;
   chatOpen: boolean;
+  /** Hallazgo de PSI fijado en el chat; `null` para preguntas generales. */
+  chatFinding: ChatFinding | null;
+  /** Hay una explicación del hallazgo fijado pendiente de pedir. */
+  chatFindingAsk: boolean;
   teamOpen: boolean;
   online: boolean | null;
   toast: L | null;
@@ -51,6 +65,8 @@ export const appStore = createStore<AppState>({
   booted: false,
   noWebgl: false,
   chatOpen: false,
+  chatFinding: null,
+  chatFindingAsk: false,
   teamOpen: false,
   online: null,
   toast: null,
@@ -92,4 +108,9 @@ export function toast(message: L): void {
   appStore.set({ toast: message });
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => appStore.set({ toast: null }), 2600);
+}
+
+/** Abre el chat con un hallazgo de PSI fijado y pide su explicación. */
+export function askAboutFinding(finding: ChatFinding): void {
+  appStore.set({ chatOpen: true, teamOpen: false, chatFinding: finding, chatFindingAsk: true });
 }

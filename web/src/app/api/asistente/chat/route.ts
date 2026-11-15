@@ -15,6 +15,8 @@ const body = z.object({
       o2: z.number().min(0).max(100).optional(),
       p: z.number().min(0).max(400).optional(),
       vent: z.number().min(0).max(100).optional(),
+      explain: z.boolean().optional(),
+      finding: z.object({ key: z.string().min(3).max(160), env: z.string().max(24) }).optional(),
     })
     .optional(),
 });
@@ -27,8 +29,8 @@ export async function POST(req: Request) {
   const a = await answerQuestion(question, lang, context ?? {});
   return Response.json(
     envelope(
-      { text: a.text, lang: a.lang, origin: a.origin, citations: a.sources },
-      { kind: a.origin === "analysis" ? "prediction" : "catalog", evidence_level: a.evidence, sources: a.sources.map((s) => ({ id: s.id })) },
+      { text: a.text, lang: a.lang, origin: a.origin, citations: a.sources, rows: a.rows },
+      { kind: a.origin === "analysis" ? "prediction" : a.origin === "psi" ? "derived" : "catalog", evidence_level: a.evidence, sources: a.sources.map((s) => ({ id: s.id })) },
     ),
   );
 }

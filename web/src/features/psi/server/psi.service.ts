@@ -69,6 +69,71 @@ export interface PsiData {
 
 const OPTIONS = { timeout: 5000, revalidate: 300 } as const;
 
+/** Contrato de `GET /api/findings/{clave}/context` (api/app/dto.py · ContextOut). */
+const factor = z.object({ name: z.string(), value: z.number(), weight: z.number(), contribution: z.number() });
+const contextOut = z.object({
+  finding: finding.extend({ factors: z.array(factor) }),
+  environment: z.object({ key: z.string(), label: z.string(), gravity_g: z.number(), o2_fraction: z.number(), pressure_atm: z.number() }),
+  evidence: z.array(z.object({ file: z.string(), row: z.number(), quality: z.number() })),
+  messages: z.array(z.object({ role: z.string(), content: z.string() })),
+});
+
+export type PsiFactor = z.infer<typeof factor>;
+
+/** Un hallazgo de PSI con todo lo que el asistente necesita para explicarlo. */
+export interface FindingPack {
+  /** `true` si respondió el backend; `false` si salió de la copia de respaldo (sin factores ni filas). */
+  live: boolean;
+  environment: { key: PsiEnvKey; label: string; gravity_g: number; o2_fraction: number; pressure_atm: number };
+  finding: PsiFinding;
+  /** Factores del índice RPI, de mayor a menor aporte. */
+  factors: PsiFactor[];
+  /** Filas del CSV que respaldan el hallazgo. */
+  evidence: { file: string; row: number; quality: number }[];
+  /** Resumen con la evidencia cruda que el backend prepara para un modelo de lenguaje. */
+  brief: string | null;
+  kernel: string;
+}
+
+/**
+ * Paquete de un hallazgo para un módulo de la plataforma.
+ * @param key Clave del hallazgo (`experimento::material::modo`).
+ * @param moduleId Módulo de la plataforma (nave, estacion, rover, traje, base, marte).
+ * @returns El paquete, o `null` si el hallazgo no existe para ese ambiente.
+ */
+export async function findingPack(key: string, moduleId: string | null | undefined): Promise<FindingPack | null> {
+  const envKey: PsiEnvKey = PSI_ENV[moduleId ?? ""] ?? "lunar";
+  const [live, meta] = await Promise.all([
+    backendFetch(`/api/findings/${encodeURIComponent(key)}/context?environment=${envKey}`, contextOut, { timeout: 5000 }),
+    backendFetch("/api/meta", metaOut, OPTIONS),
+  ]);
+  if (live) {
+    const { factors, ...found } = live.finding;
+    const e = live.environment;
+    return {
+      live: true,
+      environment: { key: envKey, label: e.label, gravity_g: e.gravity_g, o2_fraction: e.o2_fraction, pressure_atm: e.pressure_atm },
+      finding: found,
+      factors: [...factors].sort((a, b) => b.contribution - a.contribution),
+      evidence: live.evidence,
+      brief: live.messages.find((m) => m.role === "user")?.content ?? null,
+      kernel: meta?.kernel_version ?? SNAPSHOT.kernel_version,
+    };
+  }
+  const saved = SNAPSHOT.findings[envKey]?.find((f) => f.key === key);
+  const env = SNAPSHOT.environments[envKey];
+  if (!saved || !env) return null;
+  return {
+    live: false,
+    environment: { key: envKey, label: env.label, gravity_g: env.gravity_g, o2_fraction: env.o2_fraction, pressure_atm: env.pressure_atm },
+    finding: saved,
+    factors: [],
+    evidence: [],
+    brief: null,
+    kernel: SNAPSHOT.kernel_version,
+  };
+}
+
 /**
  * Datos de PSI para un módulo de la plataforma.
  * @param moduleId Módulo activo (nave, estacion, rover, traje, base, marte).

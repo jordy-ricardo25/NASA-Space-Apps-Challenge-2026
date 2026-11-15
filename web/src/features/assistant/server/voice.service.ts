@@ -30,7 +30,8 @@ export async function synthesize(text: string, lang: Lang): Promise<ReadableStre
         "Content-Type": "application/json",
         model: process.env.FISH_MODEL?.trim() || "s2.1-pro-free",
       },
-      body: JSON.stringify({ text, format: "mp3", language: lang, ...(voice ? { reference_id: voice } : {}) }),
+      // "balanced" empieza a devolver audio antes; el navegador lo reproduce según llega.
+      body: JSON.stringify({ text, format: "mp3", latency: "balanced", language: lang, ...(voice ? { reference_id: voice } : {}) }),
       signal: AbortSignal.timeout(20000),
     });
     if (!res.ok || !res.body) {

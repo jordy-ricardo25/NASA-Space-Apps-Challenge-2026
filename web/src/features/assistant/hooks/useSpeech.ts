@@ -8,6 +8,9 @@ import { speechChunks, speechText } from "../lib/speechText";
 /** Quién pone la voz: el navegador (por defecto) o Fish Audio si está configurado. */
 export type VoiceProvider = "browser" | "fish";
 
+/** Formato del audio de Fish Audio, que se reproduce según llega. */
+const STREAM_TYPE = "audio/mpeg";
+
 const SPEECH_LANG: Record<Lang, string> = { es: "es-ES", en: "en-US" };
 
 export interface Speech {
@@ -104,30 +107,79 @@ export function useSpeech(): Speech {
       const ctrl = new AbortController();
       request.current = ctrl;
       const key = `${lang}:${clean}`;
+      const el = new Audio();
+      audio.current = el;
+      let started = false;
+      el.onended = () => turn.current === mine && setSpeaking(false);
+      // Si Fish Audio falla antes de sonar, la respuesta se lee con la voz del navegador.
+      const fail = (): void => {
+        if (turn.current !== mine) return;
+        if (started) setSpeaking(false);
+        else browserSpeak(clean, lang, mine);
+      };
+      const playBlob = (blob: Blob): Promise<void> => {
+        const url = URL.createObjectURL(blob);
+        audioUrl.current = url;
+        el.src = url;
+        started = true;
+        return el.play();
+      };
       const cached = cache.current.get(key);
-      const audioBlob = cached
-        ? Promise.resolve(cached)
-        : fetch("/api/asistente/tts", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ text: clean, lang }),
-            signal: ctrl.signal,
-          }).then((r) => (r.ok ? r.blob() : Promise.reject(new Error("tts"))));
-      audioBlob
-        .then((blob) => {
-          if (cache.current.size >= 12) cache.current.clear();
-          cache.current.set(key, blob);
-          if (turn.current !== mine) return undefined;
-          const url = URL.createObjectURL(blob);
-          const el = new Audio(url);
+      if (cached) {
+        playBlob(cached).catch(fail);
+        return;
+      }
+      const keep = (blob: Blob): void => {
+        if (cache.current.size >= 12) cache.current.clear();
+        cache.current.set(key, blob);
+      };
+      fetch("/api/asistente/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: clean, lang }),
+        signal: ctrl.signal,
+      })
+        .then(async (r) => {
+          if (!r.ok || !r.body) throw new Error("tts");
+          // Sin reproducción por partes (MediaSource), se espera el audio completo.
+          if (!("MediaSource" in window) || !MediaSource.isTypeSupported(STREAM_TYPE)) {
+            const blob = await r.blob();
+            keep(blob);
+            if (turn.current === mine) await playBlob(blob);
+            return;
+          }
+          // El audio empieza a sonar con el primer fragmento, sin esperar al resto.
+          const media = new MediaSource();
+          const url = URL.createObjectURL(media);
           audioUrl.current = url;
-          audio.current = el;
-          el.onended = () => turn.current === mine && setSpeaking(false);
-          el.onerror = () => turn.current === mine && browserSpeak(clean, lang, mine);
-          return el.play();
+          el.src = url;
+          await new Promise<void>((done) => media.addEventListener("sourceopen", () => done(), { once: true }));
+          const buffer = media.addSourceBuffer(STREAM_TYPE);
+          const reader = r.body.getReader();
+          const parts: BlobPart[] = [];
+          for (;;) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            if (turn.current !== mine) {
+              void reader.cancel();
+              return;
+            }
+            const chunk = new Uint8Array(value);
+            parts.push(chunk);
+            await new Promise<void>((ok, ko) => {
+              buffer.addEventListener("updateend", () => ok(), { once: true });
+              buffer.addEventListener("error", () => ko(new Error("buffer")), { once: true });
+              buffer.appendBuffer(chunk);
+            });
+            if (!started) {
+              started = true;
+              el.play().catch(fail);
+            }
+          }
+          if (media.readyState === "open") media.endOfStream();
+          keep(new Blob(parts, { type: STREAM_TYPE }));
         })
-        // Si Fish Audio falla, la respuesta se lee con la voz del navegador.
-        .catch(() => turn.current === mine && browserSpeak(clean, lang, mine));
+        .catch(fail);
     },
     [browserSpeak, provider, silence],
   );

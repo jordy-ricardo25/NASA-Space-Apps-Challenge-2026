@@ -74,8 +74,8 @@ export function TopBar() {
         ))}
       </div>
       <Clock />
-      <button type="button" className={styles.team} onClick={() => appStore.set({ teamOpen: true })} aria-label={t(l("Equipo", "Team"))} title={t(l("Equipo", "Team"))}>
-        <Users size={17} />
+      <button type="button" className={styles.team} onClick={() => appStore.set({ teamOpen: true })} aria-label={t(l("Quiénes somos", "Who we are"))} title={t(l("Quiénes somos", "Who we are"))}>
+        <Users size={19} strokeWidth={2.2} aria-hidden="true" />
       </button>
     </header>
   );

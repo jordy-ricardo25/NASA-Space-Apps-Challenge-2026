@@ -152,19 +152,25 @@
   text-align: right;
 }
 
+// Abre "Quiénes somos": relleno cian con halo para que se vea de un vistazo.
 .team {
   display: grid;
   place-items: center;
-  width: 32px;
-  height: 32px;
-  border: 1px solid var(--color-line);
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--color-accent);
   border-radius: 50%;
-  color: var(--color-text-2);
-  transition: all 0.15s;
+  background: var(--color-accent);
+  color: var(--color-bg-deep);
+  box-shadow: 0 0 0 3px var(--color-accent-soft), 0 0 16px var(--color-line-strong);
+  transition: background 0.15s, box-shadow 0.15s, transform 0.15s var(--ease-out);
+  @include mixins.focus-ring;
 
   &:hover {
-    color: var(--color-accent);
-    border-color: var(--color-line-strong);
+    background: var(--color-text);
+    box-shadow: 0 0 0 4px var(--color-accent-soft), 0 0 22px var(--color-accent);
+    transform: scale(1.06);
   }
 }
 

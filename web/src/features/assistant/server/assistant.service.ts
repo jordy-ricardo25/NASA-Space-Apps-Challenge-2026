@@ -100,7 +100,20 @@ function analyse(question: string, ctx: ChatContext, lang: Lang): ChatAnswer | n
 }
 
 /** Consulta opcional a Gemini (File Search), anclada a la ficha encontrada. */
-async function askGemini(question: string, card: KnowledgeCard | null, lang: Lang): Promise<string | null> {
+/**
+ * Cita de un documento del almacén. Los PDF de la bibliografía se llaman
+ * "(n) Título.pdf" y corresponden a la fuente Bn del catálogo; el resto se
+ * cita por su título y remite a la página de referencias.
+ */
+function citeDocument(title: string): ChatAnswer["sources"][number] {
+  const n = /^\((\d+)\)/.exec(title)?.[1];
+  const known = n ? getSource(`B${n}`) : undefined;
+  if (known) return { id: known.id, short: known.short, url: known.url };
+  const clean = title.replace(/^\(\d+\)\s*/, "").replace(/\.[a-z0-9]+$/i, "");
+  return { id: title, short: clean.length > 48 ? `${clean.slice(0, 46)}…` : clean, url: "/referencias" };
+}
+
+async function askGemini(question: string, card: KnowledgeCard | null, lang: Lang): Promise<{ text: string; docs: string[] } | null> {
   const key = process.env.GEMINI_API_KEY;
   if (!key) return null;
   const model = process.env.GEMINI_MODEL ?? "gemini-3.5-flash-lite";
@@ -125,11 +138,13 @@ async function askGemini(question: string, card: KnowledgeCard | null, lang: Lan
       signal: AbortSignal.timeout(12000),
     });
     if (!res.ok) return null;
-    const data = (await res.json()) as { candidates?: { content?: { parts?: { text?: string }[] }; groundingMetadata?: { groundingChunks?: unknown[] } }[] };
+    const data = (await res.json()) as { candidates?: { content?: { parts?: { text?: string }[] }; groundingMetadata?: { groundingChunks?: { retrievedContext?: { title?: string } }[] } }[] };
     const cand = data.candidates?.[0];
     const text = cand?.content?.parts?.map((p) => p.text ?? "").join("").trim();
-    const grounded = (cand?.groundingMetadata?.groundingChunks?.length ?? 0) > 0 || !!card;
-    return text && grounded ? text : null;
+    // Documentos del almacén en los que se apoyó la respuesta (sin repetir).
+    const docs = [...new Set((cand?.groundingMetadata?.groundingChunks ?? []).flatMap((c) => c.retrievedContext?.title ?? []))];
+    const grounded = docs.length > 0 || !!card;
+    return text && grounded ? { text, docs } : null;
   } catch {
     return null;
   }
@@ -152,8 +167,11 @@ export async function answerQuestion(question: string, lang: Lang, ctx: ChatCont
   const found = searchCards(question);
   const generated = await askGemini(question, found?.card ?? null, lang);
   // Si el modelo se abstiene (aunque sea a medias), vale más la ficha verificada que una respuesta parcial.
-  if (generated && !generated.includes(NO_ANSWER[lang])) {
-    return { text: generated, origin: "documents", sources: cite(found?.card.sources ?? []), evidence: found?.card.evidence };
+  if (generated && !generated.text.includes(NO_ANSWER[lang])) {
+    // Se citan los documentos consultados y, si la hubo, las fuentes de la ficha (sin duplicar).
+    const sources = [...generated.docs.map(citeDocument), ...cite(found?.card.sources ?? [])];
+    const unique = sources.filter((x, i) => sources.findIndex((y) => y.id === x.id) === i).slice(0, 5);
+    return { text: generated.text, origin: "documents", sources: unique, evidence: found?.card.evidence };
   }
   if (found) return { text: found.card.text[lang], origin: "documents", sources: cite(found.card.sources), evidence: found.card.evidence };
   return { text: NO_ANSWER[lang], origin: "none", sources: [] };

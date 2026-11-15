@@ -335,8 +335,28 @@ Responde por capas, de la más segura a la más abierta:
 1. **Pregunta preparada:** respuesta aprobada por el equipo, al instante.
 2. **Análisis del escenario:** cifras calculadas por el motor físico, nunca redactadas.
 3. **Base de conocimiento:** fichas curadas a partir del documento maestro, con sus fuentes.
-4. **Gemini File Search (opcional):** solo si se configuran las claves en el servidor.
+4. **Gemini File Search:** si hay clave y almacén configurados, el modelo responde apoyado en los
+   documentos de la bibliografía y la respuesta cita el documento consultado.
 5. **Sin evidencia:** se abstiene y lo dice.
+
+### Corpus de documentos (RAG)
+
+Los documentos viven en `web/conocimiento/` (carpeta ignorada por git) y se indexan en un
+almacén de Gemini File Search con:
+
+```bash
+npm run ingest
+```
+
+- La primera ejecución crea el almacén y escribe su nombre en `FILE_SEARCH_STORE` dentro de
+  `.env.local`. Las siguientes reutilizan ese almacén: **nunca crean otro**.
+- Solo sube lo que falta. Para añadir un documento nuevo (por ejemplo, el documento final
+  del proyecto), se copia a `web/conocimiento/` y se vuelve a ejecutar el comando.
+- Al terminar indica cuántos archivos quedaron bien y cuántos mal, y guarda el detalle en
+  `conocimiento/ingesta.json`.
+- Estado actual: 23 documentos indexados (22 de la bibliografía y el informe del reto).
+- Modelo: `gemini-3.5-flash-lite` (variable `GEMINI_MODEL`).
+- En Vercel hay que definir `GEMINI_API_KEY`, `GEMINI_MODEL` y `FILE_SEARCH_STORE`.
 
 Cada respuesta muestra su origen, sus fuentes y su nivel de evidencia. El micrófono nunca
 envía solo: llena el campo de texto y la persona pulsa Enviar. La lectura en voz alta usa la
@@ -502,7 +522,7 @@ Antes de dar un cambio por terminado: `npm run check` y revisar la pantalla en C
 | Traje EVA | 100 % de O₂ queda fuera del rango ensayado (10–40 %) |
 | Catálogo de investigaciones | 17 fichas verificadas de las 24 de PSI; faltan las restantes |
 | Backend | La plataforma calcula con su propio motor; la conexión con FastAPI y los modelos entrenados del equipo está preparada pero no hecha |
-| Asistente con Gemini | Código listo, sin probar por falta de clave |
+| Asistente con Gemini | Funciona en local con la bibliografía indexada; falta configurar las variables en Vercel |
 | Voz clonada | No implementada; se usa la voz del navegador |
 | Música | Solo la estructura del módulo, apagada |
 | Fidelidad visual | Modelos con color por vértice, sin texturas ni posprocesado |

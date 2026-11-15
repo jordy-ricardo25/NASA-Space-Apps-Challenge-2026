@@ -47,6 +47,8 @@
   --gap-5: 24px;
   --topbar-h: 52px;
   --sidebar-w: 64px;
+  // Alto de la barra de navegación inferior: solo existe en tableta y teléfono.
+  --bottombar-h: 0px;
   --shadow-panel: 0 18px 50px rgba(0, 0, 0, 0.45);
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 }

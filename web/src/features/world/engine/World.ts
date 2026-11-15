@@ -42,6 +42,12 @@ export interface WorldHooks {
   fade: HTMLElement;
   quality: "auto" | "high" | "low";
   reduceMotion: boolean;
+  /**
+   * Perfil ligero para teléfonos y tabletas: menos resolución, sin suavizado,
+   * sombras ni resplandor, 30 fotogramas por segundo y reposo cuando un panel
+   * tapa el mundo. En escritorio es `false` y nada cambia.
+   */
+  lite: boolean;
 }
 
 const OVERVIEW = { pos: new THREE.Vector3(14, 8.5, 70), target: new THREE.Vector3(-15, 15, -20) };
@@ -79,6 +85,8 @@ export class World {
   private ready = false;
   private dpr = 1;
   private steps = 30;
+  /** Tiempo mínimo entre fotogramas (ms); 0 = sin límite. */
+  private minFrame = 0;
   private fAvg = 16;
   private fN = 0;
   private anchorT = 0;
@@ -108,14 +116,18 @@ export class World {
   private readonly env: THREE.Texture;
 
   constructor(private readonly canvas: HTMLCanvasElement, private readonly hooks: WorldHooks) {
-    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: "high-performance" });
+    const lite = hooks.lite;
+    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: !lite, powerPreference: "high-performance" });
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 0.92;
-    this.renderer.shadowMap.enabled = hooks.quality !== "low";
+    this.renderer.shadowMap.enabled = hooks.quality !== "low" && !lite;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    this.dpr = Math.min(window.devicePixelRatio || 1, hooks.quality === "low" ? 1 : 2);
-    this.steps = hooks.quality === "low" ? 20 : 30;
+    // Un teléfono tiene 3 píxeles físicos por punto: dibujarlos todos multiplica
+    // por nueve el trabajo de la llama volumétrica. El perfil ligero lo limita.
+    this.dpr = Math.min(window.devicePixelRatio || 1, hooks.quality === "low" ? 1 : lite ? 1.25 : 2);
+    this.steps = hooks.quality === "low" ? 20 : lite ? 16 : 30;
+    this.minFrame = lite ? 31 : 0;
     this.scene.background = new THREE.Color(0x01040a);
     // La niebla existe siempre (lejísima en la Luna) para no recompilar materiales al ir a Marte.
     this.scene.fog = this.fog;
@@ -124,7 +136,7 @@ export class World {
     this.scene.environment = this.env;
     this.scene.environmentIntensity = 0.16;
     // "?fx=0" en la URL de entrada apaga el resplandor (útil para medir o en equipos muy justos).
-    this.glowOn = hooks.quality !== "low" && new URLSearchParams(window.location.search).get("fx") !== "0";
+    this.glowOn = hooks.quality !== "low" && !lite && new URLSearchParams(window.location.search).get("fx") !== "0";
 
     this.cam.position.copy(OVERVIEW.pos);
     this.cam.lookAt(this.target);
@@ -585,6 +597,13 @@ export class World {
   private readonly frame = (now: number): void => {
     if (this.disposed) return;
     this.raf = requestAnimationFrame(this.frame);
+    if (this.hooks.lite) {
+      const since = now - this.last;
+      // Perfil ligero: 30 fotogramas por segundo, y uno por segundo cuando un
+      // panel de trabajo tapa el mundo (vista "ambient" ya asentada).
+      const resting = this.view.mode === "ambient" && this.shown === "world" && !this.tween;
+      if (since < (resting ? 1000 : this.minFrame)) return;
+    }
     const dt = Math.min(0.1, (now - this.last) / 1000);
     this.last = now;
     this.time += dt;
@@ -703,16 +722,22 @@ export class World {
   /** Calidad automática: si baja la fluidez, reduce pasos de la llama y resolución. */
   private adapt(dt: number): void {
     if (this.hooks.quality !== "auto") return;
+    // En reposo (un fotograma por segundo) no se mide la fluidez.
+    if (this.hooks.lite && dt >= 0.1) return;
     this.fAvg = this.fAvg * 0.95 + dt * 1000 * 0.05;
     if (++this.fN < 90) return;
     this.fN = 0;
-    if (this.fAvg > 27 && (this.dpr > 1 || this.steps > 16)) {
+    // Con el límite de 30 fotogramas, "lento" es pasar de 45 ms; ahí se puede
+    // bajar hasta el 75 % de la resolución.
+    const slow = this.hooks.lite ? 45 : 27;
+    const floor = this.hooks.lite ? 0.75 : 1;
+    if (this.fAvg > slow && (this.dpr > floor || this.steps > 16)) {
       if (this.steps > 16) this.steps -= 6;
       else {
-        this.dpr = Math.max(1, this.dpr - 0.25);
+        this.dpr = Math.max(floor, this.dpr - 0.25);
         this.resize();
       }
-    } else if (this.fAvg > 27 && this.glowOn) {
+    } else if (this.fAvg > slow && this.glowOn) {
       // Último recurso: se apaga el resplandor de la llama.
       this.glowOn = false;
     } else if (this.fAvg < 12 && this.steps < 30) this.steps += 4;

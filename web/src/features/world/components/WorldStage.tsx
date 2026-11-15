@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { HANDHELD_QUERY } from "@/shared/hooks/useHandheld";
 import { appStore } from "@/shared/lib/appStore";
 import { bindWorld, worldStore } from "../controller";
 import styles from "./WorldStage.module.scss";
@@ -23,6 +24,8 @@ export default function WorldStage() {
     let disposed = false;
     let instance: { dispose: () => void } | null = null;
     const { quality, reduceMotion } = appStore.get();
+    // Teléfonos y tabletas usan el perfil ligero del motor; en escritorio no cambia nada.
+    const lite = window.matchMedia(HANDHELD_QUERY).matches;
     const started = performance.now();
 
     void import("../engine/World")
@@ -32,6 +35,7 @@ export default function WorldStage() {
           fade,
           quality,
           reduceMotion,
+          lite,
           onProgress: (progress, stage) => appStore.set({ progress, stage }),
           onReady: () => {
             // La pantalla de carga se muestra un mínimo para que la animación se complete.

@@ -186,3 +186,23 @@
     padding-bottom: 72px;
   }
 }
+
+// Teléfono en horizontal: hay muy poca altura, así que el panel también se
+// desplaza entero y la cabecera se va al deslizar.
+@include mixins.short {
+  .workspace {
+    inset: 6px;
+    display: block;
+    overflow-x: hidden;
+    @include mixins.inner-scroll;
+  }
+
+  .titles h1 {
+    font-size: 18px;
+  }
+
+  .body {
+    overflow: visible;
+    padding-bottom: 60px;
+  }
+}

@@ -182,8 +182,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 10px;
-  border-top: 1px solid var(--color-line);
+  padding: 8px 10px 10px;
 
   input {
     flex: 1;
@@ -240,17 +239,6 @@
   border-color: var(--color-risk-high);
   color: #fff;
   animation: rec 1.1s ease-in-out infinite;
-}
-
-.micLang {
-  @include mixins.mono;
-  font-size: 10px;
-  color: var(--color-text-3);
-  padding: 2px 4px;
-
-  &:disabled {
-    opacity: 0.4;
-  }
 }
 
 @keyframes in {

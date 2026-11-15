@@ -1,0 +1,80 @@
+"use client";
+
+import { Mic, Square, TriangleAlert, Volume2 } from "lucide-react";
+import type { Lang } from "@/content/i18n";
+import { useLang } from "@/shared/hooks/useLang";
+import type { Dictation } from "../hooks/useDictation";
+import type { Speech } from "../hooks/useSpeech";
+import { DICTATION_NOTICE, DICTATION_PHASE, DICTATION_UNKNOWN, VOICE_TEXT } from "../lib/voiceMessages";
+import styles from "./VoiceBar.module.scss";
+
+interface VoiceBarProps {
+  dictation: Dictation;
+  speech: Speech;
+  /** Idioma de escucha, separado del idioma de la interfaz. */
+  listenLang: Lang;
+  onListenLang: (lang: Lang) => void;
+}
+
+const LANGS: Lang[] = ["es", "en"];
+
+/**
+ * Estado de la voz del asistente: qué hace el micrófono, los errores del
+ * reconocimiento (con su código, para diagnosticar), el botón que corta la
+ * voz y el idioma de escucha.
+ */
+export function VoiceBar({ dictation, speech, listenLang, onListenLang }: VoiceBarProps) {
+  const { t } = useLang();
+  const { phase, notice } = dictation;
+  const heard = (dictation.activeLang ?? listenLang).toUpperCase();
+
+  let tone: "idle" | "live" | "talk" | "error" = "idle";
+  let text: string;
+  let code: string | null = null;
+  if (speech.speaking) {
+    tone = "talk";
+    text = t(VOICE_TEXT.speaking);
+  } else if (phase !== "idle") {
+    tone = "live";
+    text = `${t(DICTATION_PHASE[phase])} ${heard} · ${dictation.secondsLeft} s`;
+  } else if (notice) {
+    tone = notice.kind === "error" ? "error" : "idle";
+    text = t(DICTATION_NOTICE[notice.code] ?? DICTATION_UNKNOWN);
+    code = notice.kind === "error" ? notice.code : null;
+  } else {
+    text = t(dictation.supported ? VOICE_TEXT.ready : VOICE_TEXT.unsupported);
+  }
+  const Icon = tone === "error" ? TriangleAlert : tone === "talk" ? Volume2 : Mic;
+
+  return (
+    <div className={styles.bar}>
+      <div className={styles.status} data-tone={tone}>
+        <Icon size={14} aria-hidden="true" />
+        <p role="status" aria-live="polite">
+          {text}
+          {code && <code> ({code})</code>}
+        </p>
+        {speech.speaking && (
+          <button type="button" className={styles.stop} onClick={speech.stop} aria-label={t(VOICE_TEXT.stopVoice)}>
+            <Square size={11} aria-hidden="true" />
+            {t(VOICE_TEXT.stop)}
+          </button>
+        )}
+      </div>
+
+      <div className={styles.options}>
+        {dictation.supported && (
+          <div className={styles.langs} role="group" aria-label={t(VOICE_TEXT.listenLang)}>
+            <span>{t(VOICE_TEXT.listenShort)}</span>
+            {LANGS.map((option) => (
+              <button key={option} type="button" aria-pressed={listenLang === option} disabled={dictation.listening} onClick={() => onListenLang(option)}>
+                {option.toUpperCase()}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+      {speech.provider === "fish" && <p className={styles.ai}>{t(VOICE_TEXT.aiVoice)}</p>}
+    </div>
+  );
+}
